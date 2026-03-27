@@ -31,7 +31,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -54,8 +53,50 @@ jobs:
         run: pnpm install
         working-directory: frontend
 
+      - name: Set webkit pkg-config path
+        run: |
+          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=$(pkg-config --cflags webkit2gtk-4.1)" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=$(pkg-config --libs webkit2gtk-4.1)" >> $GITHUB_ENV
+
+      - name: Download Go modules
+        run: go mod download
+
       - name: Build binary
         run: wails build -tags webkit2_41
+
+      - name: Prepare packaging assets
+        run: |
+          mkdir -p build
+          if [ ! -f build/appicon.png ]; then
+            python3 -c "
+          import struct, zlib
+
+          def png(w, h, color):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              raw = b''.join(b'\x00' + bytes(color) * w for _ in range(h))
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
+
+          open('build/appicon.png', 'wb').write(png(256, 256, [34, 197, 94]))
+          "
+          fi
+          if [ ! -f build/atk.desktop ]; then
+            cat > build/atk.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=ATK
+          GenericName=Android Toolkit
+          Comment=All-in-one ADB GUI for Android power users and bug hunters
+          Exec=/opt/atk/ATK
+          Icon=atk
+          Categories=Development;Utility;
+          Terminal=false
+          StartupWMClass=ATK
+          Keywords=android;adb;fastboot;debloat;logcat;flash;
+          DESKTOP
+          fi
 
       - name: Package .deb
         run: nfpm pkg --packager deb --target build/
