@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p build
           cp assets/appicon.png build/appicon.png
-          printf '[Desktop Entry]\nType=Application\nName=ATK\nGenericName=Android Toolkit\nComment=All-in-one ADB GUI for Android power users and bug hunters\nExec=ATK\nIcon=atk\nCategories=Development;Utility;\nTerminal=false\nStartupWMClass=ATK\n' > build/atk.desktop
+          cp assets/atk.desktop build/atk.desktop
       - name: Build .deb
         run: |
           nfpm pkg --packager deb --target build/
