@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p build
           cp assets/appicon.png build/appicon.png
-          cp assets/atk.desktop build/atk.desktop
+          cp assets/atk-deb.desktop build/atk.desktop
       - name: Build .deb
         run: |
           nfpm pkg --packager deb --target build/
@@ -69,7 +69,7 @@ jobs:
           chmod +x linuxdeploy-x86_64.AppImage
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp build/bin/ATK AppDir/usr/bin/ATK
-          cp build/atk.desktop AppDir/usr/share/applications/ATK.desktop
+          cp assets/atk-appimage.desktop AppDir/usr/share/applications/ATK.desktop
           cp build/appicon.png AppDir/usr/share/icons/hicolor/256x256/apps/atk.png
           ARCH=x86_64 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
           find . -maxdepth 1 -name "*.AppImage" -not -name "linuxdeploy*" -exec mv {} "build/ATK-${{ github.ref_name }}-x86_64.AppImage" \;
