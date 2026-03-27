@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #252530;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333344;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-surface border border-bg-border rounded-lg;
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium
+           transition-all duration-150 cursor-pointer select-none
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-green text-bg-base hover:bg-accent-dim active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary border border-bg-border
+           hover:bg-bg-raised hover:text-text-primary active:scale-95;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger/10 text-danger border border-danger/20
+           hover:bg-danger/20 active:scale-95;
+  }
+
+  .btn-warn {
+    @apply btn bg-warn/10 text-warn border border-warn/20
+           hover:bg-warn/20 active:scale-95;
+  }
+
+  .input {
+    @apply bg-bg-raised border border-bg-border rounded px-3 py-1.5
+           text-sm text-text-primary placeholder:text-text-muted
+           focus:outline-none focus:border-accent-green/50
+           transition-colors duration-150 w-full;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .badge-green {
+    @apply badge bg-accent-green/10 text-accent-green;
+  }
+
+  .badge-red {
+    @apply badge bg-danger/10 text-danger;
+  }
+
+  .badge-yellow {
+    @apply badge bg-warn/10 text-warn;
+  }
+
+  .badge-gray {
+    @apply badge bg-bg-border text-text-secondary;
+  }
+
+  .section-title {
+    @apply text-xs font-medium uppercase tracking-widest text-text-muted;
+  }
+
+  .mono {
+    @apply font-mono text-sm;
+  }
+}
+
+/* Glow effect on accent elements */
+.glow {
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.15);
+}
+
+/* Animated scan line for the terminal */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Pulse animation for status dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.status-dot-green { background: #00ff88; box-shadow: 0 0 6px #00ff8888; }
+.status-dot-red   { background: #ff4444; box-shadow: 0 0 6px #ff444488; }
+.status-dot-gray  { background: #44445a; animation: none; }

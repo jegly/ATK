@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ATK
+GenericName=Android Toolkit
+Comment=All-in-one ADB GUI for Android power users and bug hunters
+Exec=/opt/atk/ATK
+Icon=atk
+Categories=Development;Utility;
+Terminal=false
+StartupWMClass=ATK
+Keywords=android;adb;fastboot;debloat;logcat;flash;

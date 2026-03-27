@@ -1,0 +1,39 @@
+# Build output
+build/bin/
+build/*.deb
+build/*.rpm
+build/*.AppImage
+build/*.tar.gz
+
+# Go
+*.exe
+*.test
+*.prof
+vendor/
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+frontend/.astro/
+
+# Wails dev
+frontend/wailsjs/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+ATK_*.log
+
+# Temp
+*.tmp
+/tmp/

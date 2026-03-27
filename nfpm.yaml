@@ -1,0 +1,32 @@
+name: "atk"
+arch: "amd64"
+platform: "linux"
+version: "1.0.0"
+section: "utils"
+priority: "optional"
+maintainer: "jegly <https://github.com/jegly>"
+description: |
+  ATK (Android Toolkit) — an all-in-one ADB GUI for Android power users,
+  security researchers, and bug hunters. Includes a debloater (2157 packages),
+  live logcat, app inspector, certificate manager, Pixel factory flasher,
+  prop editor, device backup, and 487 utility commands.
+vendor: "jegly"
+homepage: "https://github.com/jegly/ATK"
+license: "GPL-3.0"
+
+contents:
+  - src: "build/bin/ATK"
+    dst: "/opt/atk/ATK"
+  - src: "/opt/atk/ATK"
+    dst: "/usr/bin/atk"
+    type: "symlink"
+  - src: "build/atk.desktop"
+    dst: "/usr/share/applications/atk.desktop"
+  - src: "build/appicon.png"
+    dst: "/usr/share/icons/hicolor/256x256/apps/atk.png"
+
+depends:
+  - adb
+  - fastboot
+  - libgtk-3-0
+  - libwebkit2gtk-4.1-0
