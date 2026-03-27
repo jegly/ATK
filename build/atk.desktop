@@ -9,3 +9,4 @@ Categories=Development;Utility;
 Terminal=false
 StartupWMClass=ATK
 Keywords=android;adb;fastboot;debloat;logcat;flash;
+StartupNotify=true
