@@ -57,7 +57,7 @@ jobs:
       - name: Generate icon and desktop file
         run: |
           mkdir -p build
-          python3 -c "import struct,zlib; chunk=lambda n,d: struct.pack('>I',len(d))+n+d+struct.pack('>I',zlib.crc32(n+d)&0xffffffff); raw=b''.join(b'\x00'+bytes([34,197,94])*256 for _ in range(256)); open('build/appicon.png','wb').write(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',256,256,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b''))"
+          cp assets/appicon.png build/appicon.png
           printf '[Desktop Entry]\nType=Application\nName=ATK\nGenericName=Android Toolkit\nComment=All-in-one ADB GUI for Android power users and bug hunters\nExec=ATK\nIcon=atk\nCategories=Development;Utility;\nTerminal=false\nStartupWMClass=ATK\n' > build/atk.desktop
       - name: Build .deb
         run: |
