@@ -1,193 +1,216 @@
-# ATK — Android Toolkit
+```
+ █████╗ ████████╗██╗  ██╗
+██╔══██╗╚══██╔══╝██║ ██╔╝
+███████║   ██║   █████╔╝ 
+██╔══██║   ██║   ██╔═██╗ 
+██║  ██║   ██║   ██║  ██╗
+╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+ANDROID TOOLKIT — v1.0.5
+```
 
-> An all-in-one ADB GUI for Android power users, security researchers, and bug hunters.
-
-Built with [Wails v2](https://wails.io) (Go + React). Runs natively on Linux, macOS, and Windows. Uses **your system ADB** — no bundled binaries, no mystery executables.
-
----
-
-## Features
-
-### 📱 Dashboard
-- Live device list with connection status
-- Rich device info — model, Android version, build, kernel, CPU, RAM, storage, battery, IP, root status, security patch, bootloader state
-- Wireless ADB — enable TCP/IP, connect/disconnect
-- One-click reboot to system / recovery / bootloader / fastboot / sideload
-
-### 📁 File Explorer
-- Browse the device filesystem
-- Push, pull, rename, copy, delete, create folders
-- Batch select and export multiple files
-- No timeout on large transfers
-
-### 📦 Package Manager
-- List all / user / system / disabled packages
-- Batch install, uninstall, enable, disable
-- Pull APK from device, clear data, force stop
-- Install APKs from local files
-
-### 🛡️ Debloater
-- **2,157 packages** from the Universal Android Debloater (UAD-ng) database
-- Covers: Samsung, Xiaomi, OnePlus/Oppo, Huawei, Sony, Motorola, LG, Nokia, Asus, Realme, Google, Carriers, AOSP
-- Safety ratings: Safe / Caution / Keep
-- Dependency warnings
-- Filter by manufacturer, safety level, or search
-- Batch disable or uninstall for user 0
-
-### 📜 Live Logcat
-- Real-time streaming via Wails events
-- Colour-coded by log level (V/D/I/W/E/F)
-- Filter by level, tag, or search string
-- Buffer selector: main / radio / events / crash / all
-- Auto-scroll, save to file, clear buffer
-
-### 🔍 App Inspector
-- Deep package inspection: version, paths, UID, install dates, debuggable flag
-- All granted permissions
-- Activities, services, broadcast receivers, content providers
-- Native libraries (.so files)
-- Signing certificate info
-- Full package dump
-- Certificate pinning heuristic check (OkHttp, TrustKit, networkSecurityConfig)
-
-### 🔒 Certificate Manager
-- List all system and user CA certificates
-- Install user CA certificates (for Burp Suite / mitmproxy HTTPS interception)
-- Remove user certificates
-- Fingerprint and expiry display
-- Built-in HTTPS interception setup guide
-
-### 💾 Device Backup
-- `adb backup` with APK, shared storage, and app selection options
-- Restore from `.adb` backup files
-- Honest warnings about Android 12+ restrictions
-
-### ⚙️ Prop Editor
-- View all 300+ system properties grouped by category
-- Search and filter
-- Edit properties inline (uses root if available)
-- Read-only properties clearly marked
-
-### 💻 Shell Terminal
-- Direct `adb shell` and `adb host` command execution
-- Command history (arrow keys)
-- No shell injection — args are split directly, no shell interpretation
-
-### 🔧 Utilities
-- **487 commands** across 15 categories:
-  Device Info, Processes & Memory, Battery & Power, Network & Connectivity,
-  Permissions & Security, Package Manager, Activities & Services, Sensors & Media,
-  Logs & Diagnostics, File System, Settings & Config, **Fastboot** (including all
-  `fastboot oem` commands), Root & Magisk, Instrumentation & Testing, Reboot
-- Commands that need arguments prompt inline before running
-- Search across all commands
-- Output copy button
-
-### ⚡ Flasher (Fastboot)
-- Flash individual partitions
-- Fastboot getvar queries
-- ADB sideload
-- Partition allowlist prevents accidental flashes to wrong targets
-
-### 📲 Pixel Factory Flash
-- Select a Pixel factory image zip directly from Google
-- Reads `flash-all.sh` from inside the zip — executes the correct sequence automatically
-- Options: wipe data, disable verity, disable verification, **force flash**, flash both slots
-- Step-by-step live progress with per-step status
-- Live flash log
+> All-in-one ADB command centre for Android power users, security researchers, and bug hunters.
+> Built with Go + React via Wails. Runs natively on Linux, Windows, and macOS.
+> Uses your system ADB — no bundled binaries, no mystery executables.
 
 ---
 
-## Security Design
+```
+[ DOWNLOADS ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-- **No bundled binaries** — uses system `adb`/`fastboot` from your PATH
-- **Settings view shows SHA-256** of whichever binary is being used — verify it yourself
-- **No shell string building** — every command uses `exec.Command(binary, arg1, arg2, ...)` with discrete args passed directly to execve. No shell injection surface.
-- **Input validation** — package names, partition names, IP addresses, and paths all validated before use
-- **Partition allowlist** — fastboot flash only accepts known partition names
+| Platform              | Format      | Install                                          |
+|-----------------------|-------------|--------------------------------------------------|
+| Linux — Debian/Ubuntu | `.deb`      | `sudo dpkg -i ATK-*.deb`                        |
+| Linux — any distro    | `.AppImage` | `chmod +x ATK-*.AppImage && ./ATK-*.AppImage`   |
+| Windows               | `.exe`      | Run directly                                     |
+| macOS 11.0+           | `.dmg`      | Unsigned — see note below                       |
 
----
+**[→ Latest Release](https://github.com/jegly/ATK/releases/latest)**
 
-## Building from Source
-
-### Prerequisites (Ubuntu/Debian)
-
+**Linux requirements**
 ```bash
-sudo apt update
-sudo apt install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev \
-  libayatana-appindicator3-dev adb fastboot curl wget git
+sudo apt install adb fastboot libwebkit2gtk-4.1-0
+```
+
+**macOS — Gatekeeper bypass**
+```bash
+xattr -rd com.apple.quarantine /Applications/ATK.app
+# or: System Preferences → Security & Privacy → Open Anyway
+```
+
+---
+
+```
+[ MODULES ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+```
+┌─────────────────────┬────────────────────────────────────────────────────┐
+│ MODULE              │ DESCRIPTION                                        │
+├─────────────────────┼────────────────────────────────────────────────────┤
+│ Dashboard           │ Device info, wireless ADB, reboot controls         │
+│ File Explorer       │ Push, pull, rename, delete, batch export           │
+│ Package Manager     │ Install, uninstall, enable, disable, pull APK      │
+│ Debloater           │ 2157 packages — Samsung, Xiaomi, Google, 10+ OEMs  │
+│ Live Logcat         │ Real-time streaming, level filter, tag filter       │
+│ App Inspector       │ Permissions, components, certs, pinning check      │
+│ Certificate Manager │ Install/remove user CAs for HTTPS interception     │
+│ Device Backup       │ adb backup with app selection and restore          │
+│ Prop Editor         │ Read/write all 300+ system properties              │
+│ Shell Terminal      │ adb shell and host commands, command history        │
+│ Utilities           │ 487 commands across 15 categories                  │
+│ Flasher             │ Fastboot partition flash, getvar, sideload         │
+│ Pixel Factory Flash │ Full factory image flash from flash-all.sh         │
+└─────────────────────┴────────────────────────────────────────────────────┘
+```
+
+---
+
+```
+[ SECURITY ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+```
+NO BUNDLED BINARIES
+  ATK has no bin/ directory. It resolves adb and fastboot from your system
+  PATH — installed via apt, Homebrew, or Android SDK. The Settings view
+  displays the full path and SHA-256 of whichever binary is in use so you
+  can verify it against Google's published platform-tools checksums.
+
+NO SHELL STRING BUILDING
+  Every command uses exec.Command(binary, arg1, arg2, ...) with discrete
+  arguments passed directly to execve. There is no shell involved and
+  therefore no shell injection surface.
+
+INPUT VALIDATION
+  Package names, partition names, IP addresses, and remote paths are all
+  validated before use. Fastboot flash only accepts a known partition
+  allowlist — no arbitrary partition names accepted.
+```
+
+---
+
+```
+[ DEBLOATER ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Package database sourced from Universal Android Debloater (UAD-ng). 2,157
+packages across 14 manufacturers and categories, each with safety ratings:
+
+```
+  SAFE     — generally safe to remove
+  CAUTION  — disable rather than uninstall; may affect device behaviour  
+  KEEP     — do not remove; will break core system functionality
+```
+
+Coverage: Samsung · Xiaomi · OnePlus/Oppo · Huawei · Sony · Motorola · LG
+          Nokia/HMD · Asus · Realme · Google · Carriers · AOSP · Misc
+
+---
+
+```
+[ PIXEL FACTORY FLASH ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+ATK reads `flash-all.sh` directly from inside the factory image zip and
+executes the correct sequence — no hardcoded partition order. Options:
+
+```
+  --wipe               Wipe userdata (-w flag on fastboot update)
+  --disable-verity     For Magisk / root setups
+  --disable-verif      Paired with disable-verity
+  --force              Bypass anti-rollback (use with caution)
+  --slot all           Flash both A and B slots
+```
+
+Download factory images from: https://developers.google.com/android/images
+
+---
+
+```
+[ BUILD FROM SOURCE ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Prerequisites — Ubuntu/Debian**
+```bash
+sudo apt install -y build-essential pkg-config libgtk-3-dev \
+  libwebkit2gtk-4.1-dev libayatana-appindicator3-dev adb fastboot
 
 # Go 1.23
 wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> ~/.bashrc
 source ~/.bashrc
 
-# Node.js 20
+# Node + pnpm + Wails
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pnpm
-
-# Wails CLI
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
-### Build
-
+**Build**
 ```bash
 git clone https://github.com/jegly/ATK
 cd ATK
 go mod tidy
 cd frontend && pnpm install && cd ..
 wails build -tags webkit2_41
-
-# Binary output
 ./build/bin/ATK
 ```
 
-### Install system-wide
-
-```bash
-sudo cp build/bin/ATK /usr/local/bin/atk
-```
-
-### Build .deb package
-
-```bash
-# Install nfpm
-go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-
-# Build binary first
-wails build -tags webkit2_41
-
-# Package as .deb
-nfpm pkg --packager deb --target build/
-```
-
-### Dev mode (hot reload)
-
+**Dev mode (hot reload)**
 ```bash
 wails dev -tags webkit2_41
 ```
 
----
-
-## Licence
-
-ATK is licensed under the **GNU General Public License v3.0**.
-
-The debloater package database is sourced from
-[Universal Android Debloater Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)
-(GPL-3.0, Universal-Debloater-Alliance).
-
-See [LICENSE](LICENSE) for full terms and third-party attributions.
+**Package as .deb**
+```bash
+go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+wails build -tags webkit2_41
+nfpm pkg --packager deb --target build/
+sudo dpkg -i build/atk_*.deb
+```
 
 ---
 
-## Acknowledgements
+```
+[ ARCH LINUX ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-- [Universal Android Debloater Alliance](https://github.com/Universal-Debloater-Alliance) — package database
-- [Wails](https://wails.io) — Go + Web framework
-- [PixelFlasher](https://github.com/badabing2005/PixelFlasher) — Pixel flash sequence reference
-- [Lucide](https://lucide.dev) — icons
-- [shadcn/ui](https://ui.shadcn.com) — UI components
+A `PKGBUILD` is included in `aur/`. See `aur/README.md` for publishing to
+the AUR. Until then, Arch users can use the `.AppImage` from the releases
+page — no installation required.
+
+---
+
+```
+[ LICENCE ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+ATK is released under the GNU General Public License v3.0.
+
+The debloater package database is from Universal Android Debloater Next
+Generation (GPL-3.0) by the Universal-Debloater-Alliance.
+
+See LICENSE for full terms and third-party attributions.
+
+---
+
+```
+[ ACKNOWLEDGEMENTS ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+```
+  Universal Android Debloater Alliance  — debloater package database
+  Wails                                 — Go + Web application framework
+  PixelFlasher (badabing2005)           — Pixel flash sequence reference
+  Lucide                                — icon set
+```
+
+---
+
+```
+  github.com/jegly/ATK
+```
