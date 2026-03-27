@@ -12,92 +12,178 @@ env:
   PNPM_VERSION: "10"
 
 jobs:
+
   build-linux:
-    name: Build Linux
+    name: Build Linux (deb + AppImage)
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential pkg-config \
-            libgtk-3-dev libwebkit2gtk-4.1-dev \
-            libayatana-appindicator3-dev
-
+          sudo apt-get install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev fuse libfuse2
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
-
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
       - name: Install nfpm
         run: go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-
       - name: Install frontend dependencies
         run: pnpm install
         working-directory: frontend
-
       - name: Set webkit pkg-config path
         run: |
           echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
           echo "CGO_CFLAGS=$(pkg-config --cflags webkit2gtk-4.1)" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=$(pkg-config --libs webkit2gtk-4.1)" >> $GITHUB_ENV
-
       - name: Download Go modules
         run: go mod download
-
       - name: Build binary
         run: wails build -tags webkit2_41
-
-      - name: Prepare packaging assets
+      - name: Generate icon and desktop file
         run: |
           mkdir -p build
-          if [ ! -f build/appicon.png ]; then
-            python3 -c "import struct,zlib; chunk=lambda n,d: struct.pack('>I',len(d))+n+d+struct.pack('>I',zlib.crc32(n+d)&0xffffffff); raw=b''.join(b'\x00'+bytes([34,197,94])*256 for _ in range(256)); open('build/appicon.png','wb').write(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',256,256,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b''))"
-          fi
-          if [ ! -f build/atk.desktop ]; then
-            printf '[Desktop Entry]\nType=Application\nName=ATK\nGenericName=Android Toolkit\nComment=All-in-one ADB GUI for Android power users and bug hunters\nExec=/opt/atk/ATK\nIcon=atk\nCategories=Development;Utility;\nTerminal=false\nStartupWMClass=ATK\nKeywords=android;adb;fastboot;debloat;logcat;flash;\n' > build/atk.desktop
-          fi
-
-      - name: Package .deb
+          python3 -c "import struct,zlib; chunk=lambda n,d: struct.pack('>I',len(d))+n+d+struct.pack('>I',zlib.crc32(n+d)&0xffffffff); raw=b''.join(b'\x00'+bytes([34,197,94])*256 for _ in range(256)); open('build/appicon.png','wb').write(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',256,256,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b''))"
+          printf '[Desktop Entry]\nType=Application\nName=ATK\nGenericName=Android Toolkit\nComment=All-in-one ADB GUI for Android power users and bug hunters\nExec=ATK\nIcon=atk\nCategories=Development;Utility;\nTerminal=false\nStartupWMClass=ATK\n' > build/atk.desktop
+      - name: Build .deb
         run: |
           nfpm pkg --packager deb --target build/
           mv build/atk_*.deb "build/ATK-${{ github.ref_name }}-amd64.deb" || true
-
-      - name: Upload artifact
+      - name: Build AppImage
+        run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+          cp build/bin/ATK AppDir/usr/bin/ATK
+          cp build/atk.desktop AppDir/usr/share/applications/ATK.desktop
+          cp build/appicon.png AppDir/usr/share/icons/hicolor/256x256/apps/atk.png
+          ARCH=x86_64 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
+          find . -maxdepth 1 -name "*.AppImage" -not -name "linuxdeploy*" -exec mv {} "build/ATK-${{ github.ref_name }}-x86_64.AppImage" \;
+      - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
           name: "atk-linux-${{ github.ref_name }}"
           path: |
             build/bin/ATK
             build/*.deb
-
+            build/*.AppImage
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: "ATK ${{ github.ref_name }}"
-          body: "ATK Android Toolkit ${{ github.ref_name }} - Install: sudo dpkg -i ATK-${{ github.ref_name }}-amd64.deb && atk - Requires: sudo apt install adb fastboot libwebkit2gtk-4.1-0"
+          body: "ATK Android Toolkit ${{ github.ref_name }}"
           files: |
             build/ATK-${{ github.ref_name }}-amd64.deb
+            build/ATK-${{ github.ref_name }}-x86_64.AppImage
             build/bin/ATK
           draft: false
           prerelease: false
+
+  build-windows:
+    name: Build Windows (exe)
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      - name: Install frontend dependencies
+        run: pnpm install
+        working-directory: frontend
+      - name: Download Go modules
+        run: go mod download
+      - name: Build Windows binary
+        run: wails build
+      - name: Rename output
+        shell: cmd
+        run: copy "build\bin\ATK.exe" "build\ATK-${{ github.ref_name }}-windows-amd64.exe"
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "atk-windows-${{ github.ref_name }}"
+          path: build/ATK-${{ github.ref_name }}-windows-amd64.exe
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/ATK-${{ github.ref_name }}-windows-amd64.exe
+
+  build-macos:
+    name: Build macOS (unsigned DMG)
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      - name: Install frontend dependencies
+        run: pnpm install
+        working-directory: frontend
+      - name: Download Go modules
+        run: go mod download
+      - name: Build macOS binary
+        run: wails build
+      - name: Create DMG
+        run: |
+          mkdir -p dmg_staging
+          if [ -d "build/bin/ATK.app" ]; then
+            cp -r build/bin/ATK.app dmg_staging/
+          else
+            cp build/bin/ATK dmg_staging/
+          fi
+          hdiutil create -volname "ATK" -srcfolder dmg_staging -ov -format UDZO "build/ATK-${{ github.ref_name }}-macos-unsigned.dmg"
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "atk-macos-${{ github.ref_name }}"
+          path: build/ATK-${{ github.ref_name }}-macos-unsigned.dmg
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/ATK-${{ github.ref_name }}-macos-unsigned.dmg
