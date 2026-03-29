@@ -15,7 +15,7 @@
 | |__| || |__| || |__| || |__| || |__| || |__| |
 |  ()  ||  ()  ||  ()  ||  ()  ||  ()  ||  ()  |
 |______||______||______||______||______||______|
-ANDROID TOOLKIT — v1.0.5
+ANDROID TOOLKIT — v1.0.14
 ```
 
 > All-in-one ADB command centre for Android power users, security researchers, and bug hunters.
