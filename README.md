@@ -18,6 +18,8 @@
 ANDROID TOOLKIT — v1.0.14
 ```
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jegly/ATK)
+
 > All-in-one ADB command centre for Android power users, security researchers, and bug hunters.
 > Built with Go + React via Wails. Runs natively on Linux, Windows, and macOS.
 > Uses your system ADB — no bundled binaries, no mystery executables.
