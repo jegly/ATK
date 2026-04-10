@@ -245,6 +245,7 @@ See LICENSE for full terms and third-party attributions.
   Wails                                 — Go + Web application framework
   PixelFlasher (badabing2005)           — Pixel flash sequence reference
   Lucide                                — icon set
+  https://github.com/Drenzzz/adb-gui-kit
 ```
 
 ---
