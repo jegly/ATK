@@ -17,6 +17,8 @@
 |______||______||______||______||______||______|
 ANDROID TOOLKIT — v1.0.14
 ```
+
+![GitHub all releases](https://img.shields.io/github/downloads/jegly/ATK/total)
 ###  Preview Demo Screenshots
 
 <p align="center">
