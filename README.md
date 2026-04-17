@@ -67,6 +67,8 @@ ANDROID TOOLKIT — v1.0.14
 
 **[→ Latest Release](https://github.com/jegly/ATK/releases/latest)**
 
+sha256:0e6b28b46f07a959c1d402f953f21f79821d8f34c70b47fc67280683ff35df82 - .Deb
+
 **Linux requirements**
 ```bash
 sudo apt install adb fastboot libwebkit2gtk-4.1-0
