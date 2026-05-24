@@ -6,27 +6,27 @@
 ###  Preview Demo Screenshots
 
 <p align="center">
-  <img src="screenshot/1.png" width="48%" alt="1">
-  <img src="screenshot/2.png" width="48%" alt="2">
+  <img src="screenshot/1.png" width="100%" alt="1">
+  <img src="screenshot/2.png" width="100%" alt="2">
 </p>
 
 <p align="center">
-  <img src="screenshot/3.png" width="48%" alt="3">
-  <img src="screenshot/4.png" width="48%" alt="4">
+  <img src="screenshot/3.png" width="100%" alt="3">
+  <img src="screenshot/4.png" width="100%" alt="4">
 </p>
 
 <p align="center">
-  <img src="screenshot/5.png" width="48%" alt="5">
-  <img src="screenshot/6.png" width="48%" alt="6">
+  <img src="screenshot/5.png" width="100%" alt="5">
+  <img src="screenshot/6.png" width="100%" alt="6">
 </p>
 
 <p align="center">
-  <img src="screenshot/7.png" width="48%" alt="7">
-  <img src="screenshot/8.png" width="48%" alt="8">
+  <img src="screenshot/7.png" width="100%" alt="7">
+  <img src="screenshot/8.png" width="100%" alt="8">
 </p>
 
 <p align="center">
-  <img src="screenshot/9.png" width="48%" alt="9">
+  <img src="screenshot/9.png" width="100%" alt="9">
 </p>
 
 
