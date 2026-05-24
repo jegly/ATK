@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshot/atk_banner.png" alt="ATK Banner" />
+  <img src="screenshot/atkbanner.png" alt="ATK Banner" />
 </p>
 
 ![GitHub all releases](https://img.shields.io/github/downloads/jegly/ATK/total)
