@@ -110,10 +110,6 @@ https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 </details>
 
-> [!NOTE]
-> The four demos above are hosted on GitHub's attachment CDN, so they play inline
-> here. The copies in `screenshot/*.mp4` are no longer needed for playback and can
-> be deleted to keep the repo small.
 
 ---
 
