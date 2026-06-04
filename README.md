@@ -53,7 +53,8 @@ work. Go star them:
 - **[apkauditor](https://apkauditor.com)** (Sandeep Wawdane) — inspiration for the APK Audit feature (clean-room reimplementation; no code reused).
 - **[Canta](https://github.com/samolego/Canta) / [Shizuku](https://github.com/RikkaApps/Shizuku)** — approach reference for removing/disabling apps without root.
 - **[Magisk](https://github.com/topjohnwu/Magisk)** (topjohnwu) — boot-image patching / root.
-- **[Universal Android Debloater Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)** — the debloater package database.
+- **[Universal Android Debloater](https://github.com/0x192/universal-android-debloater)** (0x192) — the original UAD project; the foundation of ATK's debloater. Licensed GPL-3.0.
+- **[Universal Android Debloater Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)** — the maintained UAD fork ATK's package database is sourced from.
 - **[PixelFlasher](https://github.com/badabing2005/PixelFlasher)** (badabing2005) — Pixel flash-sequence reference.
 - **[Wails](https://wails.io)** — Go + Web application framework.
 - **[Lucide](https://lucide.dev)** — icon set.
@@ -63,12 +64,34 @@ work. Go star them:
 
 Real-time demos of the map engine visualising live device telemetry:
 
-| | |
-|---|---|
-| ▶️ [Map engine — demo 1](screenshot/ATK_MAP_ENGINE_DEMO1.mp4) | ▶️ [Map engine — demo 2](screenshot/ATK_MAP_ENGINE_DEMO2.mp4) |
-| ▶️ [Map engine — demo 3](screenshot/ATK_MAP_ENGINE_DEMO3.mp4) | ▶️ [Map engine — demo 4](screenshot/ATK_MAP_ENGINE_DEMO4.mp4) |
+**▶️ Demo 1**
+
+https://github.com/user-attachments/assets/88ade32b-fc65-4165-a5a5-9419ca75eb7a
+
+**▶️ Demo 2**
+
+https://github.com/user-attachments/assets/dfb97bdf-0cdb-48d8-a11c-d80222887f1d
+
+**▶️ Demo 3**
+
+https://github.com/user-attachments/assets/090df134-2d79-4f7a-96ef-0a58e42f0ad5
+
+**▶️ Demo 4**
+
+https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 <p align="center"><img src="screenshot/Logcat.png" width="100%" alt="Live System Map"></p>
+
+<table>
+<tr>
+<td width="50%"><img src="screenshot/MAP1.png" alt="Live System Map — view 1"></td>
+<td width="50%"><img src="screenshot/MAP2.png" alt="Live System Map — view 2"></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshot/MAP3.png" alt="Live System Map — view 3"></td>
+<td width="50%"><img src="screenshot/MAP4.png" alt="Live System Map — view 4"></td>
+</tr>
+</table>
 
 <details>
 <summary>📸 More screenshots</summary>
@@ -88,9 +111,9 @@ Real-time demos of the map engine visualising live device telemetry:
 </details>
 
 > [!NOTE]
-> The demo links above open the `.mp4` in GitHub's player. To embed them **inline**
-> (autoplaying preview), drag each video into the README on github.com once — GitHub
-> then gives a `user-attachments` URL that renders in-page.
+> The four demos above are hosted on GitHub's attachment CDN, so they play inline
+> here. The copies in `screenshot/*.mp4` are no longer needed for playback and can
+> be deleted to keep the repo small.
 
 ---
 
@@ -342,8 +365,10 @@ WebKit2GTK 4.1 present.
 ## License
 
 ATK is released under the **GNU General Public License v3.0**. The debloater
-database is from the Universal Android Debloater Next Generation project
-(GPL-3.0) by the Universal-Debloater-Alliance. See `LICENSE` for full terms and
-third-party attributions.
+database derives from the **Universal Android Debloater** project (GPL-3.0),
+originally created by [0x192](https://github.com/0x192/universal-android-debloater)
+and continued by the Universal-Debloater-Alliance's
+[Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)
+fork. See `LICENSE` for full terms and third-party attributions.
 
 <p align="center"><sub>github.com/jegly/ATK</sub></p>
