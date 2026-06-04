@@ -2,7 +2,7 @@
   <img src="assets/appicon.png" alt="ATK" width="132" />
 </p>
 
-<h1 align="center">ATK · Android Toolkit</h1>
+<h1 align="center">ATK · Android Tool kit</h1>
 
 <p align="center">
   <b>An all-in-one Android command centre with a real-time system-map debugging engine.</b>
