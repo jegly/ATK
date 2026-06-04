@@ -324,7 +324,6 @@ wails build -tags webkit2_41
 **Dev mode (hot reload)** — `wails dev -tags webkit2_41`
 
 
-
 **Package as .deb**
 ```bash
 go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
