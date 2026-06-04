@@ -53,7 +53,7 @@ ATK builds on these open-source projects. Go star them:
 - **[PixelFlasher](https://github.com/badabing2005/PixelFlasher)** (badabing2005): Pixel flash-sequence reference.
 - **[Wails](https://wails.io)**: Go and Web application framework.
 - **[Lucide](https://lucide.dev)**: icon set.
-- **[adb-gui-kit](https://github.com/Drenzzz/adb-gui-kit)** (Drenzzz): early ADB GUI groundwork this project started from.
+- **[adb-gui-kit](https://github.com/Drenzzz/adb-gui-kit)** (Drenzzz): early base ADB GUI groundwork this project started from.
 
 ### 🗺️ See the Live System Map in action
 
