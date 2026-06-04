@@ -9,7 +9,6 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/downloads/jegly/ATK/total?style=for-the-badge&color=50FA7B&label=Downloads" alt="Downloads" />
   <img src="https://img.shields.io/badge/License-GPLv3-BD93F9?style=for-the-badge" alt="License GPLv3" />
   <img src="https://img.shields.io/badge/Platform-Linux-50FA7B?style=for-the-badge&logo=linux&logoColor=282A36" alt="Linux" />
   <img src="https://img.shields.io/badge/Go%20+%20React%20(Wails)-8BE9FD?style=for-the-badge&color=8BE9FD&logoColor=282A36" alt="Go + React via Wails" />
