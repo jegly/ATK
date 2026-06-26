@@ -57,7 +57,7 @@ ATK builds on these open-source projects. Go star them:
 
 ### 🗺️ See the Live System Map in action
 
-Real-time demos of the map engine showing live device telemetry:
+Real-time demos of the map engine showing live device telemetry: You may have seen this viral on X, it is getting around ! Yes it came from here, This is the original implementation. 
 
 **▶️ Demo 1**
 
