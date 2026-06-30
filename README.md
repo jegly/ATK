@@ -352,4 +352,3 @@ and continued by the Universal-Debloater-Alliance's
 fork. See `LICENSE` for full terms and third-party attributions.
 
 <p align="center"><sub>github.com/jegly/ATK</sub></p>
-
