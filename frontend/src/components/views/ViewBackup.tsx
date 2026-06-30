@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Archive, RotateCcw, AlertTriangle, Package, Check } from 'lucide-react'
-import { StartBackup, RestoreBackup, SelectBackupFile, ListPackages } from '../../lib/wails'
+import { Archive, RotateCcw, AlertTriangle, Check, FolderDown, X, Eye, EyeOff } from 'lucide-react'
+import { StartBackup, RestoreBackup, SelectBackupFile, ListPackages, PullPathsWithProgress } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import DismissibleBanner from '../DismissibleBanner'
 import type { PackageInfo } from '../../lib/types'
 
 export default function ViewBackup() {
@@ -14,6 +15,28 @@ export default function ViewBackup() {
   const [backing, setBacking]         = useState(false)
   const [search, setSearch]           = useState('')
   const [result, setResult]           = useState('')
+  const [tipsHidden, setTipsHidden]   = useState(localStorage.getItem('atk-backup-tips') === 'hidden')
+  const [folders, setFolders]         = useState<string[]>([])
+  const [folderInput, setFolderInput] = useState('')
+
+  const toggleTips = () => {
+    const v = !tipsHidden
+    setTipsHidden(v)
+    localStorage.setItem('atk-backup-tips', v ? 'hidden' : 'shown')
+  }
+  const addFolder = (p: string) => {
+    const v = p.trim()
+    if (v && !folders.includes(v)) setFolders([...folders, v])
+    setFolderInput('')
+  }
+  const backupFolders = async () => {
+    if (folders.length === 0) { notify.error('Add at least one folder to back up'); return }
+    const id = notify.loading('Folder backup — choose a destination folder…')
+    try {
+      const out = await PullPathsWithProgress(folders)
+      notify.dismiss(id); notify.success(out)
+    } catch (e: any) { notify.dismiss(id); notify.error(e) }
+  }
 
   const loadPackages = async () => {
     if (pkgsLoaded) return
@@ -91,15 +114,21 @@ export default function ViewBackup() {
   return (
     <div className="flex flex-col h-full overflow-hidden p-4 gap-4">
       {/* Warning */}
-      <div className="flex items-start gap-3 bg-warn/5 border border-warn/20 rounded-lg px-4 py-3 shrink-0">
+      <DismissibleBanner id="warn-backup" className="bg-warn/5 border border-warn/20 rounded-lg px-4 py-3 shrink-0 text-warn">
         <AlertTriangle size={15} className="text-warn shrink-0 mt-0.5" />
         <div className="text-xs text-warn/80 space-y-1">
           <p className="font-medium">Android 12+ heavily restricts adb backup</p>
           <p>Apps must opt-in via <span className="mono">android:allowBackup="true"</span> and the <span className="mono">ALLOW_ADB_BACKUP</span> flag. Many modern apps will not be backed up. For full backup, use a rooted device with Titanium Backup or Swift Backup.</p>
         </div>
+      </DismissibleBanner>
+
+      <div className="flex justify-end shrink-0 -mt-2">
+        <button onClick={toggleTips} className="btn-ghost text-xs">
+          {tipsHidden ? <><Eye size={12} /> Show tips</> : <><EyeOff size={12} /> Hide tips</>}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-1 overflow-hidden">
+      <div className={`grid grid-cols-1 ${tipsHidden ? '' : 'xl:grid-cols-2'} gap-4 flex-1 overflow-hidden`}>
         {/* Backup config */}
         <div className="card p-4 space-y-4 overflow-auto">
           <p className="section-title">Backup Configuration</p>
@@ -182,9 +211,44 @@ export default function ViewBackup() {
               {result}
             </div>
           )}
+
+          {/* Folder / file backup (no app-opt-in needed — straight adb pull) */}
+          <div className="border-t border-bg-border pt-4 space-y-2">
+            <p className="section-title">Folder backup</p>
+            <p className="text-xs text-text-muted">Pull device folders/files straight to your computer — works regardless of an app's backup flags.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {['/sdcard/DCIM', '/sdcard/Download', '/sdcard/Pictures', '/sdcard/Documents', '/sdcard'].map(p => (
+                <button key={p} onClick={() => addFolder(p)} className="btn-ghost text-xs py-0.5 px-1.5">+ {p.replace('/sdcard/', '') || '/sdcard'}</button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                className="input text-xs flex-1 mono"
+                placeholder="/sdcard/path/to/folder"
+                value={folderInput}
+                onChange={e => setFolderInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addFolder(folderInput)}
+              />
+              <button onClick={() => addFolder(folderInput)} className="btn-ghost text-xs shrink-0">Add</button>
+            </div>
+            {folders.length > 0 && (
+              <div className="space-y-1">
+                {folders.map(f => (
+                  <div key={f} className="flex items-center justify-between bg-bg-raised rounded px-2 py-1">
+                    <span className="mono text-xs text-text-secondary truncate">{f}</span>
+                    <button onClick={() => setFolders(folders.filter(x => x !== f))} className="text-text-muted hover:text-danger shrink-0"><X size={12} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={backupFolders} disabled={folders.length === 0} className="btn-ghost w-full justify-center text-xs">
+              <FolderDown size={13} /> Back up {folders.length || ''} folder(s) → computer
+            </button>
+          </div>
         </div>
 
         {/* Info panel */}
+        {!tipsHidden && (
         <div className="card p-4 space-y-4 overflow-auto">
           <p className="section-title">How adb backup works</p>
           <div className="space-y-3 text-xs text-text-muted">
@@ -219,6 +283,7 @@ export default function ViewBackup() {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   )

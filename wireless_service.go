@@ -105,12 +105,19 @@ func (a *App) GetFastbootDevices() ([]Device, error) {
 // FlashPartition flashes an image file to a named partition via fastboot.
 // partition is validated against known partition names.
 // filePath is a discrete arg.
-func (a *App) FlashPartition(partition, filePath string) (string, error) {
+func (a *App) FlashPartition(partition, filePath string, force bool) (string, error) {
+	if err := a.requireDangerUnlocked(); err != nil {
+		return "", err
+	}
 	if err := validatePartitionName(partition); err != nil {
 		return "", err
 	}
-	// fastboot flash <partition> <file> - all discrete args
-	output, err := a.runCommand("fastboot", "flash", partition, filePath)
+	args := []string{}
+	if force {
+		args = append(args, "--force")
+	}
+	args = append(args, "flash", partition, filePath)
+	output, err := a.runCommand("fastboot", args...)
 	if err != nil {
 		return "", fmt.Errorf("flash failed: %w", err)
 	}
@@ -176,6 +183,7 @@ func validatePort(port string) error {
 func validatePartitionName(name string) error {
 	knownPartitions := map[string]bool{
 		"boot":        true,
+		"init_boot":   true,
 		"recovery":    true,
 		"system":      true,
 		"vendor":      true,

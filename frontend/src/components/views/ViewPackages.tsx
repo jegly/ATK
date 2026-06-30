@@ -6,6 +6,7 @@ import {
   SelectFileForInstall, InstallPackage
 } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { ensureDangerUnlocked } from '../../lib/applock'
 import type { PackageInfo } from '../../lib/types'
 
 type Filter = 'all' | 'user' | 'system'
@@ -57,6 +58,7 @@ export default function ViewPackages() {
 
   const batchOp = async (label: string, op: (pkgs: string[]) => Promise<string>) => {
     if (selected.size === 0) { notify.error('Select packages first'); return }
+    if (!(await ensureDangerUnlocked())) return
     const id = notify.loading(`${label} ${selected.size} package(s)...`)
     try {
       const out = await op([...selected])

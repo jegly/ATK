@@ -1,137 +1,301 @@
-```
- █████╗ ████████╗██╗  ██╗
-██╔══██╗╚══██╔══╝██║ ██╔╝
-███████║   ██║   █████╔╝ 
-██╔══██║   ██║   ██╔═██╗ 
-██║  ██║   ██║   ██║  ██╗
-╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
-ANDROID TOOLKIT — v1.0.5
-```
+<p align="center">
+  <img src="assets/appicon.png" alt="ATK" width="132" />
+</p>
 
-> All-in-one ADB command centre for Android power users, security researchers, and bug hunters.
-> Built with Go + React via Wails. Runs natively on Linux, Windows, and macOS.
-> Uses your system ADB — no bundled binaries, no mystery executables.
+<h1 align="center">ATK · Android Tool kit</h1>
+
+<p align="center">
+  <b>An all-in-one Android command centre with a real-time system-map debugging engine.</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/License-GPLv3-BD93F9?style=for-the-badge" alt="License GPLv3" />
+  <img src="https://img.shields.io/badge/Platform-Linux-50FA7B?style=for-the-badge&logo=linux&logoColor=282A36" alt="Linux" />
+  <img src="https://img.shields.io/badge/Go%20+%20React%20(Wails)-8BE9FD?style=for-the-badge&color=8BE9FD&logoColor=282A36" alt="Go + React via Wails" />
+  <a href="https://deepwiki.com/jegly/ATK"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
+</p>
 
 ---
 
-```
-[ DOWNLOADS ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## What is ATK?
 
-| Platform              | Format      | Install                                          |
-|-----------------------|-------------|--------------------------------------------------|
-| Linux — Debian/Ubuntu | `.deb`      | `sudo dpkg -i ATK-*.deb`                        |
-| Linux — any distro    | `.AppImage` | `chmod +x ATK-*.AppImage && ./ATK-*.AppImage`   |
-| Windows               | `.exe`      | Run directly                                     |
-| macOS 11.0+           | `.dmg`      | Unsigned — see note below                       |
+ATK (Android Toolkit) is an all-in-one ADB and fastboot command centre for power
+users, security researchers, and bug hunters. It runs on Linux, built with Go
+and React via Wails. You get the tools an OEM service centre has, plus a
+real-time debugging engine built around a live system map.
+
+Mirror and control your phone in a detachable window. Browse files on the device
+and your computer with a built-in image viewer. Root and flash Pixels. Audit APKs
+for trackers and secrets. Debloat over 5,000 packages. Run hundreds of one-click
+ADB commands. And watch the device's behaviour in real time as a live system map.
+One themeable UI covers all of it.
+
+> 🗺️ The Live System Map turns logcat into a live, interactive view of the whole
+> system's behaviour. No other Android tool does this. [Jump to it ↓](#-live-system-map)
+
+> [!NOTE]
+> ATK uses your system `adb`, `fastboot`, and `scrcpy` from PATH. Nothing is
+> bundled. Settings shows the path and SHA-256 of each binary so you can verify
+> them yourself.
+
+---
+
+## 🙏 Built on the community
+
+ATK builds on these open-source projects. Go star them:
+
+- **[scrcpy](https://github.com/Genymobile/scrcpy)** (Genymobile): screen mirroring and control behind the Screen Mirror module.
+- **[apkauditor](https://apkauditor.com)** (Sandeep Wawdane): inspiration for the APK Audit feature. Clean-room reimplementation, no code reused.
+- **[Canta](https://github.com/samolego/Canta) / [Shizuku](https://github.com/RikkaApps/Shizuku)**: reference for removing and disabling apps without root.
+- **[Magisk](https://github.com/topjohnwu/Magisk)** (topjohnwu): boot-image patching and root.
+- **[Universal Android Debloater](https://github.com/0x192/universal-android-debloater)** (0x192): the original UAD project and the foundation of ATK's debloater. GPL-3.0.
+- **[Universal Android Debloater Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)**: the maintained UAD fork ATK's package database comes from.
+- **[PixelFlasher](https://github.com/badabing2005/PixelFlasher)** (badabing2005): Pixel flash-sequence reference.
+- **[Wails](https://wails.io)**: Go and Web application framework.
+- **[Lucide](https://lucide.dev)**: icon set.
+- **[adb-gui-kit](https://github.com/Drenzzz/adb-gui-kit)** (Drenzzz): early base ADB GUI groundwork this project started from.
+
+### 🗺️ See the Live System Map in action
+
+Real-time demos of the map engine showing live device telemetry: You may have seen this viral on X, it is getting around ! Yes it came from here, This is the original implementation. 
+
+**▶️ Demo 1**
+
+https://github.com/user-attachments/assets/88ade32b-fc65-4165-a5a5-9419ca75eb7a
+
+**▶️ Demo 2**
+
+https://github.com/user-attachments/assets/dfb97bdf-0cdb-48d8-a11c-d80222887f1d
+
+**▶️ Demo 3**
+
+https://github.com/user-attachments/assets/090df134-2d79-4f7a-96ef-0a58e42f0ad5
+
+**▶️ Demo 4**
+
+https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
+
+<p align="center"><img src="screenshot/Logcat.png" width="100%" alt="Live System Map"></p>
+
+<table>
+<tr>
+<td width="50%"><img src="screenshot/MAP1.png" alt="Live System Map view 1"></td>
+<td width="50%"><img src="screenshot/MAP2.png" alt="Live System Map view 2"></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshot/MAP3.png" alt="Live System Map view 3"></td>
+<td width="50%"><img src="screenshot/MAP4.png" alt="Live System Map view 4"></td>
+</tr>
+</table>
+
+<details>
+<summary>📸 More screenshots</summary>
+
+<table>
+<tr><td align="center"><b>Dashboard</b><br><img src="screenshot/Dashboard.png" alt="Dashboard"></td><td align="center"><b>File Explorer</b><br><img src="screenshot/Files.png" alt="Files"></td></tr>
+<tr><td align="center"><b>Package Manager</b><br><img src="screenshot/Packages.png" alt="Packages"></td><td align="center"><b>Debloater</b><br><img src="screenshot/Debloater.png" alt="Debloater"></td></tr>
+<tr><td align="center"><b>APK Audit</b><br><img src="screenshot/APK_Audit.png" alt="APK Audit"></td><td align="center"><b>App Inspector</b><br><img src="screenshot/App_Inspector.png" alt="App Inspector"></td></tr>
+<tr><td align="center"><b>Certificate Manager</b><br><img src="screenshot/Certificates.png" alt="Certificates"></td><td align="center"><b>Device Backup</b><br><img src="screenshot/Backup.png" alt="Backup"></td></tr>
+<tr><td align="center"><b>Prop Editor</b><br><img src="screenshot/Prop_Editor.png" alt="Prop Editor"></td><td align="center"><b>Shell Terminal</b><br><img src="screenshot/Shell.png" alt="Shell"></td></tr>
+<tr><td align="center"><b>Utilities</b><br><img src="screenshot/Utilities.png" alt="Utilities"></td><td align="center"><b>Flasher</b><br><img src="screenshot/Flasher.png" alt="Flasher"></td></tr>
+<tr><td align="center"><b>Screen Mirror prefs</b><br><img src="screenshot/ATK_screen_mirror_pref.png" alt="Screen Mirror prefs"></td><td align="center"><b>Settings: Appearance</b><br><img src="screenshot/Settings.png" alt="Settings"></td></tr>
+<tr><td align="center"><b>Settings: Features</b><br><img src="screenshot/Settings2.png" alt="Settings 2"></td><td align="center"><b>Settings: Advanced</b><br><img src="screenshot/Settings3.png" alt="Settings 3"></td></tr>
+<tr><td align="center"><b>Password lock</b><br><img src="screenshot/Login_Window_Password.png" alt="Login"></td><td align="center"><b>Logcat (map mode)</b><br><img src="screenshot/Logcat.png" alt="Logcat"></td></tr>
+</table>
+
+</details>
+
+
+---
+
+## Download
 
 **[→ Latest Release](https://github.com/jegly/ATK/releases/latest)**
+
+| Distro          | Format | Install                  |
+|-----------------|--------|--------------------------|
+| Debian / Ubuntu | `.deb` | `sudo dpkg -i ATK-*.deb` |
+
+> [!NOTE]
+> Linux only. ATK is built and tested on Debian and Ubuntu. Other distros build
+> from source (below).
+
+The releases page publishes checksums. Verify before installing.
 
 **Linux requirements**
 ```bash
 sudo apt install adb fastboot libwebkit2gtk-4.1-0
-```
-
-**macOS — Gatekeeper bypass**
-```bash
-xattr -rd com.apple.quarantine /Applications/ATK.app
-# or: System Preferences → Security & Privacy → Open Anyway
+# scrcpy is only needed for the Screen Mirror module:
+sudo apt install scrcpy
 ```
 
 ---
 
-```
-[ MODULES ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## Modules
 
-```
-┌─────────────────────┬────────────────────────────────────────────────────┐
-│ MODULE              │ DESCRIPTION                                        │
-├─────────────────────┼────────────────────────────────────────────────────┤
-│ Dashboard           │ Device info, wireless ADB, reboot controls         │
-│ File Explorer       │ Push, pull, rename, delete, batch export           │
-│ Package Manager     │ Install, uninstall, enable, disable, pull APK      │
-│ Debloater           │ 2157 packages — Samsung, Xiaomi, Google, 10+ OEMs  │
-│ Live Logcat         │ Real-time streaming, level filter, tag filter       │
-│ App Inspector       │ Permissions, components, certs, pinning check      │
-│ Certificate Manager │ Install/remove user CAs for HTTPS interception     │
-│ Device Backup       │ adb backup with app selection and restore          │
-│ Prop Editor         │ Read/write all 300+ system properties              │
-│ Shell Terminal      │ adb shell and host commands, command history        │
-│ Utilities           │ 487 commands across 15 categories                  │
-│ Flasher             │ Fastboot partition flash, getvar, sideload         │
-│ Pixel Factory Flash │ Full factory image flash from flash-all.sh         │
-└─────────────────────┴────────────────────────────────────────────────────┘
-```
+| Module | What it does |
+|---|---|
+| 🖥️ **Screen Mirror** | Live mirror and full control via scrcpy; detachable and recordable |
+| 📊 **Dashboard** | Device info, wireless ADB, reboot controls |
+| 📁 **File Explorer** | Browse the device and your computer, push and pull, image viewer |
+| 📦 **Package Manager** | Install, uninstall, enable, disable, pull APK, plus **privileged removal of protected system apps without root** |
+| 🔎 **APK Audit** | Static APK security audit: perms, trackers, certs, rule findings |
+| 🧹 **Debloater** | 5,362 packages across Samsung, Xiaomi, Google, and 11 more OEMs |
+| 📡 **Live Logcat + System Map** | Real-time log streaming, plus a live, interactive map of system behaviour across subsystems |
+| 🕵️ **App Inspector** | Permissions, components, certs, SSL-pinning check |
+| 🔐 **Certificate Manager** | Install and remove user CAs for HTTPS interception |
+| 💾 **Device Backup** | `adb backup` with app selection and restore |
+| 🎚️ **Prop Editor** | Read and write all 300+ system properties |
+| 💻 **Shell Terminal** | adb shell and host, command library, export session |
+| 🧰 **Utilities** | 631 one-click commands across 50+ categories |
+| ⚡ **Flasher** | Fastboot, live-boot, Magisk root, firmware download |
 
----
-
-```
-[ SECURITY ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-```
-NO BUNDLED BINARIES
-  ATK has no bin/ directory. It resolves adb and fastboot from your system
-  PATH — installed via apt, Homebrew, or Android SDK. The Settings view
-  displays the full path and SHA-256 of whichever binary is in use so you
-  can verify it against Google's published platform-tools checksums.
-
-NO SHELL STRING BUILDING
-  Every command uses exec.Command(binary, arg1, arg2, ...) with discrete
-  arguments passed directly to execve. There is no shell involved and
-  therefore no shell injection surface.
-
-INPUT VALIDATION
-  Package names, partition names, IP addresses, and remote paths are all
-  validated before use. Fastboot flash only accepts a known partition
-  allowlist — no arbitrary partition names accepted.
-```
+> [!TIP]
+> Hide any module you don't use from **Settings → Sidebar Features**. Theme
+> (Dark, Catppuccin Frappé, Latte) and sidebar position (left, top, bottom) are
+> configurable too.
 
 ---
 
-```
-[ DEBLOATER ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## ✨ What's new
 
-Package database sourced from Universal Android Debloater (UAD-ng). 2,157
-packages across 14 manufacturers and categories, each with safety ratings:
-
-```
-  SAFE     — generally safe to remove
-  CAUTION  — disable rather than uninstall; may affect device behaviour  
-  KEEP     — do not remove; will break core system functionality
-```
-
-Coverage: Samsung · Xiaomi · OnePlus/Oppo · Huawei · Sony · Motorola · LG
-          Nokia/HMD · Asus · Realme · Google · Carriers · AOSP · Misc
+- 📡 **Live System Map**: turn logcat into a live, interactive map of system behaviour across subsystems *(see below)*.
+- 🧹 **Debloater database grew from 2,157 to 5,362 packages**, with a **privileged uninstall of protected system apps without root** and a one-click **restore**.
+- 🧰 **Utilities expanded to 631 one-click commands** across 50+ categories.
+- 🎨 **Themes**: Dark, Catppuccin **Frappé**, and **Latte**. Dismissible safety banners.
+- 🔎 **APK Audit** exports to **JSON, CSV, SARIF**, with an in-app APK explorer.
+- 📦 **Smarter package ops**: combined *Disable + Uninstall*, a *disabled* badge, and verify-then-escalate so removals stick.
+- 🔌 **Offline-capable UI**: fonts are self-hosted, with no runtime CDN fetches.
 
 ---
 
-```
-[ PIXEL FACTORY FLASH ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## 🖥️ Screen Mirror
 
-ATK reads `flash-all.sh` directly from inside the factory image zip and
-executes the correct sequence — no hardcoded partition order. Options:
+See your phone on your computer and drive it with mouse and keyboard. ATK is the
+control panel. The mirror opens in its own window you can move, resize, and snap
+anywhere. It runs on scrcpy from your system install.
 
-```
-  --wipe               Wipe userdata (-w flag on fastboot update)
-  --disable-verity     For Magisk / root setups
-  --disable-verif      Paired with disable-verity
-  --force              Bypass anti-rollback (use with caution)
-  --slot all           Flash both A and B slots
-```
+- 🕹️ **Full control**: tap, swipe, type, long-press, complete input from your desktop
+- 🪟 **Detachable**: separate window, and you can keep it alive after ATK closes
+- 📷 **Capture**: one-click screenshot (PNG) and full-session screen recording
+- 🎛️ **Tunable**: max resolution, bitrate, FPS, stay-awake, turn-screen-off, show-touches, always-on-top, fullscreen, borderless
+- ⌨️ **Shortcut cheat-sheet**: Home, Back, recents, copy and paste, rotate, and more, built in
 
-Download factory images from: https://developers.google.com/android/images
+> [!NOTE]
+> Single-instance by design. Start always yields one window, and ATK clears the
+> mirror on exit unless you asked it to stay.
 
 ---
 
-```
-[ BUILD FROM SOURCE ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## 📁 File Explorer
 
-**Prerequisites — Ubuntu/Debian**
+A file manager for the device and your computer.
+
+- 🔀 **Two sources**: toggle between the phone (adb) and your local filesystem
+- ⏱️ **Push and pull**: transfers with a live progress bar, ETA, and cancel
+- 🎯 **Push by browsing**: pick files on your PC, browse the phone to the destination folder, then *Push here*, with no paths to type
+- 🖱️ **Right-click**: Open, Pull to folder, Rename, Move, Copy path, Delete
+- 🖼️ **Image viewer**: full-screen, with ← and → to flip through a folder (device or local)
+- 🧭 **Navigation**: Back, Forward, Up history, and an editable path bar
+
+---
+
+## 📡 Live System Map
+
+The Live System Map turns the raw logcat firehose into a live, interactive view
+of what your phone is doing. It is a real-time engine that unifies system-level
+telemetry from many subsystems into one live relational model, shown as an
+interactive, multi-mode visualization. No other Android tool does this.
+
+Processes, services, tags, and components become **nodes**. The relationships
+mined from the stream become **edges**: launches, crashes, ANRs, kills, signals,
+graphics and audio events, and temporal co-occurrence. Every event becomes a
+packet that **flows** from source to destination. You get one coherent, live
+picture of how `system_server`, SurfaceFlinger, the media and telephony stacks,
+and your apps interact right now.
+
+- 🌐 **Multiple render modes**: a crisp 2D graph, a neon flow view, and a 3D hierarchical tree
+- 🧩 **Many layouts**: force-directed, hub boxes, radial-by-importance, and geometric arrangements
+- 🌊 **Trackable flows**: follow individual events travelling between subsystems, source to destination
+- 🚨 **Surfacing**: crashes, ANRs, and errors auto-alert and ping their node, and you can add keyword watch-rules
+- 🎯 **Focus tools**: isolate one node's traffic, build a watchlist, filter by severity or kind, scrub a timeline, diff against a baseline
+- 🎥 **Capture and export**: record the packet stream and pull it out for offline analysis
+- ⌨️ **Built for flow**: pause and resume, fullscreen, freeze, search-to-step, colour-coding, savable presets
+
+Read it as a node-link graph to understand structure, or as flowing packets to
+watch behaviour. Pick the mode that fits your question.
+
+---
+
+## ⚡ Flasher
+
+All flash tooling in one place across three tabs, with a live device-info bar up
+top (connection mode · slot · bootloader · lock state · root).
+
+| Tab | What it does |
+|---|---|
+| **Manual** | Reboot menu (system, bootloader, fastbootd, recovery), bootloader unlock and lock, flash any safe-listed partition, getvar, ADB sideload, **live-boot** an image, or flash boot/init_boot to a chosen slot |
+| **Pixel Factory** | Drag in (or browse to) a Google factory `.zip`. ATK reads `flash-all.sh` and runs the right sequence. Options: wipe or keep data, disable-verity and verification, both slots |
+| **Download** | Fetch official Pixel **factory or OTA** images by device, straight from Google, with a progress bar and automatic **SHA-256 verification** |
+
+> [!IMPORTANT]
+> **Rooting (optional).** Enable it in `Settings → Advanced`. ATK can download and
+> install Magisk for you, extract boot/init_boot from a factory zip, push it for
+> the Magisk app to patch, pull the patched image back, then **live-boot** it
+> (temporary root) or **flash** it (permanent). It needs an unlocked bootloader.
+> Flashing can wipe or brick a device, so proceed carefully.
+
+Browse factory images: https://developers.google.com/android/images
+
+---
+
+## 🔎 APK Audit
+
+A static security audit of any APK, whether a browsed file or an app pulled off
+the device. The engine is hybrid: it uses Android SDK tools when present and a
+pure-Go fallback otherwise, so it works with zero extra dependencies.
+
+- **Score and grade** with a severity breakdown
+- **Dangerous permissions** highlighted
+- **Tracker and ad-SDK** detection
+- **Rule findings** tagged with CWE and MASVS
+- **Decoded manifest** with exported components
+- **Signing certificate**: identity, scheme (v1/v2/v3), SHA-256 and SHA-1
+- **Explorer**: browse the APK, view text, images, and hex
+- **Export** to JSON, CSV, and SARIF
+
+---
+
+## 🧹 Debloater
+
+The package database comes from Universal Android Debloater (UAD-ng): **5,362
+packages** across 14 manufacturers, each with a safety rating. Beyond enable and
+disable, ATK can run a **privileged uninstall of protected system apps without
+root**, and **restore** them later, using a Canta and Shizuku-style technique
+over ADB.
+
+| Rating | Meaning |
+|---|---|
+| 🟢 **Safe** | Generally safe to remove |
+| 🟡 **Caution** | Disable rather than uninstall; may affect device behaviour |
+| 🔴 **Keep** | Do not remove; will break core system functionality |
+
+Coverage: Samsung · Xiaomi · OnePlus/Oppo · Huawei · Sony · Motorola · LG · Nokia/HMD · Asus · Realme · Google · Carriers · AOSP · Misc
+
+---
+
+## 🔒 Security
+
+> [!NOTE]
+> - **No bundled binaries.** ATK resolves `adb`, `fastboot`, and `scrcpy` from your PATH. Settings shows each binary's path and SHA-256 to verify against Google's published checksums.
+> - **No host shell string-building.** Host commands use `exec.Command(binary, args…)` (direct `execve`, no shell). Paths sent to the *device* shell are quoted, so filenames with spaces or special characters stay safe.
+> - **Input validation.** ATK validates package names, partitions, IPs, and remote paths. Fastboot flash uses a partition allowlist. Destructive flash and bootloader actions confirm first.
+
+---
+
+## Build from Source
+
+**Prerequisites on Ubuntu/Debian**
 ```bash
 sudo apt install -y build-essential pkg-config libgtk-3-dev \
   libwebkit2gtk-4.1-dev libayatana-appindicator3-dev adb fastboot
@@ -150,7 +314,7 @@ sudo npm install -g pnpm
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
-**Build**
+**Build and run**
 ```bash
 git clone https://github.com/jegly/ATK
 cd ATK
@@ -160,10 +324,8 @@ wails build -tags webkit2_41
 ./build/bin/ATK
 ```
 
-**Dev mode (hot reload)**
-```bash
-wails dev -tags webkit2_41
-```
+**Dev mode (hot reload):** `wails dev -tags webkit2_41`
+
 
 **Package as .deb**
 ```bash
@@ -173,44 +335,21 @@ nfpm pkg --packager deb --target build/
 sudo dpkg -i build/atk_*.deb
 ```
 
----
-
-```
-[ ARCH LINUX ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-A `PKGBUILD` is included in `aur/`. See `aur/README.md` for publishing to
-the AUR. Until then, Arch users can use the `.AppImage` from the releases
-page — no installation required.
+### Other distros
+Build from source as above (`wails build -tags webkit2_41`) and run
+`./build/bin/ATK` directly. You need `adb`, `fastboot`, GTK 3, and WebKit2GTK 4.1
+present.
 
 ---
 
-```
-[ LICENCE ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+## License
 
-ATK is released under the GNU General Public License v3.0.
+ATK is released under the **GNU General Public License v3.0**. The debloater
+database derives from the **Universal Android Debloater** project (GPL-3.0),
+originally created by [0x192](https://github.com/0x192/universal-android-debloater)
+and continued by the Universal-Debloater-Alliance's
+[Next Generation](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)
+fork. See `LICENSE` for full terms and third-party attributions.
 
-The debloater package database is from Universal Android Debloater Next
-Generation (GPL-3.0) by the Universal-Debloater-Alliance.
+<p align="center"><sub>github.com/jegly/ATK</sub></p>
 
-See LICENSE for full terms and third-party attributions.
-
----
-
-```
-[ ACKNOWLEDGEMENTS ]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-```
-  Universal Android Debloater Alliance  — debloater package database
-  Wails                                 — Go + Web application framework
-  PixelFlasher (badabing2005)           — Pixel flash sequence reference
-  Lucide                                — icon set
-```
-
----
-
-```
-  github.com/jegly/ATK
-```

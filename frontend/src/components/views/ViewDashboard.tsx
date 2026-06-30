@@ -1,15 +1,22 @@
 import { useState, useEffect, useCallback } from 'react'
 import { RefreshCw, Wifi, WifiOff, RotateCcw, Shield, Cpu, Battery, HardDrive, Monitor } from 'lucide-react'
 import {
-  GetDevices, GetDeviceInfo, EnableWirelessAdb,
+  GetDevices, GetDeviceInfo, GetSecurityOverview, EnableWirelessAdb,
   ConnectWirelessAdb, DisconnectWirelessAdb, Reboot
 } from '../../lib/wails'
 import { notify } from '../../lib/notify'
 import type { Device, DeviceInfo } from '../../lib/types'
 
+interface SecurityOverview {
+  root: string; selinux: string; verifiedBoot: string; bootloaderLocked: string
+  encryption: string; securityPatch: string; dmVerity: string; debuggable: string
+  secure: string; buildType: string; buildTags: string; adbEnabled: string; devOptions: string
+}
+
 export default function ViewDashboard() {
   const [devices, setDevices] = useState<Device[]>([])
   const [info, setInfo] = useState<DeviceInfo | null>(null)
+  const [sec, setSec] = useState<SecurityOverview | null>(null)
   const [loading, setLoading] = useState(false)
   const [infoLoading, setInfoLoading] = useState(false)
   const [wirelessIp, setWirelessIp] = useState('')
@@ -30,9 +37,11 @@ export default function ViewDashboard() {
   const loadDeviceInfo = useCallback(async () => {
     setInfoLoading(true)
     setInfo(null)
+    setSec(null)
     try {
-      const i = await GetDeviceInfo()
+      const [i, s] = await Promise.all([GetDeviceInfo(), GetSecurityOverview().catch(() => null)])
       setInfo(i)
+      setSec(s)
     } catch (e: any) {
       notify.error(e)
     } finally {
@@ -98,6 +107,26 @@ export default function ViewDashboard() {
   }
 
   const connectedDevices = devices.filter(d => d.status === 'device')
+
+  type Tone = 'good' | 'warn' | 'bad' | 'none'
+  const toneCls: Record<Tone, string> = {
+    good: 'text-accent-green', warn: 'text-warn', bad: 'text-danger', none: 'text-text-primary',
+  }
+  const secRows: { label: string; value: string; tone: Tone }[] = sec ? [
+    { label: 'Bootloader', value: sec.bootloaderLocked, tone: sec.bootloaderLocked === 'Locked' ? 'good' : sec.bootloaderLocked === 'Unlocked' ? 'warn' : 'none' },
+    { label: 'Root', value: sec.root, tone: sec.root.includes('su') ? 'warn' : 'good' },
+    { label: 'SELinux', value: sec.selinux, tone: /enforc/i.test(sec.selinux) ? 'good' : /permiss/i.test(sec.selinux) ? 'bad' : 'none' },
+    { label: 'Verified boot', value: sec.verifiedBoot, tone: sec.verifiedBoot === 'green' ? 'good' : (sec.verifiedBoot === 'orange' || sec.verifiedBoot === 'yellow') ? 'warn' : sec.verifiedBoot === 'red' ? 'bad' : 'none' },
+    { label: 'dm-verity', value: sec.dmVerity, tone: /enforc/i.test(sec.dmVerity) ? 'good' : /disabled|logging/i.test(sec.dmVerity) ? 'warn' : 'none' },
+    { label: 'Encryption', value: sec.encryption, tone: /^encrypted/i.test(sec.encryption) ? 'good' : /unencrypted/i.test(sec.encryption) ? 'bad' : 'none' },
+    { label: 'Security patch', value: sec.securityPatch, tone: 'none' },
+    { label: 'Build type', value: sec.buildType, tone: sec.buildType === 'user' ? 'good' : (sec.buildType === 'userdebug' || sec.buildType === 'eng') ? 'warn' : 'none' },
+    { label: 'Build tags', value: sec.buildTags, tone: /release-keys/.test(sec.buildTags) ? 'good' : /test-keys/.test(sec.buildTags) ? 'warn' : 'none' },
+    { label: 'ro.debuggable', value: sec.debuggable, tone: sec.debuggable === '1' ? 'bad' : sec.debuggable === '0' ? 'good' : 'none' },
+    { label: 'ro.secure', value: sec.secure, tone: sec.secure === '0' ? 'bad' : sec.secure === '1' ? 'good' : 'none' },
+    { label: 'ADB enabled', value: sec.adbEnabled, tone: sec.adbEnabled === '1' ? 'warn' : 'none' },
+    { label: 'Dev options', value: sec.devOptions, tone: sec.devOptions === '1' ? 'warn' : 'none' },
+  ] : []
 
   return (
     <div className="p-4 space-y-4 h-full overflow-auto">
@@ -188,6 +217,25 @@ export default function ViewDashboard() {
           )}
         </div>
       </div>
+
+      {/* Security Overview — quick audit */}
+      {sec && (
+        <div className="card p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Shield size={14} className="text-accent-green" />
+            <p className="section-title">Security Overview</p>
+            <span className="text-[11px] text-text-muted ml-1">quick device audit</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-2">
+            {secRows.map(r => (
+              <div key={r.label} className="flex items-start gap-2 min-w-0">
+                <span className="text-text-muted text-xs w-24 shrink-0 pt-0.5">{r.label}</span>
+                <span className={`text-xs truncate ${toneCls[r.tone]}`}>{r.value || 'N/A'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Wireless ADB */}

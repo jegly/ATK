@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"sync"
+	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // DeviceMode represents whether a device is in ADB or Fastboot mode
@@ -77,6 +80,10 @@ type App struct {
 	// cancellation for long-running ops
 	currentCancel context.CancelFunc
 	opMutex       sync.Mutex
+
+	// app-lock "require password for destructive actions" session window
+	dangerMu    sync.Mutex
+	dangerUntil time.Time
 }
 
 // NewApp creates a new App instance
@@ -90,4 +97,18 @@ func NewApp() *App {
 // Startup is called when the app starts
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+	// Frameless windows can open off-centre on some WMs; centre on launch.
+	runtime.WindowCenter(ctx)
+}
+
+// Shutdown is called when the app is closing — tidy up spawned child processes
+// (e.g. a scrcpy mirror) so they don't outlive the app as orphan windows.
+// Exception: a mirror started in "detached" mode is left running on purpose.
+func (a *App) Shutdown(ctx context.Context) {
+	scrcpyMu.Lock()
+	detached := scrcpyDetached
+	scrcpyMu.Unlock()
+	if !detached {
+		a.StopScrcpy()
+	}
 }

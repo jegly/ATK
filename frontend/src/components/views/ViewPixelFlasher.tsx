@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Zap, AlertTriangle, FolderOpen, Check, X, RefreshCw, ChevronDown, ChevronRight } from 'lucide-react'
 import { GetFastbootDevices, Reboot } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import DismissibleBanner from '../DismissibleBanner'
 import type { Device } from '../../lib/types'
 
 type StepStatus = 'waiting' | 'running' | 'done' | 'error' | 'skipped'
@@ -143,35 +144,55 @@ export default function ViewPixelFlasher() {
     }
   }
 
+  const loadZip = async (path: string) => {
+    if (!path) return
+    if (!path.toLowerCase().endsWith('.zip')) {
+      notify.error('Please choose a Pixel factory image .zip')
+      return
+    }
+    setFactoryZip(path)
+    setSteps([])
+    setParsedSteps([])
+    setLog([])
+    setDone(false)
+    // Read flash-all.sh from inside the zip using Go backend
+    try {
+      // @ts-ignore
+      const content: string = await window['go']['main']['App']['ReadFileFromZip'](path, 'flash-all.sh')
+      if (content) {
+        const parsed = parseFlashAllSh(content)
+        setParsedSteps(parsed)
+        setSteps(buildSteps(parsed, opts))
+        addLog(`Parsed flash-all.sh: ${parsed.length} steps found`)
+      } else {
+        addLog('Warning: flash-all.sh not found in zip — is this a valid Pixel factory image?')
+      }
+    } catch {
+      addLog('Could not read flash-all.sh from zip. Make sure this is an extracted factory image folder or valid zip.')
+    }
+  }
+
   const handleSelectZip = async () => {
     try {
       // @ts-ignore
       const path: string = await window['go']['main']['App']['SelectFileForFlash']()
-      if (!path) return
-      setFactoryZip(path)
-      setSteps([])
-      setParsedSteps([])
-      setLog([])
-      setDone(false)
-      // Read flash-all.sh from inside the zip using Go backend
-      try {
-        // @ts-ignore
-        const content: string = await window['go']['main']['App']['ReadFileFromZip'](path, 'flash-all.sh')
-        if (content) {
-          const parsed = parseFlashAllSh(content)
-          setParsedSteps(parsed)
-          setSteps(buildSteps(parsed, opts))
-          addLog(`Parsed flash-all.sh: ${parsed.length} steps found`)
-        } else {
-          addLog('Warning: flash-all.sh not found in zip — is this a valid Pixel factory image?')
-        }
-      } catch {
-        addLog('Could not read flash-all.sh from zip. Make sure this is an extracted factory image folder or valid zip.')
-      }
+      await loadZip(path)
     } catch (e: any) {
       notify.error('Could not open file dialog')
     }
   }
+
+  // Drag-and-drop a factory .zip onto the drop target below to auto-load it.
+  useEffect(() => {
+    const rt = (window as any)['runtime']
+    rt?.OnFileDrop?.((_x: number, _y: number, paths: string[]) => {
+      const zip = (paths || []).find(p => p.toLowerCase().endsWith('.zip'))
+      if (zip) loadZip(zip)
+      else if (paths?.length) notify.error('Drop a Pixel factory image .zip')
+    }, true)
+    return () => rt?.OnFileDropOff?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts])
 
   const updateOpts = (newOpts: FlashOptions) => {
     setOpts(newOpts)
@@ -342,7 +363,7 @@ export default function ViewPixelFlasher() {
       <h1 className="text-base font-medium text-text-primary">Pixel Factory Flash</h1>
 
       {/* Warning */}
-      <div className="flex items-start gap-3 bg-danger/5 border border-danger/20 rounded-lg px-4 py-3 shrink-0">
+      <DismissibleBanner id="warn-pixelflasher" className="bg-danger/5 border border-danger/20 rounded-lg px-4 py-3 shrink-0 text-danger">
         <AlertTriangle size={16} className="text-danger shrink-0 mt-0.5" />
         <div className="text-xs text-danger/90 space-y-1">
           <p className="font-medium">This will completely overwrite your device firmware.</p>
@@ -354,7 +375,7 @@ export default function ViewPixelFlasher() {
             Bootloader must be unlocked.
           </p>
         </div>
-      </div>
+      </DismissibleBanner>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Left: config */}
@@ -379,17 +400,17 @@ export default function ViewPixelFlasher() {
           </div>
 
           {/* Factory image */}
-          <div className="card p-4 space-y-3">
+          <div className="card p-4 space-y-3" style={{ '--wails-drop-target': 'drop' } as React.CSSProperties}>
             <p className="section-title">Factory Image Zip</p>
             <p className="text-xs text-text-muted">
-              Extract the outer zip from Google, then select the inner <span className="mono">device-build-factory-*.zip</span>
+              Extract the outer zip from Google, then select the inner <span className="mono">device-build-factory-*.zip</span> — or <span className="text-text-secondary">drag &amp; drop a .zip anywhere on this panel</span>.
             </p>
             <div className="flex gap-2">
               <input
                 className="input text-xs flex-1 mono"
                 value={factoryZip}
                 readOnly
-                placeholder="Select factory image zip..."
+                placeholder="Select or drop a factory image zip..."
               />
               <button onClick={handleSelectZip} className="btn-ghost text-xs shrink-0">
                 <FolderOpen size={13} /> Browse

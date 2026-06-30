@@ -1,9 +1,14 @@
 package main
 
 import (
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/pem"
 	"fmt"
+	"os/exec"
 	"strings"
-	"time"
+	"sync"
 )
 
 type CertInfo struct {
@@ -32,45 +37,72 @@ func (a *App) listCerts(path string, isUser bool) ([]CertInfo, error) {
 		return nil, nil
 	}
 
-	var certs []CertInfo
+	var names []string
 	for _, fname := range strings.Fields(out) {
 		fname = strings.TrimSpace(fname)
-		if fname == "" || strings.HasPrefix(fname, "ls:") {
-			continue
+		if fname != "" && !strings.HasPrefix(fname, "ls:") {
+			names = append(names, fname)
 		}
-
-		fullPath := path + "/" + fname
-		certOut, err := a.runAdbShellTimeout(10*time.Second, "openssl", "x509",
-			"-in", fullPath, "-noout", "-subject", "-issuer", "-enddate", "-fingerprint")
-
-		info := CertInfo{
-			Filename: fname,
-			IsUser:   isUser,
-			IsSystem: !isUser,
-		}
-
-		if err == nil {
-			for _, line := range strings.Split(certOut, "\n") {
-				line = strings.TrimSpace(line)
-				switch {
-				case strings.HasPrefix(line, "subject="):
-					info.Subject = strings.TrimPrefix(line, "subject=")
-				case strings.HasPrefix(line, "issuer="):
-					info.Issuer = strings.TrimPrefix(line, "issuer=")
-				case strings.HasPrefix(line, "notAfter="):
-					info.Expiry = strings.TrimPrefix(line, "notAfter=")
-				case strings.HasPrefix(line, "SHA1 Fingerprint="):
-					info.Fingerprint = strings.TrimPrefix(line, "SHA1 Fingerprint=")
-				case strings.HasPrefix(line, "SHA256 Fingerprint="):
-					info.Fingerprint = strings.TrimPrefix(line, "SHA256 Fingerprint=")
-				}
-			}
-		}
-
-		certs = append(certs, info)
 	}
 
+	// Devices don't ship `openssl`, so read each cert off the device and parse
+	// it host-side with crypto/x509. Done in parallel — there can be 140+ certs.
+	certs := make([]CertInfo, len(names))
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 8)
+	for i, fname := range names {
+		wg.Add(1)
+		go func(i int, fname string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			info := CertInfo{Filename: fname, IsUser: isUser, IsSystem: !isUser}
+			if data, derr := a.readDeviceFile(path + "/" + fname); derr == nil {
+				fillCertInfo(&info, data)
+			}
+			certs[i] = info
+		}(i, fname)
+	}
+	wg.Wait()
 	return certs, nil
+}
+
+// readDeviceFile streams a (small) device file's raw bytes via adb exec-out.
+func (a *App) readDeviceFile(path string) ([]byte, error) {
+	adbPath, err := a.getBinaryPath("adb")
+	if err != nil {
+		return nil, err
+	}
+	cmd := exec.Command(adbPath, "exec-out", "cat", path)
+	setCommandSysProcAttr(cmd)
+	return cmd.Output()
+}
+
+// fillCertInfo parses a PEM/DER certificate and fills the friendly fields.
+func fillCertInfo(info *CertInfo, data []byte) {
+	der := data
+	if block, _ := pem.Decode(data); block != nil {
+		der = block.Bytes
+	}
+	c, err := x509.ParseCertificate(der)
+	if err != nil {
+		return
+	}
+	info.Subject = friendlyName(c.Subject.CommonName, c.Subject.Organization, c.Subject.String())
+	info.Issuer = friendlyName(c.Issuer.CommonName, c.Issuer.Organization, c.Issuer.String())
+	info.Expiry = c.NotAfter.Format("2006-01-02")
+	sum := sha256.Sum256(c.Raw)
+	info.Fingerprint = hex.EncodeToString(sum[:])
+}
+
+func friendlyName(cn string, org []string, full string) string {
+	if cn != "" {
+		return cn
+	}
+	if len(org) > 0 && org[0] != "" {
+		return org[0]
+	}
+	return full
 }
 
 // InstallUserCert installs a PEM certificate as a user-trusted CA.
