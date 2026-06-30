@@ -93,6 +93,17 @@ func (a *App) GetProp(key string) (string, error) {
 // categorizeProp assigns a category to a property based on its key prefix.
 func categorizeProp(key string) string {
 	switch {
+	// Match by substring first so these group regardless of prefix.
+	case strings.Contains(key, "uwb"):
+		return "UWB"
+	case strings.Contains(key, "satellite"):
+		return "Satellite"
+	// Verified Boot / AVB + post-quantum signature schemes (Android 17 PQC).
+	case strings.Contains(key, "vbmeta") || strings.Contains(key, "avb") ||
+		strings.Contains(key, "pqc") || strings.Contains(key, "dilithium") ||
+		strings.Contains(key, "ml_dsa") || strings.Contains(key, "ml-dsa") ||
+		strings.Contains(key, "sphincs") || strings.Contains(key, "falcon"):
+		return "Verified Boot / PQC"
 	case strings.HasPrefix(key, "ro.build"):
 		return "Build"
 	case strings.HasPrefix(key, "ro.product"):

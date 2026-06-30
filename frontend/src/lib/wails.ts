@@ -7,6 +7,8 @@ export const GetDevices = () => window['go']['main']['App']['GetDevices']()
 // @ts-ignore
 export const GetDeviceInfo = () => window['go']['main']['App']['GetDeviceInfo']()
 // @ts-ignore
+export const GetSecurityOverview = () => window['go']['main']['App']['GetSecurityOverview']()
+// @ts-ignore
 export const GetDeviceMode = () => window['go']['main']['App']['GetDeviceMode']()
 // @ts-ignore
 export const Reboot = (mode: string) => window['go']['main']['App']['Reboot'](mode)
@@ -42,6 +44,30 @@ export const CopyFile = (src: string, dst: string) => window['go']['main']['App'
 export const PullMultipleFiles = (paths: string[]) => window['go']['main']['App']['PullMultipleFiles'](paths)
 // @ts-ignore
 export const SelectFileForPush = () => window['go']['main']['App']['SelectFileForPush']()
+// @ts-ignore
+export const PushWithProgress = (local: string, remoteDir: string) => window['go']['main']['App']['PushWithProgress'](local, remoteDir)
+// @ts-ignore
+export const PullPathsWithProgress = (paths: string[]) => window['go']['main']['App']['PullPathsWithProgress'](paths)
+// @ts-ignore
+export const SaveTextFile = (defaultName: string, content: string) => window['go']['main']['App']['SaveTextFile'](defaultName, content)
+// @ts-ignore
+export const HomeDir = () => window['go']['main']['App']['HomeDir']()
+// @ts-ignore
+export const ListLocalFiles = (path: string) => window['go']['main']['App']['ListLocalFiles'](path)
+// @ts-ignore
+export const PushPathsWithProgress = (localPaths: string[], remoteDir: string) => window['go']['main']['App']['PushPathsWithProgress'](localPaths, remoteDir)
+
+// Screen mirror (scrcpy)
+// @ts-ignore
+export const ScrcpyAvailable = () => window['go']['main']['App']['ScrcpyAvailable']()
+// @ts-ignore
+export const ScrcpyRunning = () => window['go']['main']['App']['ScrcpyRunning']()
+// @ts-ignore
+export const StartScrcpy = (opts: any) => window['go']['main']['App']['StartScrcpy'](opts)
+// @ts-ignore
+export const StopScrcpy = () => window['go']['main']['App']['StopScrcpy']()
+// @ts-ignore
+export const CaptureScreenshot = () => window['go']['main']['App']['CaptureScreenshot']()
 
 // Package ops
 // @ts-ignore
@@ -67,7 +93,11 @@ export const UninstallMultiplePackages = (pkgs: string[]) => window['go']['main'
 // @ts-ignore
 export const DisableMultiplePackages = (pkgs: string[]) => window['go']['main']['App']['DisableMultiplePackages'](pkgs)
 // @ts-ignore
+export const UninstallAndDisableMultiplePackages = (pkgs: string[]) => window['go']['main']['App']['UninstallAndDisableMultiplePackages'](pkgs)
+// @ts-ignore
 export const EnableMultiplePackages = (pkgs: string[]) => window['go']['main']['App']['EnableMultiplePackages'](pkgs)
+// @ts-ignore
+export const RestoreMultiplePackages = (pkgs: string[]) => window['go']['main']['App']['RestoreMultiplePackages'](pkgs)
 // @ts-ignore
 export const SelectFileForInstall = () => window['go']['main']['App']['SelectFileForInstall']()
 // @ts-ignore
@@ -91,11 +121,55 @@ export const DisconnectWirelessAdb = (ip: string, port: string) => window['go'][
 // @ts-ignore
 export const GetFastbootDevices = () => window['go']['main']['App']['GetFastbootDevices']()
 // @ts-ignore
-export const FlashPartition = (partition: string, file: string) => window['go']['main']['App']['FlashPartition'](partition, file)
+export const FlashPartition = (partition: string, file: string, force: boolean) => window['go']['main']['App']['FlashPartition'](partition, file, force)
 // @ts-ignore
 export const FastbootGetVar = (variable: string) => window['go']['main']['App']['FastbootGetVar'](variable)
 // @ts-ignore
 export const SelectFileForFlash = () => window['go']['main']['App']['SelectFileForFlash']()
+// @ts-ignore
+export const FastbootBoot = (file: string) => window['go']['main']['App']['FastbootBoot'](file)
+// @ts-ignore
+export const FlashBootImage = (partition: string, file: string, slot: string, force: boolean) => window['go']['main']['App']['FlashBootImage'](partition, file, slot, force)
+// @ts-ignore
+export const FastbootFlashing = (action: string) => window['go']['main']['App']['FastbootFlashing'](action)
+// @ts-ignore
+export const FastbootReboot = (target: string) => window['go']['main']['App']['FastbootReboot'](target)
+// @ts-ignore
+export const FlasherDeviceInfo = () => window['go']['main']['App']['FlasherDeviceInfo']()
+// Magisk root tools
+// @ts-ignore
+export const MagiskInstalled = () => window['go']['main']['App']['MagiskInstalled']()
+// @ts-ignore
+export const InstallMagisk = () => window['go']['main']['App']['InstallMagisk']()
+// @ts-ignore
+export const ExtractBootImages = (zipPath: string) => window['go']['main']['App']['ExtractBootImages'](zipPath)
+// @ts-ignore
+export const PushImageToDevice = (localPath: string) => window['go']['main']['App']['PushImageToDevice'](localPath)
+// @ts-ignore
+export const OpenMagisk = () => window['go']['main']['App']['OpenMagisk']()
+// @ts-ignore
+export const PullPatchedBoot = () => window['go']['main']['App']['PullPatchedBoot']()
+// @ts-ignore
+export const ListMagiskModules = () => window['go']['main']['App']['ListMagiskModules']()
+// @ts-ignore
+export const ToggleMagiskModule = (id: string, enable: boolean) => window['go']['main']['App']['ToggleMagiskModule'](id, enable)
+// @ts-ignore
+export const RemoveMagiskModule = (id: string) => window['go']['main']['App']['RemoveMagiskModule'](id)
+// Firmware download
+// @ts-ignore
+export const ListFirmware = (codename: string, kind: string) => window['go']['main']['App']['ListFirmware'](codename, kind)
+// @ts-ignore
+export const DownloadFirmware = (url: string, sha256: string) => window['go']['main']['App']['DownloadFirmware'](url, sha256)
+// @ts-ignore
+export const ListPayloadPartitions = (zipPath: string) => window['go']['main']['App']['ListPayloadPartitions'](zipPath)
+// @ts-ignore
+export const ExtractPayloadPartition = (zipPath: string, name: string) => window['go']['main']['App']['ExtractPayloadPartition'](zipPath, name)
+// @ts-ignore
+export const AnalyzeBootImage = (path: string) => window['go']['main']['App']['AnalyzeBootImage'](path)
+// @ts-ignore
+export const HashFile = (path: string) => window['go']['main']['App']['HashFile'](path)
+// @ts-ignore
+export const SelectAnyFile = () => window['go']['main']['App']['SelectAnyFile']()
 
 // Logcat
 // @ts-ignore
@@ -104,6 +178,8 @@ export const StartLogcat = (filter: string, buffer: string) => window['go']['mai
 export const StopLogcat = () => window['go']['main']['App']['StopLogcat']()
 // @ts-ignore
 export const ClearLogcat = () => window['go']['main']['App']['ClearLogcat']()
+// @ts-ignore
+export const LogcatProcessNames = (): Promise<Record<string, string>> => window['go']['main']['App']['LogcatProcessNames']()
 
 // App inspection
 // @ts-ignore
@@ -140,3 +216,29 @@ export const GetAllProps = () => window['go']['main']['App']['GetAllProps']()
 export const SetProp = (key: string, value: string) => window['go']['main']['App']['SetProp'](key, value)
 // @ts-ignore
 export const GetProp = (key: string) => window['go']['main']['App']['GetProp'](key)
+
+// APK Auditor
+// @ts-ignore
+export const SelectAPKForAudit = () => window['go']['main']['App']['SelectAPKForAudit']()
+// @ts-ignore
+export const AuditAPK = (path: string) => window['go']['main']['App']['AuditAPK'](path)
+// @ts-ignore
+export const AuditInstalledApp = (pkg: string) => window['go']['main']['App']['AuditInstalledApp'](pkg)
+// @ts-ignore
+export const ReadAPKEntry = (apkPath: string, entry: string) => window['go']['main']['App']['ReadAPKEntry'](apkPath, entry)
+// @ts-ignore
+export const ExportAudit = (audit: any, format: string) => window['go']['main']['App']['ExportAudit'](audit, format)
+
+// App lock
+// @ts-ignore
+export const AppLockStatus = (): Promise<{ enabled: boolean; requireForDanger: boolean }> => window['go']['main']['App']['AppLockStatus']()
+// @ts-ignore
+export const VerifyAppPassword = (password: string): Promise<boolean> => window['go']['main']['App']['VerifyAppPassword'](password)
+// @ts-ignore
+export const SetAppPassword = (current: string, next: string): Promise<void> => window['go']['main']['App']['SetAppPassword'](current, next)
+// @ts-ignore
+export const DisableAppLock = (current: string): Promise<void> => window['go']['main']['App']['DisableAppLock'](current)
+// @ts-ignore
+export const SetRequireForDanger = (current: string, require: boolean): Promise<void> => window['go']['main']['App']['SetRequireForDanger'](current, require)
+// @ts-ignore
+export const UnlockDanger = (password: string): Promise<boolean> => window['go']['main']['App']['UnlockDanger'](password)

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Shield, RefreshCw, Plus, Trash2, AlertTriangle, Check, Lock } from 'lucide-react'
 import { ListSystemCerts, ListUserCerts, InstallUserCert, RemoveUserCert, SelectCertFile } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import DismissibleBanner from '../DismissibleBanner'
 import type { CertInfo } from '../../lib/types'
 
 export default function ViewCerts() {
@@ -70,15 +71,13 @@ export default function ViewCerts() {
       </div>
 
       {/* Burp/MITM info banner */}
-      <div className="border-b border-bg-border/50 bg-accent-green/5 px-4 py-2 shrink-0">
-        <div className="flex items-start gap-2">
-          <Shield size={13} className="text-accent-green shrink-0 mt-0.5" />
-          <div className="text-xs text-text-secondary space-y-0.5">
-            <p className="font-medium text-accent-green">HTTPS Interception Setup (Burp Suite / mitmproxy)</p>
-            <p>1. Export your proxy CA cert as DER/PEM  2. Click "Install User CA" above  3. Set device proxy to your machine IP  4. For Android 7+ apps with pinning — use Magisk TrustUserCerts module or patch the APK</p>
-          </div>
+      <DismissibleBanner id="info-certs-burp" className="border-b border-bg-border/50 bg-accent-green/5 px-4 py-2 shrink-0 text-accent-green">
+        <Shield size={13} className="text-accent-green shrink-0 mt-0.5" />
+        <div className="text-xs text-text-secondary space-y-0.5">
+          <p className="font-medium text-accent-green">HTTPS Interception Setup (Burp Suite / mitmproxy)</p>
+          <p>1. Export your proxy CA cert as DER/PEM  2. Click "Install User CA" above  3. Set device proxy to your machine IP  4. For Android 7+ apps with pinning — use Magisk TrustUserCerts module or patch the APK</p>
         </div>
-      </div>
+      </DismissibleBanner>
 
       {/* Tabs */}
       <div className="border-b border-bg-border flex shrink-0">
@@ -99,13 +98,13 @@ export default function ViewCerts() {
 
       {/* Warning for user certs */}
       {activeTab === 'user' && (
-        <div className="border-b border-warn/20 bg-warn/5 px-4 py-2 flex items-start gap-2 shrink-0">
+        <DismissibleBanner id="warn-certs-user" className="border-b border-warn/20 bg-warn/5 px-4 py-2 shrink-0 text-warn">
           <AlertTriangle size={13} className="text-warn shrink-0 mt-0.5" />
           <p className="text-xs text-warn/80">
             <span className="font-medium">Android 7+ restricts user certs</span> — apps targeting API 24+ won't trust them by default.
             Use <span className="mono">TrustUserCerts</span> Magisk module or recompile the app's network security config to include user certs.
           </p>
-        </div>
+        </DismissibleBanner>
       )}
 
       {/* Cert list */}

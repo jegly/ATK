@@ -13,6 +13,32 @@ export default function ViewAppInspect() {
   const [pinning, setPinning]       = useState('')
   const [activeTab, setActiveTab]   = useState('overview')
   const [showManifest, setShowManifest] = useState(false)
+  // Width of the package picker rail. Draggable so long package names (which
+  // truncate at the old fixed 256px) can be read in full. Persisted.
+  const [panelW, setPanelW] = useState(() => {
+    const v = parseInt(localStorage.getItem('atk-appinspect-w') || '', 10)
+    return Number.isFinite(v) ? Math.min(560, Math.max(200, v)) : 256
+  })
+
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startW = panelW
+    let latest = startW
+    document.body.style.userSelect = 'none'
+    const onMove = (ev: MouseEvent) => {
+      latest = Math.min(560, Math.max(200, startW + ev.clientX - startX))
+      setPanelW(latest)
+    }
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      document.body.style.userSelect = ''
+      localStorage.setItem('atk-appinspect-w', String(latest))
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   const loadPackages = async () => {
     if (pkgsLoaded) return
@@ -51,7 +77,7 @@ export default function ViewAppInspect() {
 
   const filtered = packages.filter(p =>
     p.packageName.toLowerCase().includes(search.toLowerCase())
-  ).slice(0, 20)
+  )
 
   const tabs = [
     { id: 'overview',     label: 'Overview',     icon: <Package size={12} /> },
@@ -64,8 +90,8 @@ export default function ViewAppInspect() {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Left: package picker */}
-      <div className="w-64 shrink-0 border-r border-bg-border flex flex-col overflow-hidden">
+      {/* Left: package picker (resizable) */}
+      <div className="shrink-0 border-r border-bg-border flex flex-col overflow-hidden relative" style={{ width: panelW }}>
         <div className="p-3 border-b border-bg-border space-y-2 shrink-0">
           <p className="section-title">App Inspector</p>
           <div className="relative">
@@ -99,6 +125,12 @@ export default function ViewAppInspect() {
             <p className="text-text-muted text-xs text-center p-4">Type to search or focus to load package list</p>
           )}
         </div>
+        {/* Drag handle to widen the rail when package names get cut off */}
+        <div
+          onMouseDown={startResize}
+          title="Drag to resize"
+          className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize hover:bg-accent-green/40 active:bg-accent-green/60"
+        />
       </div>
 
       {/* Right: inspection results */}

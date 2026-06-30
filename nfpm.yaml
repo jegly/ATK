@@ -1,7 +1,7 @@
 name: "atk"
 arch: "amd64"
 platform: "linux"
-version: "1.0.6"
+version: "1.1.0"
 section: "utils"
 priority: "optional"
 maintainer: "jegly <https://github.com/jegly>"

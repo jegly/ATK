@@ -1,13 +1,83 @@
 import { useState, useEffect } from 'react'
-import { Shield, RefreshCw, Check, AlertTriangle } from 'lucide-react'
-import { GetBinaryInfo, SetAdbPath, SetFastbootPath } from '../../lib/wails'
+import { Shield, RefreshCw, Check, AlertTriangle, Palette, Lock } from 'lucide-react'
+import { GetBinaryInfo, SetAdbPath, SetFastbootPath, AppLockStatus, SetAppPassword, DisableAppLock, SetRequireForDanger } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { refreshAppLockStatus } from '../../lib/applock'
+import { applyTheme, getTheme, THEMES, type Theme } from '../../lib/theme'
+import { getSidebarPosition, setSidebarPosition, SIDEBAR_POSITIONS, getSidebarLabels, setSidebarLabels, type SidebarPosition } from '../../lib/layout'
+import { getRootTools, setRootTools, getHiddenViews, setHiddenViews, TOGGLEABLE_VIEWS, getMuteNoDevice, setMuteNoDevice } from '../../lib/featureflags'
+import { resetDismissed } from '../../lib/dismissible'
 
 export default function ViewSettings() {
   const [binaryInfo, setBinaryInfo] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [adbPath, setAdbPath] = useState('')
   const [fastbootPath, setFastbootPath] = useState('')
+  const [theme, setTheme] = useState<Theme>(getTheme())
+  const [sidebarPos, setSidebarPos] = useState<SidebarPosition>(getSidebarPosition())
+  const [sidebarLabels, setSidebarLabelsState] = useState<boolean>(getSidebarLabels())
+  const [rootTools, setRootToolsState] = useState<boolean>(getRootTools())
+
+  const changeTheme = (t: Theme) => { setTheme(t); applyTheme(t) }
+  const changeSidebarPos = (p: SidebarPosition) => { setSidebarPos(p); setSidebarPosition(p) }
+  const changeSidebarLabels = (on: boolean) => { setSidebarLabelsState(on); setSidebarLabels(on) }
+  const changeRootTools = (on: boolean) => { setRootToolsState(on); setRootTools(on) }
+
+  // App lock
+  const [lock, setLock] = useState({ enabled: false, requireForDanger: false })
+  const [pwCurrent, setPwCurrent] = useState('')
+  const [pwNew, setPwNew] = useState('')
+  const [pwConfirm, setPwConfirm] = useState('')
+  const [lockBusy, setLockBusy] = useState(false)
+
+  useEffect(() => { AppLockStatus().then(setLock).catch(() => {}) }, [])
+
+  const reloadLock = async () => {
+    try { setLock(await AppLockStatus()) } catch {}
+    await refreshAppLockStatus() // keep the live danger-gate cache in sync
+  }
+
+  const savePassword = async () => {
+    if (pwNew.length < 4) { notify.error('Password must be at least 4 characters'); return }
+    if (pwNew !== pwConfirm) { notify.error('Passwords do not match'); return }
+    setLockBusy(true)
+    try {
+      await SetAppPassword(lock.enabled ? pwCurrent : '', pwNew)
+      notify.success(lock.enabled ? 'Password changed' : 'App lock enabled')
+      setPwCurrent(''); setPwNew(''); setPwConfirm('')
+      await reloadLock()
+    } catch (e: any) { notify.error(e) } finally { setLockBusy(false) }
+  }
+
+  const removeLock = async () => {
+    if (!confirm('Remove the app password? ATK will open without prompting.')) return
+    setLockBusy(true)
+    try {
+      await DisableAppLock(pwCurrent)
+      notify.success('App lock removed')
+      setPwCurrent(''); setPwNew(''); setPwConfirm('')
+      await reloadLock()
+    } catch (e: any) { notify.error(e) } finally { setLockBusy(false) }
+  }
+
+  const toggleDanger = async (on: boolean) => {
+    if (!pwCurrent) { notify.error('Enter your current password above to change this'); return }
+    setLockBusy(true)
+    try {
+      await SetRequireForDanger(pwCurrent, on)
+      notify.success(on ? 'Destructive actions now require the password' : 'Re-auth on destructive actions turned off')
+      setPwCurrent('')
+      await reloadLock()
+    } catch (e: any) { notify.error(e) } finally { setLockBusy(false) }
+  }
+
+  const [hidden, setHiddenState] = useState<string[]>(getHiddenViews())
+  const [muteND, setMuteND] = useState<boolean>(getMuteNoDevice())
+  const changeMuteND = (on: boolean) => { setMuteND(on); setMuteNoDevice(on) }
+  const toggleFeature = (view: string) => {
+    const next = hidden.includes(view) ? hidden.filter(v => v !== view) : [...hidden, view]
+    setHiddenState(next); setHiddenViews(next)
+  }
 
   const loadBinaryInfo = async () => {
     setLoading(true)
@@ -46,6 +116,229 @@ export default function ViewSettings() {
   return (
     <div className="p-4 space-y-4 h-full overflow-auto max-w-2xl">
       <h1 className="text-base font-medium text-text-primary">Settings</h1>
+
+      {/* Appearance / theme */}
+      <div className="card p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Palette size={14} className="text-accent-green" />
+          <p className="section-title">Appearance</p>
+        </div>
+        <p className="text-xs text-text-muted">Choose a colour theme. Applies instantly and is remembered.</p>
+        <div className="grid grid-cols-3 gap-2">
+          {THEMES.map(t => (
+            <button
+              key={t.id}
+              onClick={() => changeTheme(t.id)}
+              className={`text-left rounded border p-3 transition-colors ${
+                theme === t.id
+                  ? 'border-accent-green bg-accent-green/10'
+                  : 'border-bg-border hover:bg-bg-raised'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-text-primary">{t.label}</span>
+                {theme === t.id && <Check size={12} className="text-accent-green" />}
+              </div>
+              <p className="text-xs text-text-muted mt-1 leading-snug">{t.hint}</p>
+            </button>
+          ))}
+        </div>
+
+        <p className="text-xs text-text-muted pt-1">Sidebar position. Applies instantly and is remembered.</p>
+        <div className="grid grid-cols-3 gap-2">
+          {SIDEBAR_POSITIONS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => changeSidebarPos(p.id)}
+              className={`text-left rounded border p-3 transition-colors ${
+                sidebarPos === p.id
+                  ? 'border-accent-green bg-accent-green/10'
+                  : 'border-bg-border hover:bg-bg-raised'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-text-primary">{p.label}</span>
+                {sidebarPos === p.id && <Check size={12} className="text-accent-green" />}
+              </div>
+              <p className="text-xs text-text-muted mt-1 leading-snug">{p.hint}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <div className="pr-3">
+            <p className="text-xs font-medium text-text-primary">Show navigation labels</p>
+            <p className="text-xs text-text-muted">Display the name under each sidebar icon (e.g. Dashboard, Files).</p>
+          </div>
+          <button
+            onClick={() => changeSidebarLabels(!sidebarLabels)}
+            role="switch"
+            aria-checked={sidebarLabels}
+            title="Toggle navigation labels"
+            className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${
+              sidebarLabels ? 'bg-accent-green' : 'bg-bg-border'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${
+                sidebarLabels ? 'left-[18px]' : 'left-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <div className="pr-3">
+            <p className="text-xs font-medium text-text-primary">Mute "no device" pop-ups</p>
+            <p className="text-xs text-text-muted">Hide error toasts about a missing / offline / unauthorized device while browsing.</p>
+          </div>
+          <button
+            onClick={() => changeMuteND(!muteND)}
+            role="switch"
+            aria-checked={muteND}
+            className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${muteND ? 'bg-accent-green' : 'bg-bg-border'}`}
+          >
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${muteND ? 'left-[18px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-xs text-text-muted">Restore warnings you've hidden with the ✕ button.</p>
+          <button
+            onClick={() => { resetDismissed(); notify.success('Hidden warnings restored — reopen views to see them') }}
+            className="btn-ghost text-xs shrink-0"
+          >
+            Show hidden warnings
+          </button>
+        </div>
+      </div>
+
+      {/* Sidebar features kill-switch */}
+      <div className="card p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Palette size={14} className="text-accent-green" />
+          <p className="section-title">Sidebar Features</p>
+        </div>
+        <p className="text-xs text-text-muted">Turn off the tools you don't use to declutter the sidebar. Settings always stays.</p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+          {TOGGLEABLE_VIEWS.map(f => {
+            const on = !hidden.includes(f.view)
+            return (
+              <div key={f.view} className="flex items-center justify-between gap-2">
+                <span className="text-xs text-text-secondary">{f.label}</span>
+                <button
+                  onClick={() => toggleFeature(f.view)}
+                  role="switch"
+                  aria-checked={on}
+                  className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${on ? 'bg-accent-green' : 'bg-bg-border'}`}
+                >
+                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* App lock / security */}
+      <div className="card p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <Lock size={14} className="text-accent-green" />
+          <p className="section-title">App Lock</p>
+          {lock.enabled && <span className="badge-green text-xs">enabled</span>}
+        </div>
+        <p className="text-xs text-text-muted">
+          Require a password to open ATK. Stored only as a salted scrypt hash — never the password itself.
+          <br />
+          <span className="text-warn">Note:</span> this gates the ATK app so it can't be driven into flashing
+          or uninstalling without the password. It can't stop a compromised computer from running{' '}
+          <span className="mono">adb</span>/<span className="mono">fastboot</span> directly, outside ATK — nothing
+          running as your user can.
+        </p>
+
+        {/* Current password (needed to change/remove or toggle re-auth when a lock exists) */}
+        {lock.enabled && (
+          <input
+            type="password"
+            className="input text-xs w-full"
+            placeholder="Current password"
+            value={pwCurrent}
+            onChange={e => setPwCurrent(e.target.value)}
+          />
+        )}
+
+        {/* Set / change password */}
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="password"
+            className="input text-xs w-full"
+            placeholder={lock.enabled ? 'New password' : 'Password'}
+            value={pwNew}
+            onChange={e => setPwNew(e.target.value)}
+          />
+          <input
+            type="password"
+            className="input text-xs w-full"
+            placeholder="Confirm password"
+            value={pwConfirm}
+            onChange={e => setPwConfirm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <button onClick={savePassword} disabled={lockBusy} className="btn-primary text-xs">
+            {lock.enabled ? 'Change password' : 'Enable app lock'}
+          </button>
+          {lock.enabled && (
+            <button onClick={removeLock} disabled={lockBusy} className="btn-ghost text-xs text-danger">
+              Remove app lock
+            </button>
+          )}
+        </div>
+
+        {/* Optional: re-auth before destructive actions */}
+        {lock.enabled && (
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-bg-border/50">
+            <div>
+              <p className="text-xs font-medium text-text-primary">Require password for destructive actions</p>
+              <p className="text-xs text-text-muted mt-0.5">
+                Re-prompt before flashing, uninstalling/debloating, and Magisk installs. Enter your current
+                password above first. Stays unlocked for a few minutes after each confirmation.
+              </p>
+            </div>
+            <button
+              onClick={() => toggleDanger(!lock.requireForDanger)}
+              role="switch"
+              aria-checked={lock.requireForDanger}
+              disabled={lockBusy}
+              className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${lock.requireForDanger ? 'bg-accent-green' : 'bg-bg-border'}`}
+            >
+              <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${lock.requireForDanger ? 'left-[18px]' : 'left-0.5'}`} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Advanced / root tools */}
+      <div className="card p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={14} className="text-warn" />
+          <p className="section-title">Advanced</p>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium text-text-primary">Enable rooting tools (Magisk patching)</p>
+            <p className="text-xs text-text-muted mt-0.5">Adds a Magisk boot-patching panel to the Flasher for rooting. Off by default — these operations can wipe or brick a device if misused.</p>
+          </div>
+          <button
+            onClick={() => changeRootTools(!rootTools)}
+            role="switch"
+            aria-checked={rootTools}
+            className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${rootTools ? 'bg-accent-green' : 'bg-bg-border'}`}
+          >
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${rootTools ? 'left-[18px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+      </div>
 
       {/* Binary trust section */}
       <div className="card p-4 space-y-4">

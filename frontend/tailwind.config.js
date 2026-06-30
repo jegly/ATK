@@ -1,4 +1,9 @@
 /** @type {import('tailwindcss').Config} */
+// Colors are driven by CSS variables (RGB channels) defined per theme in
+// src/styles/global.css, so opacity modifiers like `bg-accent-green/5` keep
+// working. Switch themes by setting data-theme="dark|frappe|latte" on <html>.
+const rgbVar = (name) => `rgb(var(${name}) / <alpha-value>)`
+
 export default {
   content: [
     "./index.html",
@@ -8,23 +13,23 @@ export default {
     extend: {
       colors: {
         bg: {
-          base:    '#0a0a0f',
-          surface: '#111118',
-          raised:  '#18181f',
-          border:  '#252530',
+          base:    rgbVar('--bg-base'),
+          surface: rgbVar('--bg-surface'),
+          raised:  rgbVar('--bg-raised'),
+          border:  rgbVar('--bg-border'),
         },
         accent: {
-          green:   '#00ff88',
-          dim:     '#00cc6a',
-          muted:   '#003322',
+          green:   rgbVar('--accent-green'),
+          dim:     rgbVar('--accent-dim'),
+          muted:   rgbVar('--accent-muted'),
         },
         text: {
-          primary:   '#e8e8f0',
-          secondary: '#8888aa',
-          muted:     '#44445a',
+          primary:   rgbVar('--text-primary'),
+          secondary: rgbVar('--text-secondary'),
+          muted:     rgbVar('--text-muted'),
         },
-        danger: '#ff4444',
-        warn:   '#ffaa00',
+        danger: rgbVar('--danger'),
+        warn:   rgbVar('--warn'),
       },
       fontFamily: {
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],

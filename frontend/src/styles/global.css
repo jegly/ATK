@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Theme palettes — switch via data-theme on <html>.
+   Values are RGB channels so Tailwind opacity modifiers work
+   (e.g. bg-accent-green/5 -> rgb(var(--accent-green) / 0.05)).
+   ============================================================ */
+:root,
+:root[data-theme="dark"] {
+  --bg-base: 10 10 15;
+  --bg-surface: 17 17 24;
+  --bg-raised: 24 24 31;
+  --bg-border: 37 37 48;
+  --accent-green: 0 255 136;
+  --accent-dim: 0 204 106;
+  --accent-muted: 0 51 34;
+  --text-primary: 232 232 240;
+  --text-secondary: 136 136 170;
+  --text-muted: 68 68 90;
+  --danger: 255 68 68;
+  --warn: 255 170 0;
+  --scrollbar-hover: 51 51 68;
+}
+
+/* Catppuccin Frappé — soft pastels on a dark blue-grey base */
+:root[data-theme="frappe"] {
+  --bg-base: 48 52 70;           /* base     #303446 */
+  --bg-surface: 41 44 60;        /* mantle   #292c3c */
+  --bg-raised: 65 69 89;         /* surface0 #414559 */
+  --bg-border: 81 87 109;        /* surface1 #51576d */
+  --accent-green: 166 209 137;   /* green    #a6d189 */
+  --accent-dim: 140 180 115;     /* darker green for hovers */
+  --accent-muted: 65 69 89;      /* surface0 */
+  --text-primary: 198 208 245;   /* text     #c6d0f5 */
+  --text-secondary: 165 173 206; /* subtext0 #a5adce */
+  --text-muted: 115 121 148;     /* overlay0 #737994 */
+  --danger: 231 130 132;         /* red      #e78284 */
+  --warn: 229 200 144;           /* yellow   #e5c890 */
+  --scrollbar-hover: 98 104 128; /* surface2 #626880 */
+}
+
+/* Catppuccin Latte — soft pastels, true light mode */
+:root[data-theme="latte"] {
+  --bg-base: 239 241 245;        /* base     #eff1f5 */
+  --bg-surface: 230 233 239;     /* mantle   #e6e9ef */
+  --bg-raised: 220 224 232;      /* crust    #dce0e8 */
+  --bg-border: 204 208 218;      /* surface0 #ccd0da */
+  --accent-green: 64 160 43;     /* green    #40a02b */
+  --accent-dim: 50 130 35;       /* darker green for hovers */
+  --accent-muted: 204 227 192;   /* light green tint */
+  --text-primary: 76 79 105;     /* text     #4c4f69 */
+  --text-secondary: 108 111 133; /* subtext0 #6c6f85 */
+  --text-muted: 140 143 161;     /* overlay1 #8c8fa1 */
+  --danger: 210 15 57;           /* red      #d20f39 */
+  --warn: 223 142 29;            /* yellow   #df8e1d */
+  --scrollbar-hover: 188 192 204;/* surface1 #bcc0cc */
+}
+
+/* Latte is the only light theme — theme its native form controls light. Set on
+   body (not :root) so it never tints the transparent document canvas. */
+:root[data-theme="latte"] body { color-scheme: light; }
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -13,29 +73,66 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
+    /* Keep the WebKit canvas transparent so the rounded app-root corners show
+       through to the desktop. Without this the browser paints an OPAQUE canvas
+       backdrop dictated by `color-scheme`, which fills the four corners with a
+       square — the theme-switch "square corners" bug. color-scheme is therefore
+       set on <body>/controls below, NOT on :root, so it can't tint the canvas. */
+    background-color: transparent;
+  }
+
+  /* The rounded window surface lives HERE — on #root, which is always present —
+     not on a per-screen container. Previously only the main app root was
+     rounded, so the loading screen and the lock gate showed a SQUARE window
+     until the main view mounted (the "square at login, rounds a few seconds
+     after the password" bug). Rounding #root makes every screen rounded from the
+     first paint. overflow:hidden clips children to the radius; bg-base fills it;
+     outside the radius stays transparent so the corners show the desktop. */
+  #root {
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgb(var(--bg-base));
   }
 
   body {
-    background: #0a0a0f;
-    color: #e8e8f0;
+    /* The rounded app root (App.tsx) carries the real bg so the window corners
+       clip to transparency. Needs the translucent window surface set in main.go.
+       color-scheme lives here (not :root) to theme native controls without
+       forcing an opaque document canvas. */
+    background: transparent;
+    color-scheme: dark;
+    color: rgb(var(--text-primary));
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    user-select: none;
+    /* Content is selectable/copyable; interactive chrome opts out below. */
+    user-select: text;
+    -webkit-user-select: text;
   }
 
-  /* Force dark theme on all form elements — overrides system/browser defaults */
+  /* Buttons, navigation and the title bar shouldn't be text-selectable —
+     keeps the native app feel and avoids accidental drag-selection of UI. */
+  button, [role="button"], nav, aside, .titlebar {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  ::selection {
+    background: rgb(var(--accent-green) / 0.25);
+    color: rgb(var(--text-primary));
+  }
+
+  /* Themed form elements — color-scheme is set per theme on :root */
   input, textarea, select {
-    background-color: #18181f;
-    color: #e8e8f0;
-    border-color: #252530;
-    color-scheme: dark;
+    background-color: rgb(var(--bg-raised));
+    color: rgb(var(--text-primary));
+    border-color: rgb(var(--bg-border));
   }
 
   select {
-    background-color: #18181f;
-    color: #e8e8f0;
+    background-color: rgb(var(--bg-raised));
+    color: rgb(var(--text-primary));
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2388889a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -45,17 +142,17 @@
   }
 
   select option {
-    background-color: #18181f;
-    color: #e8e8f0;
+    background-color: rgb(var(--bg-raised));
+    color: rgb(var(--text-primary));
   }
 
   input[type="checkbox"] {
-    accent-color: #00ff88;
-    background-color: #18181f;
+    accent-color: rgb(var(--accent-green));
+    background-color: rgb(var(--bg-raised));
   }
 
   input::placeholder {
-    color: #44445a;
+    color: rgb(var(--text-muted));
   }
 
   ::-webkit-scrollbar {
@@ -66,11 +163,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #252530;
+    background: rgb(var(--bg-border));
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #333344;
+    background: rgb(var(--scrollbar-hover));
   }
 }
 
@@ -135,6 +232,13 @@
     @apply text-xs font-medium uppercase tracking-widest text-text-muted;
   }
 
+  /* compact icon button for the Logcat visual map overlays */
+  .map-btn {
+    @apply inline-flex items-center justify-center h-7 w-7 rounded bg-black/40
+           text-text-secondary border border-bg-border hover:bg-bg-raised
+           hover:text-text-primary transition-colors cursor-pointer;
+  }
+
   .mono {
     @apply font-mono text-sm;
   }
@@ -142,7 +246,7 @@
 
 /* Glow effect on accent elements */
 .glow {
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.15);
+  box-shadow: 0 0 12px rgb(var(--accent-green) / 0.15);
 }
 
 @keyframes pulse-dot {
@@ -158,6 +262,6 @@
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
-.status-dot-green { background: #00ff88; box-shadow: 0 0 6px #00ff8888; }
-.status-dot-red   { background: #ff4444; box-shadow: 0 0 6px #ff444488; }
-.status-dot-gray  { background: #44445a; animation: none; }
+.status-dot-green { background: rgb(var(--accent-green)); box-shadow: 0 0 6px rgb(var(--accent-green) / 0.53); }
+.status-dot-red   { background: rgb(var(--danger)); box-shadow: 0 0 6px rgb(var(--danger) / 0.53); }
+.status-dot-gray  { background: rgb(var(--text-muted)); animation: none; }
