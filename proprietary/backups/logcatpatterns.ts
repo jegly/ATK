@@ -1,21 +1,4 @@
-// ⚑ BACKUP / REFERENCE COPY — NOT compiled, NOT imported, NOT for GitHub.
-// This is the original TypeScript of the Logcat visual-map relationship-mining
-// engine, kept here after it was ported to Go (backend_logcatpatterns.go) on
-// 2026-06-04. The Go file is the LIVE version now; this is preserved so we can
-// read/refactor the logic in future. If you change the Go version, mirror it here.
-//
-// ---------------------------------------------------------------------------
-//
-// Parsed-reference extraction for the Logcat visual map.
-//
-// A log line is just text, but Android's framework + system-event logs encode
-// real relationships: who started whom, who crashed, who got killed, who sent a
-// signal to which pid. We mine those so the map can draw *meaningful* edges
-// ("ActivityManager → com.foo: spawn") on top of the ambient co-occurrence web.
-//
-// Covers both the framework text logs (main/system buffers) and the binary
-// event-log tags (events buffer: am_proc_start, am_anr, am_crash, am_kill…) so
-// "show system events" works when the user selects the events/all buffer.
+
 
 import type { LogcatLine } from './types'
 
