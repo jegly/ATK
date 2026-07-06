@@ -144,25 +144,48 @@ sudo apt install scrcpy
 | 📊 **Dashboard** | Device info, wireless ADB, reboot controls |
 | 📁 **File Explorer** | Browse the device and your computer, push and pull, image viewer |
 | 📦 **Package Manager** | Install, uninstall, enable, disable, pull APK, plus **privileged removal of protected system apps without root** |
-| 🔎 **APK Audit** | Static APK security audit: perms, trackers, certs, rule findings |
 | 🧹 **Debloater** | 5,362 packages across Samsung, Xiaomi, Google, and 11 more OEMs |
+| 💻 **Shell Terminal** | adb shell and host, command library, export session |
 | 📡 **Live Logcat + System Map** | Real-time log streaming, plus a live, interactive map of system behaviour across subsystems |
-| 🕵️ **App Inspector** | Permissions, components, certs, SSL-pinning check |
+| 🕵️ **App Inspector** | Permissions, components, certs, SSL-pinning check, plus a 0–100 **privacy score** from a DEX tracker/ad-SDK scan |
+| 🚀 **Intent Lab** | List an app's launchable activities from `dumpsys` and start them with one click, plus a free-form implicit-intent launcher — reach hidden settings screens |
+| 🔎 **APK Audit** | Static APK security audit: perms, trackers, certs, rule findings |
 | 🔐 **Certificate Manager** | Install and remove user CAs for HTTPS interception |
 | 💾 **Device Backup** | `adb backup` with app selection and restore |
 | 🎚️ **Prop Editor** | Read and write all 300+ system properties |
-| 💻 **Shell Terminal** | adb shell and host, command library, export session |
 | 🧰 **Utilities** | 631 one-click commands across 50+ categories |
 | ⚡ **Flasher** | Fastboot, live-boot, Magisk root, firmware download |
+| 💿 **GSI Loader** | Boot a Generic System Image via **DSU** (temporary, no unlock/wipe) or a danger-gated **permanent fastboot flash**, with a Treble/ABI/VNDK compatibility pre-check |
 
 > [!TIP]
 > Hide any module you don't use from **Settings → Sidebar Features**. Theme
-> (Dark, Catppuccin Frappé, Latte) and sidebar position (left, top, bottom) are
-> configurable too.
+> — Dark, Catppuccin Frappé/Latte/Mocha/Macchiato, Dracula, Gruvbox Material,
+> and a dozen more — plus sidebar position (left, top, bottom) are configurable
+> too.
 
 ---
 
-## ✨ What's new
+## ✨ What's new in v1.2.0
+
+- 💿 **GSI Loader**: boot a Generic System Image via **DSU** (temporary guest OS)
+  or a danger-gated **permanent fastboot flash**, with a built-in compatibility
+  pre-check.
+- 🚀 **Intent Lab**: list and launch an app's exported activities from `dumpsys`,
+  plus a free-form implicit-intent launcher, to reach hidden settings screens.
+- 🕵️ **Privacy & Tracker Scanner**: a 0–100 privacy score and A–F grade for any
+  app, from an offline DEX tracker/ad-SDK scan, built into App Inspector.
+- 🔒 **App Lock**: password-protect the app and gate destructive actions
+  (flashing, permanent GSI install) behind a separate danger-unlock.
+- 🎨 **~14 new theme palettes** — Dracula, Catppuccin Mocha/Macchiato, Gruvbox
+  Material, C64, Adventure Time, and more.
+- 🧹 **Debloater**: unmatched device packages now show as **Unknown** instead of
+  disappearing from the list.
+- 🔐 **Security**: fixed a path-injection issue in the local file viewer, and
+  bumped several dependencies with known CVEs (`x/image`, `x/net`, `vite`,
+  `postcss`, `esbuild`).
+
+<details>
+<summary>Previous release (v1.1.0)</summary>
 
 - 📡 **Live System Map**: turn logcat into a live, interactive map of system behaviour across subsystems *(see below)*.
 - 🧹 **Debloater database grew from 2,157 to 5,362 packages**, with a **privileged uninstall of protected system apps without root** and a one-click **restore**.
@@ -171,6 +194,8 @@ sudo apt install scrcpy
 - 🔎 **APK Audit** exports to **JSON, CSV, SARIF**, with an in-app APK explorer.
 - 📦 **Smarter package ops**: combined *Disable + Uninstall*, a *disabled* badge, and verify-then-escalate so removals stick.
 - 🔌 **Offline-capable UI**: fonts are self-hosted, with no runtime CDN fetches.
+
+</details>
 
 ---
 
@@ -254,6 +279,28 @@ Browse factory images: https://developers.google.com/android/images
 
 ---
 
+## 💿 GSI Loader
+
+Boot a Generic System Image (GSI) two different ways, each with its own risk
+profile.
+
+| Mode | What it does |
+|---|---|
+| **DSU (Temporary)** | Loads the GSI as a guest OS via Android's Dynamic System Updates. No bootloader unlock, no data wipe — reboot to return to your normal system |
+| **GSI Flasher (Permanent)** | Fastboot-flashes the GSI to the system partition. Destructive: wipes userdata, needs an unlocked bootloader. Danger-gated behind App Lock |
+
+Both modes run a **compatibility pre-check** first — Treble enablement, CPU ABI,
+VNDK isolation, and Android version — so you know whether a GSI is even viable
+on the connected device before you commit to either path. You supply the GSI
+image file (ATK doesn't fetch these — see Android Flash Tool / ci.android.com).
+
+> [!IMPORTANT]
+> The permanent flash path wipes user data and requires an unlocked bootloader.
+> It's gated behind App Lock's danger-unlock, same as other destructive flash
+> operations.
+
+---
+
 ## 🔎 APK Audit
 
 A static security audit of any APK, whether a browsed file or an app pulled off
@@ -295,6 +342,7 @@ Coverage: Samsung · Xiaomi · OnePlus/Oppo · Huawei · Sony · Motorola · LG 
 > - **No bundled binaries.** ATK resolves `adb`, `fastboot`, and `scrcpy` from your PATH. Settings shows each binary's path and SHA-256 to verify against Google's published checksums.
 > - **No host shell string-building.** Host commands use `exec.Command(binary, args…)` (direct `execve`, no shell). Paths sent to the *device* shell are quoted, so filenames with spaces or special characters stay safe.
 > - **Input validation.** ATK validates package names, partitions, IPs, and remote paths. Fastboot flash uses a partition allowlist. Destructive flash and bootloader actions confirm first.
+> - **App Lock.** Optionally password-protect the app itself, with a separate danger-unlock required for destructive actions (permanent flashing, permanent GSI install, wiping).
 
 ---
 
