@@ -4,6 +4,7 @@ import { GetBinaryInfo, SetAdbPath, SetFastbootPath, AppLockStatus, SetAppPasswo
 import { notify } from '../../lib/notify'
 import { refreshAppLockStatus } from '../../lib/applock'
 import { applyTheme, getTheme, THEMES, type Theme } from '../../lib/theme'
+import { getCustomAccent, setCustomAccent, getCustomFont, setCustomFont, FONT_OPTIONS } from '../../lib/appearance'
 import { getSidebarPosition, setSidebarPosition, SIDEBAR_POSITIONS, getSidebarLabels, setSidebarLabels, type SidebarPosition } from '../../lib/layout'
 import { getRootTools, setRootTools, getHiddenViews, setHiddenViews, TOGGLEABLE_VIEWS, getMuteNoDevice, setMuteNoDevice } from '../../lib/featureflags'
 import { resetDismissed } from '../../lib/dismissible'
@@ -18,7 +19,12 @@ export default function ViewSettings() {
   const [sidebarLabels, setSidebarLabelsState] = useState<boolean>(getSidebarLabels())
   const [rootTools, setRootToolsState] = useState<boolean>(getRootTools())
 
+  const [customAccent, setCustomAccentState] = useState<string>(getCustomAccent())
+  const [customFont, setCustomFontState] = useState<string>(getCustomFont())
+
   const changeTheme = (t: Theme) => { setTheme(t); applyTheme(t) }
+  const changeAccent = (hex: string | null) => { setCustomAccentState(hex || ''); setCustomAccent(hex) }
+  const changeFont = (id: string) => { setCustomFontState(id); setCustomFont(id || null) }
   const changeSidebarPos = (p: SidebarPosition) => { setSidebarPos(p); setSidebarPosition(p) }
   const changeSidebarLabels = (on: boolean) => { setSidebarLabelsState(on); setSidebarLabels(on) }
   const changeRootTools = (on: boolean) => { setRootToolsState(on); setRootTools(on) }
@@ -139,9 +145,49 @@ export default function ViewSettings() {
                 <span className="text-xs font-medium text-text-primary">{t.label}</span>
                 {theme === t.id && <Check size={12} className="text-accent-green" />}
               </div>
-              <p className="text-xs text-text-muted mt-1 leading-snug">{t.hint}</p>
+              {/* Swatch preview: base · surface · accent · text */}
+              <div className="flex gap-1 mt-2" aria-hidden="true">
+                {t.swatch.map((c, i) => (
+                  <span
+                    key={i}
+                    className="h-4 flex-1 rounded-sm border border-black/10"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-text-muted mt-1.5 leading-snug">{t.hint}</p>
             </button>
           ))}
+        </div>
+
+        {/* Custom accent colour + font — system-wide overrides on top of the theme */}
+        <div className="pt-1 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-text-muted mb-1.5">Custom accent colour (overrides the theme accent everywhere)</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={customAccent || '#a6d189'}
+                onChange={e => changeAccent(e.target.value)}
+                className="h-8 w-12 rounded border border-bg-border bg-bg-raised cursor-pointer p-0.5"
+                title="Pick a custom accent colour"
+              />
+              <span className="mono text-xs text-text-secondary">{customAccent || 'theme default'}</span>
+              {customAccent && (
+                <button onClick={() => changeAccent(null)} className="btn-ghost text-xs ml-auto">Reset</button>
+              )}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-text-muted mb-1.5">Font (applied app-wide)</p>
+            <select
+              className="input text-xs w-full"
+              value={customFont}
+              onChange={e => changeFont(e.target.value)}
+            >
+              {FONT_OPTIONS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+            </select>
+          </div>
         </div>
 
         <p className="text-xs text-text-muted pt-1">Sidebar position. Applies instantly and is remembered.</p>

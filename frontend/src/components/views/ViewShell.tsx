@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Terminal, Trash2, ChevronRight, ChevronDown, Library, Search, Copy, Save } from 'lucide-react'
 import { RunShellCommand, RunAdbHostCommand, SaveTextFile } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { CodeView, detectLang } from '../../lib/syntax'
 import { CATEGORIES, type Command } from './ViewUtilities'
 
 interface HistoryEntry {
@@ -233,13 +234,17 @@ export default function ViewShell() {
                   <span>{entry.cmd}</span>
                 </div>
               )}
-              <pre
-                className={`whitespace-pre-wrap break-words leading-relaxed ${
-                  entry.error ? 'text-danger' : 'text-text-secondary'
-                }`}
-              >
-                {entry.output}
-              </pre>
+              {entry.error ? (
+                <pre className="whitespace-pre-wrap break-words leading-relaxed text-danger">
+                  {entry.output}
+                </pre>
+              ) : (
+                <CodeView
+                  code={entry.output}
+                  lang={detectLang('', entry.output) === 'text' ? 'log' : detectLang('', entry.output)}
+                  className="whitespace-pre-wrap break-words leading-relaxed text-text-secondary"
+                />
+              )}
             </div>
           ))}
           {loading && (

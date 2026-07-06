@@ -190,6 +190,38 @@ export interface AppInspection {
   manifestDump: string
 }
 
+export interface IntentActivity {
+  name: string
+  component: string
+  exported: boolean
+}
+
+export interface GsiCompat {
+  trebleEnabled: boolean
+  abi: string
+  gsiArch: string
+  vndkIsolated: boolean
+  androidRelease: string
+  sdk: string
+  dsuStatus: string
+}
+
+export interface PrivacyTracker {
+  name: string
+  category: string
+  matches: number
+}
+
+export interface PrivacyReport {
+  packageName: string
+  score: number          // 0-100, higher = more private
+  grade: string          // A-F
+  trackerCount: number
+  trackers: PrivacyTracker[]
+  dangerousPermissions: string[]
+  apkSize: number
+}
+
 export interface CertInfo {
   filename: string
   subject: string
@@ -223,6 +255,8 @@ export type View =
   | 'shell'
   | 'logcat'
   | 'appinspect'
+  | 'intentlab'
+  | 'gsiloader'
   | 'apkaudit'
   | 'certs'
   | 'backup'

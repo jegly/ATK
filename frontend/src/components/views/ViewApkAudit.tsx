@@ -9,6 +9,7 @@ import {
   ReadAPKEntry, ExportAudit,
 } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { CodeView, detectLang } from '../../lib/syntax'
 import type { APKAudit, APKAuditFinding, APKEntryContent, PackageInfo } from '../../lib/types'
 
 type Tab = 'overview' | 'findings' | 'manifest' | 'components' | 'cert' | 'explorer'
@@ -531,7 +532,11 @@ export default function ViewApkAudit() {
                           </div>
                         )}
                         {entry?.kind === 'text' && (
-                          <pre className="mono text-[11px] text-text-secondary whitespace-pre-wrap break-words leading-relaxed p-3">{entry.text}</pre>
+                          <CodeView
+                            code={entry.text || ''}
+                            lang={detectLang(entry.name || entryPath, entry.text || '')}
+                            className="mono text-[11px] text-text-secondary whitespace-pre-wrap break-words leading-relaxed p-3"
+                          />
                         )}
                         {entry?.kind === 'binary' && (
                           <pre className="mono text-[11px] text-text-secondary whitespace-pre p-3 leading-snug">{entry.hex}</pre>

@@ -2,13 +2,14 @@
   <img src="assets/appicon.png" alt="ATK" width="132" />
 </p>
 
-<h1 align="center">ATK · Android Tool kit</h1>
+<h1 align="center">ATK · Android Toolkit</h1>
 
 <p align="center">
   <b>An all-in-one Android command centre with a real-time system-map debugging engine.</b>
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/github/downloads/jegly/ATK/total?style=for-the-badge&color=50FA7B&label=Downloads" alt="Downloads" />
   <img src="https://img.shields.io/badge/License-GPLv3-BD93F9?style=for-the-badge" alt="License GPLv3" />
   <img src="https://img.shields.io/badge/Platform-Linux-50FA7B?style=for-the-badge&logo=linux&logoColor=282A36" alt="Linux" />
   <img src="https://img.shields.io/badge/Go%20+%20React%20(Wails)-8BE9FD?style=for-the-badge&color=8BE9FD&logoColor=282A36" alt="Go + React via Wails" />
@@ -53,11 +54,11 @@ ATK builds on these open-source projects. Go star them:
 - **[PixelFlasher](https://github.com/badabing2005/PixelFlasher)** (badabing2005): Pixel flash-sequence reference.
 - **[Wails](https://wails.io)**: Go and Web application framework.
 - **[Lucide](https://lucide.dev)**: icon set.
-- **[adb-gui-kit](https://github.com/Drenzzz/adb-gui-kit)** (Drenzzz): early base ADB GUI groundwork this project started from.
+- **[adb-gui-kit](https://github.com/Drenzzz/adb-gui-kit)** (Drenzzz): early ADB GUI groundwork this project started from.
 
 ### 🗺️ See the Live System Map in action
 
-Real-time demos of the map engine showing live device telemetry: You may have seen this viral on X, it is getting around ! Yes it came from here, This is the original implementation. 
+Real-time demos of the map engine showing live device telemetry:
 
 **▶️ Demo 1**
 
@@ -105,6 +106,10 @@ https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 </details>
 
+> [!NOTE]
+> The four demos above are hosted on GitHub's attachment CDN, so they play inline
+> here. The copies in `screenshot/*.mp4` are no longer needed for playback and you
+> can delete them to keep the repo small.
 
 ---
 
@@ -326,6 +331,11 @@ wails build -tags webkit2_41
 
 **Dev mode (hot reload):** `wails dev -tags webkit2_41`
 
+> [!NOTE]
+> **About the Live System Map.** The map engine is the one closed-source part of
+> ATK, and its sources are not in this public repo. The **pre-built releases ship
+> the complete app**, map included, and that is the supported way to run ATK with
+> the map. Building from this repo gives you the full toolkit minus the map module.
 
 **Package as .deb**
 ```bash

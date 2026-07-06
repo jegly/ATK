@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, FolderOpen, Package, Terminal,
   Zap, Wrench, Settings, Shield,
-  ScrollText, Search, Lock, Archive, SlidersHorizontal, ScanSearch, MonitorSmartphone
+  ScrollText, Search, Lock, Archive, SlidersHorizontal, ScanSearch, MonitorSmartphone, Rocket, HardDriveDownload
 } from 'lucide-react'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { View } from '../../lib/types'
@@ -26,12 +26,14 @@ const navItems: NavItem[] = [
   { view: 'shell',        icon: <Terminal size={17} />,        label: 'Shell' },
   { view: 'logcat',       icon: <ScrollText size={17} />,      label: 'Logcat',       dividerBefore: true },
   { view: 'appinspect',   icon: <Search size={17} />,          label: 'App Inspector' },
+  { view: 'intentlab',    icon: <Rocket size={17} />,          label: 'Intent Lab' },
   { view: 'apkaudit',     icon: <ScanSearch size={17} />,      label: 'APK Audit' },
   { view: 'certs',        icon: <Lock size={17} />,            label: 'Certificates' },
   { view: 'backup',       icon: <Archive size={17} />,         label: 'Backup' },
   { view: 'props',        icon: <SlidersHorizontal size={17}/>, label: 'Prop Editor' },
   { view: 'utilities',    icon: <Wrench size={17} />,          label: 'Utilities',    dividerBefore: true },
   { view: 'flasher',      icon: <Zap size={17} />,             label: 'Flasher' },
+  { view: 'gsiloader',    icon: <HardDriveDownload size={17} />, label: 'GSI Loader' },
 ]
 
 interface DragProps {

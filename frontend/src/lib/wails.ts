@@ -185,6 +185,29 @@ export const LogcatProcessNames = (): Promise<Record<string, string>> => window[
 // @ts-ignore
 export const InspectApp = (pkg: string) => window['go']['main']['App']['InspectApp'](pkg)
 // @ts-ignore
+export const ScanAppPrivacy = (pkg: string) => window['go']['main']['App']['ScanAppPrivacy'](pkg)
+// @ts-ignore
+export const ListActivities = (pkg: string) => window['go']['main']['App']['ListActivities'](pkg)
+// @ts-ignore
+export const StartActivity = (component: string) => window['go']['main']['App']['StartActivity'](component)
+// @ts-ignore
+export const StartIntentAction = (action: string, data: string) => window['go']['main']['App']['StartIntentAction'](action, data)
+// GSI Loader
+// @ts-ignore
+export const GsiCompat = () => window['go']['main']['App']['GsiCompat']()
+// @ts-ignore
+export const GsiDsuStatus = () => window['go']['main']['App']['GsiDsuStatus']()
+// @ts-ignore
+export const InstallDsu = (imagePath: string, systemSize: number, userdataSize: number) => window['go']['main']['App']['InstallDsu'](imagePath, systemSize, userdataSize)
+// @ts-ignore
+export const DsuEnable = () => window['go']['main']['App']['DsuEnable']()
+// @ts-ignore
+export const DsuDisable = () => window['go']['main']['App']['DsuDisable']()
+// @ts-ignore
+export const DsuWipe = () => window['go']['main']['App']['DsuWipe']()
+// @ts-ignore
+export const FlashGsiSystem = (imagePath: string, opts: any) => window['go']['main']['App']['FlashGsiSystem'](imagePath, opts)
+// @ts-ignore
 export const CheckPinning = (pkg: string) => window['go']['main']['App']['CheckPinning'](pkg)
 
 // Certificates

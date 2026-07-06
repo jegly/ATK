@@ -62,6 +62,301 @@
    body (not :root) so it never tints the transparent document canvas. */
 :root[data-theme="latte"] body { color-scheme: light; }
 
+/* ============================================================
+   Ported palettes from Notas — mapped onto the same RGB-channel
+   tokens above. Switch via data-theme on <html>. Secondary tokens
+   (accent-dim/-muted, text-muted, scrollbar-hover) are derived.
+   ============================================================ */
+/* Dracula — ported from Notas (dark) */
+:root[data-theme="dracula"] {
+  --bg-base: 40 42 54;
+  --bg-surface: 52 55 70;
+  --bg-raised: 60 63 81;
+  --bg-border: 68 71 90;
+  --accent-green: 189 147 249;
+  --accent-dim: 155 121 204;
+  --accent-muted: 73 69 97;
+  --text-primary: 248 248 242;
+  --text-secondary: 158 168 199;
+  --text-muted: 99 105 126;
+  --danger: 255 85 85;
+  --warn: 241 250 140;
+  --scrollbar-hover: 142 151 179;
+}
+
+/* Catppuccin Macchiato — ported from Notas (dark) */
+:root[data-theme="catppuccin-macchiato"] {
+  --bg-base: 36 39 58;
+  --bg-surface: 54 58 79;
+  --bg-raised: 73 77 100;
+  --bg-border: 73 77 100;
+  --accent-green: 198 160 246;
+  --accent-dim: 162 131 202;
+  --accent-muted: 76 73 104;
+  --text-primary: 202 211 245;
+  --text-secondary: 165 173 203;
+  --text-muted: 100 106 130;
+  --danger: 237 135 150;
+  --warn: 238 212 159;
+  --scrollbar-hover: 148 156 184;
+}
+
+/* Catppuccin Mocha — ported from Notas (dark) */
+:root[data-theme="catppuccin-mocha"] {
+  --bg-base: 30 30 46;
+  --bg-surface: 49 50 68;
+  --bg-raised: 69 71 90;
+  --bg-border: 69 71 90;
+  --accent-green: 203 166 247;
+  --accent-dim: 166 136 203;
+  --accent-muted: 72 67 95;
+  --text-primary: 205 214 244;
+  --text-secondary: 166 173 200;
+  --text-muted: 98 102 123;
+  --danger: 243 139 168;
+  --warn: 249 226 175;
+  --scrollbar-hover: 149 155 180;
+}
+
+/* Vintage Light — ported from Notas (light) */
+:root[data-theme="vintage-light"] {
+  --bg-base: 246 239 225;
+  --bg-surface: 239 229 208;
+  --bg-raised: 231 218 191;
+  --bg-border: 216 200 168;
+  --accent-green: 176 125 58;
+  --accent-dim: 144 102 48;
+  --accent-muted: 230 213 185;
+  --text-primary: 70 57 43;
+  --text-secondary: 122 106 85;
+  --text-muted: 184 172 155;
+  --danger: 161 77 58;
+  --warn: 176 125 58;
+  --scrollbar-hover: 139 123 100;
+}
+:root[data-theme="vintage-light"] body { color-scheme: light; }
+
+/* Neon Tessera — ported from Notas (dark) */
+:root[data-theme="neon-tessera"] {
+  --bg-base: 10 14 20;
+  --bg-surface: 17 22 31;
+  --bg-raised: 22 29 41;
+  --bg-border: 29 39 53;
+  --accent-green: 0 229 255;
+  --accent-dim: 0 188 209;
+  --accent-muted: 14 53 65;
+  --text-primary: 216 230 242;
+  --text-secondary: 126 147 168;
+  --text-muted: 68 80 94;
+  --danger: 255 56 96;
+  --warn: 255 196 0;
+  --scrollbar-hover: 109 128 147;
+}
+
+/* Adventure Time — ported from Notas (dark) */
+:root[data-theme="adventure-time"] {
+  --bg-base: 31 29 69;
+  --bg-surface: 42 39 85;
+  --bg-raised: 52 48 106;
+  --bg-border: 58 53 111;
+  --accent-green: 231 116 30;
+  --accent-dim: 189 95 25;
+  --accent-muted: 70 51 77;
+  --text-primary: 248 220 192;
+  --text-secondary: 163 154 196;
+  --text-muted: 97 92 132;
+  --danger: 189 0 19;
+  --warn: 231 176 0;
+  --scrollbar-hover: 144 136 181;
+}
+
+/* Borland — ported from Notas (dark) */
+:root[data-theme="borland"] {
+  --bg-base: 0 0 164;
+  --bg-surface: 10 26 176;
+  --bg-raised: 23 48 192;
+  --bg-border: 42 64 196;
+  --accent-green: 255 255 78;
+  --accent-dim: 209 209 64;
+  --accent-muted: 47 60 161;
+  --text-primary: 255 255 128;
+  --text-secondary: 182 182 230;
+  --text-muted: 91 91 197;
+  --danger: 255 89 89;
+  --warn: 255 255 78;
+  --scrollbar-hover: 157 161 224;
+}
+
+/* Commodore 64 — ported from Notas (dark) */
+:root[data-theme="c64"] {
+  --bg-base: 64 49 141;
+  --bg-surface: 77 62 160;
+  --bg-raised: 90 75 176;
+  --bg-border: 86 72 168;
+  --accent-green: 191 206 114;
+  --accent-dim: 157 169 93;
+  --accent-muted: 94 84 153;
+  --text-primary: 202 189 242;
+  --text-secondary: 147 133 201;
+  --text-muted: 106 91 171;
+  --danger: 136 57 50;
+  --warn: 191 206 114;
+  --scrollbar-hover: 136 122 195;
+}
+
+/* Fairy Floss Dark — ported from Notas (dark) */
+:root[data-theme="fairy-floss-dark"] {
+  --bg-base: 59 54 76;
+  --bg-surface: 74 69 100;
+  --bg-raised: 86 80 111;
+  --bg-border: 86 79 111;
+  --accent-green: 255 184 209;
+  --accent-dim: 209 151 171;
+  --accent-muted: 101 86 116;
+  --text-primary: 248 248 242;
+  --text-secondary: 197 189 218;
+  --text-muted: 128 122 147;
+  --danger: 255 133 127;
+  --warn: 255 234 0;
+  --scrollbar-hover: 177 169 199;
+}
+
+/* Flat — ported from Notas (dark) */
+:root[data-theme="flat"] {
+  --bg-base: 44 62 80;
+  --bg-surface: 52 73 94;
+  --bg-raised: 62 88 112;
+  --bg-border: 62 80 102;
+  --accent-green: 52 152 219;
+  --accent-dim: 43 125 180;
+  --accent-muted: 52 85 113;
+  --text-primary: 236 240 241;
+  --text-secondary: 164 181 196;
+  --text-muted: 104 122 138;
+  --danger: 231 76 60;
+  --warn: 241 196 15;
+  --scrollbar-hover: 146 163 179;
+}
+
+/* Gogh — Starry Night — ported from Notas (dark) */
+:root[data-theme="gogh"] {
+  --bg-base: 13 27 52;
+  --bg-surface: 20 38 74;
+  --bg-raised: 27 50 96;
+  --bg-border: 33 52 95;
+  --accent-green: 244 205 58;
+  --accent-dim: 200 168 48;
+  --accent-muted: 54 63 72;
+  --text-primary: 232 238 255;
+  --text-secondary: 148 168 204;
+  --text-muted: 80 98 128;
+  --danger: 217 96 59;
+  --warn: 244 205 58;
+  --scrollbar-hover: 127 147 184;
+}
+
+/* Grass — ported from Notas (dark) */
+:root[data-theme="grass"] {
+  --bg-base: 19 119 61;
+  --bg-surface: 28 138 74;
+  --bg-raised: 35 154 85;
+  --bg-border: 42 154 94;
+  --accent-green: 231 176 0;
+  --accent-dim: 189 144 0;
+  --accent-muted: 58 144 63;
+  --text-primary: 255 240 165;
+  --text-secondary: 188 214 160;
+  --text-muted: 104 166 110;
+  --danger: 207 58 42;
+  --warn: 231 176 0;
+  --scrollbar-hover: 162 203 148;
+}
+
+/* Gruvbox Material — ported from Notas (dark) */
+:root[data-theme="gruvbox-material"] {
+  --bg-base: 40 40 40;
+  --bg-surface: 50 48 47;
+  --bg-raised: 60 56 54;
+  --bg-border: 69 64 61;
+  --accent-green: 216 166 87;
+  --accent-dim: 177 136 71;
+  --accent-muted: 75 66 53;
+  --text-primary: 212 190 152;
+  --text-secondary: 168 153 132;
+  --text-muted: 104 96 86;
+  --danger: 234 105 98;
+  --warn: 216 166 87;
+  --scrollbar-hover: 150 137 119;
+}
+
+/* Homebrew — ported from Notas (dark) */
+:root[data-theme="homebrew"] {
+  --bg-base: 0 0 0;
+  --bg-surface: 12 20 12;
+  --bg-raised: 18 32 18;
+  --bg-border: 16 56 16;
+  --accent-green: 0 255 0;
+  --accent-dim: 0 209 0;
+  --accent-muted: 10 55 10;
+  --text-primary: 0 208 0;
+  --text-secondary: 31 138 31;
+  --text-muted: 16 69 16;
+  --danger: 200 0 0;
+  --warn: 154 154 0;
+  --scrollbar-hover: 28 123 28;
+}
+
+/* Ocean — ported from Notas (dark) */
+:root[data-theme="ocean"] {
+  --bg-base: 43 48 59;
+  --bg-surface: 52 61 70;
+  --bg-raised: 62 72 85;
+  --bg-border: 62 72 85;
+  --accent-green: 143 161 179;
+  --accent-dim: 117 132 147;
+  --accent-muted: 66 76 86;
+  --text-primary: 192 197 206;
+  --text-secondary: 139 149 164;
+  --text-muted: 91 98 112;
+  --danger: 191 97 106;
+  --warn: 235 203 139;
+  --scrollbar-hover: 125 135 150;
+}
+
+/* Kokuban — ported from Notas (dark) */
+:root[data-theme="kokuban"] {
+  --bg-base: 31 53 38;
+  --bg-surface: 39 64 48;
+  --bg-raised: 47 76 57;
+  --bg-border: 49 80 64;
+  --accent-green: 242 233 200;
+  --accent-dim: 198 191 164;
+  --accent-muted: 69 89 71;
+  --text-primary: 240 240 232;
+  --text-secondary: 169 194 175;
+  --text-muted: 100 124 106;
+  --danger: 242 160 160;
+  --warn: 240 230 140;
+  --scrollbar-hover: 147 173 155;
+}
+
+/* Mono Cyan — ported from Notas (dark) */
+:root[data-theme="mono-cyan"] {
+  --bg-base: 8 20 20;
+  --bg-surface: 14 31 31;
+  --bg-raised: 20 48 48;
+  --bg-border: 22 56 56;
+  --accent-green: 0 208 208;
+  --accent-dim: 0 171 171;
+  --accent-muted: 12 58 58;
+  --text-primary: 200 240 240;
+  --text-secondary: 92 154 154;
+  --text-muted: 50 87 87;
+  --danger: 224 133 133;
+  --warn: 128 224 224;
+  --scrollbar-hover: 79 136 136;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -102,7 +397,9 @@
     background: transparent;
     color-scheme: dark;
     color: rgb(var(--text-primary));
-    font-family: 'IBM Plex Sans', sans-serif;
+    /* --app-font is an optional system-wide override set from Settings (see
+       lib/appearance.ts); falls back to the bundled UI font. */
+    font-family: var(--app-font, 'IBM Plex Sans', sans-serif);
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -265,3 +562,15 @@
 .status-dot-green { background: rgb(var(--accent-green)); box-shadow: 0 0 6px rgb(var(--accent-green) / 0.53); }
 .status-dot-red   { background: rgb(var(--danger)); box-shadow: 0 0 6px rgb(var(--danger) / 0.53); }
 .status-dot-gray  { background: rgb(var(--text-muted)); animation: none; }
+
+/* ============================================================
+   Syntax highlighting (lib/syntax.tsx). Colours map onto the
+   active theme's tokens, so highlighting tracks the theme (and
+   any custom accent) automatically — no per-theme authoring.
+   ============================================================ */
+.syn-tag, .syn-key { color: rgb(var(--accent-green)); }
+.syn-attr          { color: rgb(var(--accent-dim)); }
+.syn-str           { color: rgb(var(--warn)); }
+.syn-num, .syn-bool{ color: rgb(var(--danger)); }
+.syn-com           { color: rgb(var(--text-muted)); font-style: italic; }
+.syn-punc          { color: rgb(var(--text-secondary)); }

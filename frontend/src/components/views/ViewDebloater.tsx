@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Shield, RefreshCw, Search, Trash2, PowerOff, Zap, RotateCcw, AlertTriangle, Check, X, ChevronDown, ChevronRight } from 'lucide-react'
+import { Shield, RefreshCw, Search, Trash2, PowerOff, Zap, RotateCcw, AlertTriangle, Check, X, HelpCircle, ChevronDown, ChevronRight } from 'lucide-react'
 import { ListPackages, DisableMultiplePackages, UninstallMultiplePackages, UninstallAndDisableMultiplePackages, RestoreMultiplePackages } from '../../lib/wails'
 import { ensureDangerUnlocked } from '../../lib/applock'
 import { notify } from '../../lib/notify'
@@ -8,10 +8,42 @@ import { DEBLOAT_CATEGORIES } from '../../lib/debloat_db'
 import type { Safety } from '../../lib/debloat_db'
 import type { PackageInfo } from '../../lib/types'
 
-const SAFETY_CONFIG: Record<Safety, { label: string; cls: string; icon: React.ReactNode }> = {
+// Display safety includes 'unknown' for device packages not in the UAD database.
+type RowSafety = Safety | 'unknown'
+
+const UNCATEGORIZED = 'Uncategorized'
+
+const SAFETY_CONFIG: Record<RowSafety, { label: string; cls: string; icon: React.ReactNode }> = {
   safe:    { label: 'Safe',    cls: 'badge-green',  icon: <Check size={10} /> },
   caution: { label: 'Caution', cls: 'badge-yellow', icon: <AlertTriangle size={10} /> },
   keep:    { label: 'Keep',    cls: 'badge-red',    icon: <X size={10} /> },
+  unknown: { label: 'Unknown', cls: 'badge-gray',   icon: <HelpCircle size={10} /> },
+}
+
+// A single package row shown in the list. Device packages are enriched from the
+// UAD database where a match exists; unmatched device packages fall into
+// 'Uncategorized' with 'unknown' safety.
+interface Row {
+  pkg: string
+  label: string
+  description: string
+  safety: RowSafety
+  category: string
+  deps?: string[]
+  neededBy?: string[]
+  isInstalled: boolean
+  isDisabled: boolean
+}
+
+// Order categories appear in: the UAD categories in their defined order, then
+// the catch-all Uncategorized group last.
+const CATEGORY_ORDER = [...DEBLOAT_CATEGORIES.map(c => c.name), UNCATEGORIZED]
+
+// Derive a readable label from a bare package name for uncategorized packages,
+// e.g. "com.sec.android.app.launcher" -> "Launcher".
+function shortLabel(pkg: string): string {
+  const seg = pkg.split('.').filter(Boolean).pop() || pkg
+  return seg.charAt(0).toUpperCase() + seg.slice(1)
 }
 
 export default function ViewDebloater() {
@@ -20,11 +52,28 @@ export default function ViewDebloater() {
   const [loading, setLoading]       = useState(false)
   const [selected, setSelected]     = useState<Set<string>>(new Set())
   const [search, setSearch]         = useState('')
-  const [safetyFilter, setSafety]   = useState<Safety | 'all'>('all')
+  const [safetyFilter, setSafety]   = useState<RowSafety | 'all'>('all')
   const [mfrFilter, setMfrFilter]   = useState('all')
   const [openCats, setOpenCats]     = useState<Set<string>>(new Set())
   const [operating, setOperating]   = useState(false)
   const [stateFilter, setStateFilter] = useState<'installed' | 'enabled' | 'disabled' | 'notinstalled' | 'all'>('installed')
+
+  // pkg -> UAD database entry (with its category). Built once; first match wins.
+  const dbIndex = useMemo(() => {
+    const m = new Map<string, Row>()
+    for (const cat of DEBLOAT_CATEGORIES) {
+      for (const p of cat.packages) {
+        if (!m.has(p.pkg)) {
+          m.set(p.pkg, {
+            pkg: p.pkg, label: p.label, description: p.description, safety: p.safety,
+            category: cat.name, deps: p.deps, neededBy: p.neededBy,
+            isInstalled: false, isDisabled: false,
+          })
+        }
+      }
+    }
+    return m
+  }, [])
 
   const loadInstalled = async () => {
     setLoading(true)
@@ -36,11 +85,9 @@ export default function ViewDebloater() {
       const names = new Set<string>((pkgs || []).map((p: PackageInfo) => p.packageName))
       setInstalled(names)
       setDisabled(new Set<string>((pkgs || []).filter((p: PackageInfo) => !p.isEnabled).map((p: PackageInfo) => p.packageName)))
-      // Auto-open categories that have installed packages
+      // Auto-open every category that has at least one package on the device.
       const withInstalled = new Set<string>()
-      DEBLOAT_CATEGORIES.forEach(cat => {
-        if (cat.packages.some(p => names.has(p.pkg))) withInstalled.add(cat.name)
-      })
+      names.forEach(name => withInstalled.add(dbIndex.get(name)?.category ?? UNCATEGORIZED))
       setOpenCats(withInstalled)
     } catch (e: any) {
       notify.error(e)
@@ -51,38 +98,62 @@ export default function ViewDebloater() {
 
   useEffect(() => { loadInstalled() }, [])
 
-  const manufacturers = useMemo(() => ['all', ...DEBLOAT_CATEGORIES.map(c => c.name)], [])
+  const manufacturers = useMemo(() => ['all', ...CATEGORY_ORDER], [])
+
+  // The unified row set: every device package (enriched or uncategorized), plus
+  // database-only packages so the "Not installed" / "All" filters can browse the
+  // full UAD catalogue.
+  const allRows = useMemo(() => {
+    const rows: Row[] = []
+    installed.forEach(name => {
+      const e = dbIndex.get(name)
+      if (e) {
+        rows.push({ ...e, isInstalled: true, isDisabled: disabled.has(name) })
+      } else {
+        rows.push({
+          pkg: name, label: shortLabel(name),
+          description: 'Not in the debloat database — likely an OEM, carrier, or region-specific package. Safety unknown; research before removing.',
+          safety: 'unknown', category: UNCATEGORIZED,
+          isInstalled: true, isDisabled: disabled.has(name),
+        })
+      }
+    })
+    dbIndex.forEach((e, pkg) => {
+      if (!installed.has(pkg)) rows.push({ ...e, isInstalled: false, isDisabled: false })
+    })
+    return rows
+  }, [installed, disabled, dbIndex])
 
   const visibleCategories = useMemo(() => {
-    return DEBLOAT_CATEGORIES
-      .filter(cat => mfrFilter === 'all' || cat.name === mfrFilter)
-      .map(cat => ({
-        ...cat,
-        packages: cat.packages.filter(p => {
-          if (safetyFilter !== 'all' && p.safety !== safetyFilter) return false
-          const inst = installed.has(p.pkg)
-          const dis = disabled.has(p.pkg)
-          switch (stateFilter) {
-            case 'installed':    if (!inst) return false; break
-            case 'enabled':      if (!inst || dis) return false; break
-            case 'disabled':     if (!dis) return false; break
-            case 'notinstalled': if (inst) return false; break
-            // 'all' → no state restriction
-          }
-          if (search) {
-            const q = search.toLowerCase()
-            return p.pkg.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
-          }
-          return true
-        })
-      }))
-      .filter(cat => cat.packages.length > 0)
-  }, [search, safetyFilter, mfrFilter, installed, disabled, stateFilter])
+    const q = search.toLowerCase()
+    const byCat = new Map<string, Row[]>()
+    for (const r of allRows) {
+      if (mfrFilter !== 'all' && r.category !== mfrFilter) continue
+      if (safetyFilter !== 'all' && r.safety !== safetyFilter) continue
+      switch (stateFilter) {
+        case 'installed':    if (!r.isInstalled) continue; break
+        case 'enabled':      if (!r.isInstalled || r.isDisabled) continue; break
+        case 'disabled':     if (!r.isDisabled) continue; break
+        case 'notinstalled': if (r.isInstalled) continue; break
+        // 'all' → no state restriction
+      }
+      if (q && !(r.pkg.toLowerCase().includes(q) || r.label.toLowerCase().includes(q) || r.description.toLowerCase().includes(q))) continue
+      if (!byCat.has(r.category)) byCat.set(r.category, [])
+      byCat.get(r.category)!.push(r)
+    }
+    return CATEGORY_ORDER
+      .filter(name => byCat.has(name))
+      .map(name => ({ name, packages: byCat.get(name)!.sort((a, b) => a.pkg.localeCompare(b.pkg)) }))
+  }, [allRows, search, safetyFilter, mfrFilter, stateFilter])
 
-  const totalInstalled = useMemo(() =>
-    DEBLOAT_CATEGORIES.reduce((n, cat) => n + cat.packages.filter(p => installed.has(p.pkg)).length, 0),
-    [installed]
-  )
+  // Device counts — mirror the Packages tab (deviceCount) and explain the gap.
+  const deviceCount = installed.size
+  const cataloguedCount = useMemo(() => {
+    let n = 0
+    installed.forEach(name => { if (dbIndex.has(name)) n++ })
+    return n
+  }, [installed, dbIndex])
+  const uncategorizedCount = deviceCount - cataloguedCount
 
   const toggleCat = (name: string) => setOpenCats(prev => {
     const next = new Set(prev)
@@ -97,11 +168,8 @@ export default function ViewDebloater() {
   })
 
   const selectAllVisible = () => {
-    const selectable = visibleCategories
-      .flatMap(c => c.packages)
-      .filter(p => installed.has(p.pkg) && p.safety !== 'keep')
-      .map(p => p.pkg)
-    if (selected.size === selectable.length) {
+    const selectable = visibleCategories.flatMap(c => c.packages).map(p => p.pkg)
+    if (selected.size > 0 && selected.size >= selectable.length) {
       setSelected(new Set())
     } else {
       setSelected(new Set(selectable))
@@ -134,24 +202,26 @@ export default function ViewDebloater() {
       <div className="border-b border-bg-border px-4 py-2 flex items-center gap-2 flex-wrap shrink-0 bg-bg-surface">
         <Shield size={14} className="text-accent-green shrink-0" />
         <span className="text-xs text-text-secondary">
-          {loading ? 'Scanning device...' : `${totalInstalled} of ${DEBLOAT_CATEGORIES.reduce((n,c)=>n+c.packages.length,0)} packages found on device`}
+          {loading
+            ? 'Scanning device...'
+            : `${deviceCount} on device · ${cataloguedCount} catalogued · ${uncategorizedCount} uncategorized`}
         </span>
         <div className="flex-1" />
 
-        {/* Manufacturer filter */}
+        {/* Manufacturer / category filter */}
         <select
           className="input text-xs w-36 py-1"
           value={mfrFilter}
           onChange={e => setMfrFilter(e.target.value)}
         >
           {manufacturers.map(m => (
-            <option key={m} value={m}>{m === 'all' ? 'All manufacturers' : m}</option>
+            <option key={m} value={m}>{m === 'all' ? 'All categories' : m}</option>
           ))}
         </select>
 
         {/* Safety filter */}
         <div className="flex gap-0.5 bg-bg-raised rounded p-0.5">
-          {(['all', 'safe', 'caution', 'keep'] as const).map(f => (
+          {(['all', 'safe', 'caution', 'keep', 'unknown'] as const).map(f => (
             <button
               key={f}
               onClick={() => setSafety(f)}
@@ -197,7 +267,7 @@ export default function ViewDebloater() {
       <DismissibleBanner id="warn-debloater" className="bg-warn/5 border-b border-warn/20 px-4 py-2 shrink-0 text-warn">
         <AlertTriangle size={13} className="text-warn shrink-0 mt-0.5" />
         <p className="text-xs text-warn/80">
-          <span className="font-medium">Always prefer Disable over Uninstall.</span> Never remove packages marked <span className="text-danger font-medium">Keep</span> — they will break your device. Source: Universal Android Debloater (UAD-ng), 5362 packages.
+          <span className="font-medium">Always prefer Disable over Uninstall.</span> Packages marked <span className="text-danger font-medium">Keep</span> are device-critical — removing them can break your device. <span className="font-medium">Uncategorized</span> packages aren't in the debloat database; research before removing. Safety data: Universal Android Debloater (UAD-ng).
         </p>
       </DismissibleBanner>
 
@@ -255,14 +325,14 @@ export default function ViewDebloater() {
           <div className="flex flex-col items-center justify-center h-32 gap-2 text-text-muted">
             <Shield size={24} className="opacity-30" />
             <p className="text-sm">No packages match current filters</p>
-            {stateFilter !== 'notinstalled' && totalInstalled === 0 && (
+            {stateFilter !== 'notinstalled' && deviceCount === 0 && (
               <p className="text-xs">Try clicking "Scan" to detect installed packages</p>
             )}
           </div>
         )}
 
         {!loading && visibleCategories.map(cat => {
-          const installedCount = cat.packages.filter(p => installed.has(p.pkg)).length
+          const installedCount = cat.packages.filter(p => p.isInstalled).length
           const isOpen = openCats.has(cat.name)
 
           return (
@@ -288,8 +358,8 @@ export default function ViewDebloater() {
 
               {/* Packages */}
               {isOpen && cat.packages.map(p => {
-                const isInst    = installed.has(p.pkg)
-                const isDisabled = disabled.has(p.pkg)
+                const isInst    = p.isInstalled
+                const isDisabled = p.isDisabled
                 const isSel     = selected.has(p.pkg)
                 const safety    = SAFETY_CONFIG[p.safety]
 
@@ -298,16 +368,15 @@ export default function ViewDebloater() {
                     key={p.pkg}
                     className={`
                       flex items-start gap-3 px-4 py-2 border-t border-bg-border/30 transition-colors
-                      ${p.safety !== 'keep' ? 'hover:bg-bg-raised cursor-pointer' : ''}
+                      hover:bg-bg-raised cursor-pointer
                       ${!isInst ? 'opacity-60' : ''}
                       ${isSel ? 'bg-accent-green/5' : ''}
                     `}
-                    onClick={() => p.safety !== 'keep' && toggleSelect(p.pkg)}
+                    onClick={() => toggleSelect(p.pkg)}
                   >
                     <input
                       type="checkbox"
                       checked={isSel}
-                      disabled={p.safety === 'keep'}
                       onChange={() => toggleSelect(p.pkg)}
                       className="accent-accent-green mt-0.5 shrink-0"
                       onClick={e => e.stopPropagation()}
@@ -340,9 +409,9 @@ export default function ViewDebloater() {
 
       {/* Status bar */}
       <div className="border-t border-bg-border px-4 py-1.5 flex items-center justify-between text-xs text-text-muted shrink-0">
-        <span>{totalInstalled} debloat candidates on device · {DEBLOAT_CATEGORIES.reduce((n,c)=>n+c.packages.length,0)} total in database</span>
+        <span>{deviceCount} on device · {cataloguedCount} catalogued · {uncategorizedCount} uncategorized · {DEBLOAT_CATEGORIES.reduce((n,c)=>n+c.packages.length,0)} in database</span>
         <button onClick={selectAllVisible} className="hover:text-text-secondary transition-colors">
-          {selected.size > 0 ? 'Deselect all' : 'Select all safe+caution'}
+          {selected.size > 0 ? 'Deselect all' : 'Select all visible'}
         </button>
       </div>
     </div>

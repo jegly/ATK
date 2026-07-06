@@ -13,11 +13,13 @@ import ViewDebloater    from './components/views/ViewDebloater'
 import ViewShell        from './components/views/ViewShell'
 import ViewLogcat       from './components/views/ViewLogcat'
 import ViewAppInspect   from './components/views/ViewAppInspect'
+import ViewIntentLab     from './components/views/ViewIntentLab'
 import ViewApkAudit     from './components/views/ViewApkAudit'
 import ViewCerts        from './components/views/ViewCerts'
 import ViewBackup       from './components/views/ViewBackup'
 import ViewProps        from './components/views/ViewProps'
 import ViewFlasher      from './components/views/ViewFlasher'
+import ViewGsiLoader    from './components/views/ViewGsiLoader'
 import ViewUtilities    from './components/views/ViewUtilities'
 import ViewSettings     from './components/views/ViewSettings'
 import { CheckSystemRequirements } from './lib/wails'
@@ -57,11 +59,13 @@ export default function App() {
       case 'shell':        return <ViewShell />
       case 'logcat':       return <ViewLogcat />
       case 'appinspect':   return <ViewAppInspect />
+      case 'intentlab':    return <ViewIntentLab />
       case 'apkaudit':     return <ViewApkAudit />
       case 'certs':        return <ViewCerts />
       case 'backup':       return <ViewBackup />
       case 'props':        return <ViewProps />
       case 'flasher':      return <ViewFlasher />
+      case 'gsiloader':    return <ViewGsiLoader />
       case 'utilities':    return <ViewUtilities />
       case 'settings':     return <ViewSettings />
       default:             return <ViewDashboard />

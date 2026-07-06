@@ -10,6 +10,7 @@ import {
   SelectFileForPush, CancelOperation
 } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { CodeView, detectLang } from '../../lib/syntax'
 import type { FileEntry } from '../../lib/types'
 
 // Wails runtime is injected on window['runtime'] (same access as ViewLogcat).
@@ -41,6 +42,8 @@ export default function ViewFiles() {
   const [viewer, setViewer] = useState<string | null>(null) // image filename being viewed
   const [imgLoading, setImgLoading] = useState(false)
   const [imgError, setImgError] = useState(false)
+  const [textView, setTextView] = useState<{ name: string; content: string } | null>(null)
+  const [textLoading, setTextLoading] = useState(false)
   const progRef = useRef<{ label: string; t0: number } | null>(null)
   // Remembered path per source + the last device dir (push destination default).
   const remembered = useRef<Record<Source, string>>({ device: '/sdcard', local: '' })
@@ -260,6 +263,32 @@ export default function ViewFiles() {
   )
   const openViewer = (name: string) => { setViewer(name); setImgLoading(true); setImgError(false) }
 
+  // Text preview: fetch the file's bytes via the same /__file route the image
+  // viewer uses (works for device and local), cap the size, and show highlighted.
+  const openText = async (name: string) => {
+    setTextView({ name, content: '' })
+    setTextLoading(true)
+    try {
+      const res = await fetch(fileURL(name))
+      let t = await res.text()
+      if (t.length > 400000) t = t.slice(0, 400000) + '\n\n… (truncated at 400 KB)'
+      setTextView({ name, content: t })
+    } catch (e: any) {
+      notify.error(e)
+      setTextView(null)
+    } finally {
+      setTextLoading(false)
+    }
+  }
+
+  // Esc closes the text viewer.
+  useEffect(() => {
+    if (!textView) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setTextView(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [textView])
+
   const stepViewer = useCallback((delta: number) => {
     setViewer(cur => {
       if (!cur) return cur
@@ -288,6 +317,7 @@ export default function ViewFiles() {
   const open = (entry: FileEntry) => {
     if (entry.type === 'Directory' || entry.type === 'Symlink') navigate(entry)
     else if (isImage(entry.name)) openViewer(entry.name)
+    else if (isText(entry.name)) openText(entry.name)
   }
 
   const formatSize = (size: string) => {
@@ -602,6 +632,33 @@ export default function ViewFiles() {
         </div>
       )}
 
+      {/* Text viewer — highlighted preview for text/code/config files */}
+      {textView && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-sm" onClick={() => setTextView(null)}>
+          <div className="flex items-center justify-between px-4 py-2 text-xs text-text-secondary shrink-0">
+            <span className="mono truncate">{textView.name}</span>
+            <button onClick={e => { e.stopPropagation(); setTextView(null) }} className="btn-ghost p-1.5" title="Close (Esc)">
+              <X size={16} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden px-4 pb-4" onClick={e => e.stopPropagation()}>
+            <div className="h-full overflow-auto bg-bg-surface border border-bg-border rounded">
+              {textLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="w-5 h-5 border-2 border-accent-green border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <CodeView
+                  code={textView.content}
+                  lang={detectLang(textView.name, textView.content)}
+                  className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed p-3"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Status bar */}
       <div className="border-t border-bg-border px-4 py-1.5 flex items-center justify-between text-xs text-text-muted">
         <span className="mono flex items-center gap-1.5">
@@ -637,4 +694,8 @@ function formatEta(ms: number): string {
 
 function isImage(name: string): boolean {
   return /\.(png|jpe?g|gif|webp|bmp|ico)$/i.test(name)
+}
+
+function isText(name: string): boolean {
+  return /\.(txt|xml|json|prop|conf|cfg|ini|env|log|sh|bash|rc|smali|java|kt|gradle|ya?ml|md|csv|html?|css|js|ts|toml|properties|list)$/i.test(name)
 }

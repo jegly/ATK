@@ -37,3 +37,10 @@ ATK_*.log
 # Temp
 *.tmp
 /tmp/
+
+# ── PROPRIETARY — Logcat visual map. NEVER publish to GitHub. ──
+# (Builds into the shipped binary as obfuscated JS + native Go; source stays private.)
+/proprietary/
+/backend_logcatpatterns.go
+/frontend/src/lib/logcatgraph.ts
+/frontend/src/components/views/LogcatMap.tsx

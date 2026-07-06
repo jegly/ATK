@@ -1,8 +1,14 @@
-import { useState } from 'react'
-import { Search, Package, Shield, Activity, Server, Database, Cpu, FileCode, AlertTriangle } from 'lucide-react'
-import { InspectApp, CheckPinning, ListPackages } from '../../lib/wails'
+import { useState, useEffect } from 'react'
+import { Search, Package, Shield, ShieldCheck, Activity, Server, Database, Cpu, FileCode, AlertTriangle, Radar } from 'lucide-react'
+import { InspectApp, CheckPinning, ListPackages, ScanAppPrivacy } from '../../lib/wails'
 import { notify } from '../../lib/notify'
-import type { AppInspection, PackageInfo } from '../../lib/types'
+import { CodeView } from '../../lib/syntax'
+import type { AppInspection, PackageInfo, PrivacyReport } from '../../lib/types'
+
+// Privacy grade -> tailwind text/badge colour.
+const GRADE_COLOR: Record<string, string> = {
+  A: 'text-accent-green', B: 'text-accent-green', C: 'text-warn', D: 'text-warn', F: 'text-danger',
+}
 
 export default function ViewAppInspect() {
   const [search, setSearch]         = useState('')
@@ -13,6 +19,8 @@ export default function ViewAppInspect() {
   const [pinning, setPinning]       = useState('')
   const [activeTab, setActiveTab]   = useState('overview')
   const [showManifest, setShowManifest] = useState(false)
+  const [privacy, setPrivacy]       = useState<PrivacyReport | null>(null)
+  const [privacyLoading, setPrivacyLoading] = useState(false)
   // Width of the package picker rail. Draggable so long package names (which
   // truncate at the old fixed 256px) can be read in full. Persisted.
   const [panelW, setPanelW] = useState(() => {
@@ -49,11 +57,16 @@ export default function ViewAppInspect() {
     } catch {}
   }
 
+  // Populate the picker as soon as the view opens (so it isn't empty until the
+  // search box is focused). Safe with no device — it just stays empty.
+  useEffect(() => { loadPackages() }, [])
+
   const inspect = async (pkg: string) => {
     if (!pkg.trim()) return
     setLoading(true)
     setResult(null)
     setPinning('')
+    setPrivacy(null)
     setActiveTab('overview')
     try {
       const data = await InspectApp(pkg.trim())
@@ -62,6 +75,19 @@ export default function ViewAppInspect() {
       notify.error(e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const scanPrivacy = async () => {
+    if (!result) return
+    setPrivacyLoading(true)
+    try {
+      const rep = await ScanAppPrivacy(result.packageName)
+      setPrivacy(rep)
+    } catch (e: any) {
+      notify.error(e)
+    } finally {
+      setPrivacyLoading(false)
     }
   }
 
@@ -81,6 +107,7 @@ export default function ViewAppInspect() {
 
   const tabs = [
     { id: 'overview',     label: 'Overview',     icon: <Package size={12} /> },
+    { id: 'privacy',      label: privacy ? `Privacy (${privacy.grade})` : 'Privacy', icon: <ShieldCheck size={12} /> },
     { id: 'permissions',  label: `Permissions (${result?.permissions?.length || 0})`, icon: <Shield size={12} /> },
     { id: 'components',   label: 'Components',   icon: <Activity size={12} /> },
     { id: 'libs',         label: 'Native Libs',  icon: <Cpu size={12} /> },
@@ -218,6 +245,100 @@ export default function ViewAppInspect() {
                 </div>
               )}
 
+              {activeTab === 'privacy' && (
+                <div className="space-y-4">
+                  {!privacy && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                      <Radar size={28} className="text-text-muted opacity-40" />
+                      <p className="text-xs text-text-muted max-w-sm">
+                        Scans the app's bytecode for known tracker / analytics / ad SDKs and
+                        cross-references dangerous permissions to compute a privacy score.
+                        Pulls the APK off the device — may take a few seconds.
+                      </p>
+                      <button onClick={scanPrivacy} disabled={privacyLoading} className="btn-primary text-xs">
+                        {privacyLoading
+                          ? <><div className="w-3 h-3 border-2 border-bg-base border-t-transparent rounded-full animate-spin" /> Scanning...</>
+                          : <><Radar size={12} /> Scan privacy</>}
+                      </button>
+                    </div>
+                  )}
+
+                  {privacy && (
+                    <>
+                      {/* Score header */}
+                      <div className="flex items-center gap-4 rounded border border-bg-border bg-bg-raised p-4">
+                        <div className={`text-4xl font-bold ${GRADE_COLOR[privacy.grade] || 'text-text-primary'}`}>
+                          {privacy.grade}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2">
+                            <span className={`text-lg font-semibold ${GRADE_COLOR[privacy.grade] || 'text-text-primary'}`}>{privacy.score}</span>
+                            <span className="text-xs text-text-muted">/ 100 privacy score</span>
+                          </div>
+                          <p className="text-xs text-text-muted mt-0.5">
+                            {privacy.trackerCount} tracker{privacy.trackerCount === 1 ? '' : 's'} ·{' '}
+                            {privacy.dangerousPermissions.length} dangerous permission{privacy.dangerousPermissions.length === 1 ? '' : 's'}
+                            {privacy.apkSize > 0 && <> · {(privacy.apkSize / 1048576).toFixed(1)} MB APK</>}
+                          </p>
+                          {/* Score bar */}
+                          <div className="mt-2 h-1.5 rounded-full bg-bg-border overflow-hidden">
+                            <div
+                              className={`h-full ${privacy.score >= 70 ? 'bg-accent-green' : privacy.score >= 40 ? 'bg-warn' : 'bg-danger'}`}
+                              style={{ width: `${privacy.score}%` }}
+                            />
+                          </div>
+                        </div>
+                        <button onClick={scanPrivacy} disabled={privacyLoading} className="btn-ghost text-xs shrink-0">
+                          <Radar size={12} /> {privacyLoading ? 'Scanning...' : 'Rescan'}
+                        </button>
+                      </div>
+
+                      {/* Trackers */}
+                      <div>
+                        <p className="section-title mb-2">Trackers ({privacy.trackerCount})</p>
+                        {privacy.trackerCount === 0 && (
+                          <p className="text-xs text-accent-green flex items-center gap-1.5">
+                            <ShieldCheck size={12} /> No known trackers detected in bytecode.
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {privacy.trackers.map(t => (
+                            <div key={t.name} className="flex items-center gap-2 rounded border border-bg-border bg-bg-surface px-2.5 py-1.5" title={`${t.matches} signature match${t.matches === 1 ? '' : 'es'}`}>
+                              <Radar size={11} className="text-danger shrink-0" />
+                              <span className="text-xs text-text-primary">{t.name}</span>
+                              <span className="badge-gray text-xs">{t.category}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Dangerous permissions */}
+                      <div>
+                        <p className="section-title mb-2">Dangerous permissions ({privacy.dangerousPermissions.length})</p>
+                        {privacy.dangerousPermissions.length === 0 && (
+                          <p className="text-xs text-text-muted">None declared.</p>
+                        )}
+                        <div className="space-y-1">
+                          {privacy.dangerousPermissions.map(p => (
+                            <div key={p} className="flex items-center gap-2 py-1 border-b border-bg-border/30">
+                              <AlertTriangle size={11} className="text-warn shrink-0" />
+                              <span className="mono text-xs text-text-secondary">{p}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-text-muted leading-relaxed pt-1">
+                        Heuristic: matches known SDK package signatures in DEX bytecode (string
+                        constants aren't decrypted, so obfuscated/encrypted trackers may be missed)
+                        and counts declared Android "dangerous" permissions. A lower score means more
+                        trackers / invasive permissions.
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+
               {activeTab === 'permissions' && (
                 <div className="space-y-1">
                   {result.permissions?.length === 0 && (
@@ -295,9 +416,11 @@ export default function ViewAppInspect() {
                     {showManifest ? 'Hide' : 'Show'} full package dump ({result.manifestDump?.split('\n').length} lines)
                   </button>
                   {showManifest && (
-                    <pre className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed bg-bg-raised rounded p-3 border border-bg-border max-h-[60vh] overflow-auto">
-                      {result.manifestDump}
-                    </pre>
+                    <CodeView
+                      code={result.manifestDump || ''}
+                      lang="log"
+                      className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed bg-bg-raised rounded p-3 border border-bg-border max-h-[60vh] overflow-auto"
+                    />
                   )}
                 </div>
               )}
