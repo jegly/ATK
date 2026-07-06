@@ -3,18 +3,18 @@ import { FileText, Wrench, ChevronDown, ChevronRight, Play, Copy, Check } from '
 import { Reboot, RunAdbHostCommand } from '../../lib/wails'
 import { notify } from '../../lib/notify'
 
-interface Command {
+export interface Command {
   label: string
   cmd: string
   needsInput?: { placeholder: string; token: string }[]
 }
 
-interface Category {
+export interface Category {
   name: string
   commands: Command[]
 }
 
-const CATEGORIES: Category[] = [
+export const CATEGORIES: Category[] = [
   // ─────────────────────────────────────────────
   {
     name: 'Device Info',
@@ -796,13 +796,371 @@ const CATEGORIES: Category[] = [
       { label: 'Remount system (root)',                cmd: 'remount' },
     ],
   },
+
+  // ════════════════ EXPANDED CATEGORIES ════════════════
+  {
+    name: 'App Ops & Privacy',
+    commands: [
+      { label: 'All app-ops for a package',           cmd: 'shell appops get <package>',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+      { label: 'Dump full appops service',            cmd: 'shell dumpsys appops' },
+      { label: 'Apps allowed a given op',             cmd: 'shell appops query-op <op> allow',
+        needsInput: [{ placeholder: 'CAMERA', token: '<op>' }] },
+      { label: 'Set op → allow',                      cmd: 'shell appops set <package> <op> allow',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }, { placeholder: 'CAMERA', token: '<op>' }] },
+      { label: 'Set op → deny',                       cmd: 'shell appops set <package> <op> deny',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }, { placeholder: 'CAMERA', token: '<op>' }] },
+      { label: 'Set op → ignore',                     cmd: 'shell appops set <package> <op> ignore',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }, { placeholder: 'CAMERA', token: '<op>' }] },
+      { label: 'Reset all ops for a package',         cmd: 'shell appops reset <package>',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+      { label: 'Background run access',               cmd: 'shell appops get <package> RUN_ANY_IN_BACKGROUND',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+    ],
+  },
+  {
+    name: 'Display & Screen',
+    commands: [
+      { label: 'Current resolution',                  cmd: 'shell wm size' },
+      { label: 'Override resolution',                 cmd: 'shell wm size <WxH>',
+        needsInput: [{ placeholder: '1080x2400', token: '<WxH>' }] },
+      { label: 'Reset resolution',                    cmd: 'shell wm size reset' },
+      { label: 'Current density (DPI)',               cmd: 'shell wm density' },
+      { label: 'Override density',                    cmd: 'shell wm density <dpi>',
+        needsInput: [{ placeholder: '420', token: '<dpi>' }] },
+      { label: 'Reset density',                       cmd: 'shell wm density reset' },
+      { label: 'Displays (dumpsys display)',          cmd: 'shell dumpsys display' },
+      { label: 'SurfaceFlinger state',                cmd: 'shell dumpsys SurfaceFlinger' },
+      { label: 'Force rotation (0-3)',                cmd: 'shell settings put system user_rotation <0-3>',
+        needsInput: [{ placeholder: '0', token: '<0-3>' }] },
+      { label: 'Disable auto-rotate',                 cmd: 'shell settings put system accelerometer_rotation 0' },
+      { label: 'Enable auto-rotate',                  cmd: 'shell settings put system accelerometer_rotation 1' },
+      { label: 'Screen-off timeout (ms)',             cmd: 'shell settings put system screen_off_timeout <ms>',
+        needsInput: [{ placeholder: '600000', token: '<ms>' }] },
+      { label: 'Wake screen',                         cmd: 'shell input keyevent KEYCODE_WAKEUP' },
+      { label: 'Sleep screen',                        cmd: 'shell input keyevent KEYCODE_SLEEP' },
+      { label: 'Stay awake while charging',           cmd: 'shell settings put global stay_on_while_plugged_in 3' },
+    ],
+  },
+  {
+    name: 'Screen Capture & Recording',
+    commands: [
+      { label: 'Screenshot to /sdcard',               cmd: 'shell screencap -p /sdcard/atk_screen.png' },
+      { label: 'Record screen 10s to /sdcard',        cmd: 'shell screenrecord --time-limit 10 /sdcard/atk_rec.mp4' },
+      { label: 'Record with bit-rate',                cmd: 'shell screenrecord --bit-rate 8000000 --time-limit 10 /sdcard/atk_rec.mp4' },
+      { label: 'Record at size',                      cmd: 'shell screenrecord --size <WxH> --time-limit 10 /sdcard/atk_rec.mp4',
+        needsInput: [{ placeholder: '720x1280', token: '<WxH>' }] },
+      { label: 'List captured files',                 cmd: 'shell ls -l /sdcard/atk_screen.png /sdcard/atk_rec.mp4' },
+    ],
+  },
+  {
+    name: 'Input & Automation',
+    commands: [
+      { label: 'Tap at coordinate',                   cmd: 'shell input tap <x> <y>',
+        needsInput: [{ placeholder: '540', token: '<x>' }, { placeholder: '1200', token: '<y>' }] },
+      { label: 'Swipe',                               cmd: 'shell input swipe <x1> <y1> <x2> <y2> 300',
+        needsInput: [{ placeholder: '300', token: '<x1>' }, { placeholder: '1500', token: '<y1>' }, { placeholder: '300', token: '<x2>' }, { placeholder: '500', token: '<y2>' }] },
+      { label: 'Type text',                           cmd: 'shell input text <text>',
+        needsInput: [{ placeholder: 'hello', token: '<text>' }] },
+      { label: 'Key event (code/name)',               cmd: 'shell input keyevent <key>',
+        needsInput: [{ placeholder: 'KEYCODE_HOME', token: '<key>' }] },
+      { label: 'Home',                                cmd: 'shell input keyevent KEYCODE_HOME' },
+      { label: 'Back',                                cmd: 'shell input keyevent KEYCODE_BACK' },
+      { label: 'App switch (recents)',                cmd: 'shell input keyevent KEYCODE_APP_SWITCH' },
+      { label: 'Power button',                        cmd: 'shell input keyevent KEYCODE_POWER' },
+      { label: 'Volume up',                           cmd: 'shell input keyevent KEYCODE_VOLUME_UP' },
+      { label: 'Unlock (menu key)',                   cmd: 'shell input keyevent 82' },
+      { label: 'Monkey: random events on app',        cmd: 'shell monkey -p <package> -v 200',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+    ],
+  },
+  {
+    name: 'WiFi',
+    commands: [
+      { label: 'WiFi state dump',                     cmd: 'shell dumpsys wifi' },
+      { label: 'Connection status',                   cmd: 'shell cmd wifi status' },
+      { label: 'Trigger scan',                        cmd: 'shell cmd wifi start-scan' },
+      { label: 'Scan results',                        cmd: 'shell cmd wifi list-scan-results' },
+      { label: 'Saved networks',                      cmd: 'shell cmd wifi list-networks' },
+      { label: 'Enable WiFi',                         cmd: 'shell svc wifi enable' },
+      { label: 'Disable WiFi',                        cmd: 'shell svc wifi disable' },
+      { label: 'WiFi MAC (factory)',                  cmd: 'shell cat /sys/class/net/wlan0/address' },
+    ],
+  },
+  {
+    name: 'Bluetooth',
+    commands: [
+      { label: 'Bluetooth manager dump',              cmd: 'shell dumpsys bluetooth_manager' },
+      { label: 'Enable Bluetooth',                    cmd: 'shell cmd bluetooth_manager enable' },
+      { label: 'Disable Bluetooth',                   cmd: 'shell cmd bluetooth_manager disable' },
+      { label: 'Adapter on/off state',               cmd: 'shell settings get global bluetooth_on' },
+      { label: 'Bluetooth MAC address',               cmd: 'shell settings get secure bluetooth_address' },
+    ],
+  },
+  {
+    name: 'Telephony & SIM',
+    commands: [
+      { label: 'Telephony registry dump',             cmd: 'shell dumpsys telephony.registry' },
+      { label: 'IMEI / device id (svc call)',         cmd: 'shell service call iphonesubinfo 1' },
+      { label: 'SIM operator',                        cmd: 'shell getprop gsm.sim.operator.alpha' },
+      { label: 'Network operator',                    cmd: 'shell getprop gsm.operator.alpha' },
+      { label: 'SIM state',                           cmd: 'shell getprop gsm.sim.state' },
+      { label: 'Data network type',                   cmd: 'shell getprop gsm.network.type' },
+      { label: 'Airplane mode state',                 cmd: 'shell settings get global airplane_mode_on' },
+      { label: 'Airplane mode on',                    cmd: 'shell cmd connectivity airplane-mode enable' },
+      { label: 'Airplane mode off',                   cmd: 'shell cmd connectivity airplane-mode disable' },
+      { label: 'Carrier config dump',                 cmd: 'shell dumpsys carrier_config' },
+    ],
+  },
+  {
+    name: 'Location & GPS',
+    commands: [
+      { label: 'Location service dump',               cmd: 'shell dumpsys location' },
+      { label: 'Location mode',                       cmd: 'shell settings get secure location_mode' },
+      { label: 'Enable location',                     cmd: 'shell settings put secure location_mode 3' },
+      { label: 'Disable location',                    cmd: 'shell settings put secure location_mode 0' },
+      { label: 'Providers allowed',                   cmd: 'shell settings get secure location_providers_allowed' },
+    ],
+  },
+  {
+    name: 'NFC & Sensors',
+    commands: [
+      { label: 'NFC service dump',                    cmd: 'shell dumpsys nfc' },
+      { label: 'NFC enabled state',                   cmd: 'shell settings get secure nfc_on' },
+      { label: 'Sensor service dump',                 cmd: 'shell dumpsys sensorservice' },
+    ],
+  },
+  {
+    name: 'Biometrics & Lock',
+    commands: [
+      { label: 'Fingerprint service dump',            cmd: 'shell dumpsys fingerprint' },
+      { label: 'Face service dump',                   cmd: 'shell dumpsys face' },
+      { label: 'Biometric manager dump',              cmd: 'shell dumpsys biometric' },
+      { label: 'Lock settings / keyguard',            cmd: 'shell dumpsys lock_settings' },
+      { label: 'Trust agent state',                   cmd: 'shell dumpsys trust' },
+    ],
+  },
+  {
+    name: 'Notifications',
+    commands: [
+      { label: 'Notification service dump',           cmd: 'shell dumpsys notification' },
+      { label: 'Notification listeners',              cmd: 'shell settings get secure enabled_notification_listeners' },
+      { label: 'Do-Not-Disturb state',                cmd: 'shell settings get global zen_mode' },
+    ],
+  },
+  {
+    name: 'Jobs, Alarms & Doze',
+    commands: [
+      { label: 'JobScheduler dump',                   cmd: 'shell dumpsys jobscheduler' },
+      { label: 'Alarm manager dump',                  cmd: 'shell dumpsys alarm' },
+      { label: 'Doze / idle state',                   cmd: 'shell dumpsys deviceidle' },
+      { label: 'Force into Doze',                      cmd: 'shell dumpsys deviceidle force-idle' },
+      { label: 'Exit Doze',                           cmd: 'shell dumpsys deviceidle unforce' },
+      { label: 'Doze whitelist',                      cmd: 'shell dumpsys deviceidle whitelist' },
+      { label: 'Standby bucket for app',              cmd: 'shell am get-standby-bucket <package>',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+    ],
+  },
+  {
+    name: 'Users & Profiles',
+    commands: [
+      { label: 'List users',                          cmd: 'shell pm list users' },
+      { label: 'Current user',                        cmd: 'shell am get-current-user' },
+      { label: 'Packages for a user',                 cmd: 'shell pm list packages --user <userId>',
+        needsInput: [{ placeholder: '0', token: '<userId>' }] },
+      { label: 'Max supported users',                 cmd: 'shell pm get-max-users' },
+      { label: 'Work / managed users dump',           cmd: 'shell dumpsys user' },
+    ],
+  },
+  {
+    name: 'Device Policy & MDM',
+    commands: [
+      { label: 'Device policy dump',                  cmd: 'shell dumpsys device_policy' },
+      { label: 'Active device admins',                cmd: 'shell dpm list-owners' },
+      { label: 'Device owner?',                       cmd: 'shell dumpsys device_policy | grep -i "Device Owner"' },
+      { label: 'Profile owner?',                      cmd: 'shell dumpsys device_policy | grep -i "Profile Owner"' },
+    ],
+  },
+  {
+    name: 'Storage & Disk',
+    commands: [
+      { label: 'Volume list',                         cmd: 'shell sm list-volumes' },
+      { label: 'Disk list',                           cmd: 'shell sm list-disks' },
+      { label: 'Filesystem usage',                    cmd: 'shell df -h' },
+      { label: 'Storage stats (diskstats)',           cmd: 'shell dumpsys diskstats' },
+      { label: 'storaged dump',                       cmd: 'shell dumpsys storaged' },
+      { label: 'Mounted filesystems',                 cmd: 'shell mount' },
+    ],
+  },
+  {
+    name: 'Accessibility & IME',
+    commands: [
+      { label: 'Accessibility service dump',          cmd: 'shell dumpsys accessibility' },
+      { label: 'Enabled a11y services',               cmd: 'shell settings get secure enabled_accessibility_services' },
+      { label: 'List input methods',                  cmd: 'shell ime list -a' },
+      { label: 'Enabled IMEs',                        cmd: 'shell ime list -s' },
+      { label: 'Current default IME',                 cmd: 'shell settings get secure default_input_method' },
+    ],
+  },
+  {
+    name: 'Content Providers',
+    commands: [
+      { label: 'Query secure settings',               cmd: 'shell content query --uri content://settings/secure' },
+      { label: 'Query global settings',               cmd: 'shell content query --uri content://settings/global' },
+      { label: 'Query system settings',               cmd: 'shell content query --uri content://settings/system' },
+      { label: 'Query custom URI',                    cmd: 'shell content query --uri <uri>',
+        needsInput: [{ placeholder: 'content://telephony/carriers', token: '<uri>' }] },
+    ],
+  },
+  {
+    name: 'Window Manager',
+    commands: [
+      { label: 'Window manager dump',                 cmd: 'shell dumpsys window' },
+      { label: 'Focused window / app',                cmd: 'shell dumpsys window windows | grep -iE "mCurrentFocus|mFocusedApp"' },
+      { label: 'Foreground activity',                 cmd: 'shell dumpsys activity activities | grep -i mResumedActivity' },
+      { label: 'Recent tasks',                        cmd: 'shell dumpsys activity recents | grep -i intent' },
+    ],
+  },
+  {
+    name: 'Network — Firewall & Routing',
+    commands: [
+      { label: 'IP addresses (all ifaces)',           cmd: 'shell ip addr' },
+      { label: 'Routing table',                       cmd: 'shell ip route' },
+      { label: 'Routing rules',                       cmd: 'shell ip rule' },
+      { label: 'ARP / neighbour table',               cmd: 'shell ip neigh' },
+      { label: 'Open sockets (ss)',                   cmd: 'shell ss -tunap' },
+      { label: 'Listening sockets',                   cmd: 'shell ss -ltnp' },
+      { label: 'iptables filter (root)',              cmd: 'shell iptables -L -n -v' },
+      { label: 'DNS resolver props',                  cmd: 'shell getprop | grep -i "net.dns"' },
+      { label: 'Connectivity dump',                   cmd: 'shell dumpsys connectivity' },
+      { label: 'Per-uid net policy',                  cmd: 'shell dumpsys netpolicy' },
+      { label: 'TCP connection states',               cmd: 'shell cat /proc/net/tcp' },
+      { label: 'Ping a host',                         cmd: 'shell ping -c 4 <host>',
+        needsInput: [{ placeholder: '8.8.8.8', token: '<host>' }] },
+    ],
+  },
+  {
+    name: 'Audio & Camera',
+    commands: [
+      { label: 'Audio service dump',                  cmd: 'shell dumpsys audio' },
+      { label: 'Audio policy / routing',              cmd: 'shell dumpsys media.audio_policy' },
+      { label: 'Media sessions',                      cmd: 'shell dumpsys media_session' },
+      { label: 'Play / pause media',                  cmd: 'shell input keyevent KEYCODE_MEDIA_PLAY_PAUSE' },
+      { label: 'Camera service dump',                 cmd: 'shell dumpsys media.camera' },
+      { label: 'Camera characteristics',              cmd: 'shell dumpsys media.camera | grep -iE "Camera [0-9]|Facing"' },
+    ],
+  },
+  {
+    name: 'Backup Manager (bmgr)',
+    commands: [
+      { label: 'Backup enabled?',                     cmd: 'shell bmgr enabled' },
+      { label: 'List transports',                     cmd: 'shell bmgr list transports' },
+      { label: 'Backed-up sets',                      cmd: 'shell bmgr list sets' },
+      { label: 'Run backup for app',                  cmd: 'shell bmgr backupnow <package>',
+        needsInput: [{ placeholder: 'com.example.app', token: '<package>' }] },
+    ],
+  },
+  {
+    name: 'Security & Integrity',
+    commands: [
+      { label: 'SELinux mode',                        cmd: 'shell getenforce' },
+      { label: 'Verified boot state',                 cmd: 'shell getprop ro.boot.verifiedbootstate' },
+      { label: 'Bootloader locked?',                  cmd: 'shell getprop ro.boot.flash.locked' },
+      { label: 'dm-verity mode',                      cmd: 'shell getprop ro.boot.veritymode' },
+      { label: 'Build tags (test-keys?)',             cmd: 'shell getprop ro.build.tags' },
+      { label: 'Debuggable / secure flags',           cmd: 'shell getprop | grep -iE "ro.debuggable|ro.secure"' },
+      { label: 'su present?',                         cmd: 'shell which su' },
+      { label: 'Magisk present?',                     cmd: 'shell ls -l /data/adb/magisk 2>/dev/null' },
+      { label: 'Frida ports listening?',              cmd: 'shell netstat -tlnp 2>/dev/null | grep -E "27042|27043"' },
+      { label: 'Running uid',                         cmd: 'shell id' },
+      { label: 'Writable (rw) mounts',                cmd: 'shell mount | grep -iE " rw,| rw "' },
+    ],
+  },
+  {
+    name: 'Developer & Debug',
+    commands: [
+      { label: 'List all global settings',            cmd: 'shell settings list global' },
+      { label: 'Show touches overlay on',             cmd: 'shell settings put system show_touches 1' },
+      { label: 'Show touches overlay off',            cmd: 'shell settings put system show_touches 0' },
+      { label: 'Pointer location overlay on',         cmd: 'shell settings put system pointer_location 1' },
+      { label: 'Disable animations',                  cmd: 'shell settings put global window_animation_scale 0' },
+      { label: 'Reset animations',                    cmd: 'shell settings put global window_animation_scale 1' },
+      { label: 'GPU overdraw debug',                  cmd: 'shell setprop debug.hwui.overdraw show' },
+      { label: 'USB debugging state',                 cmd: 'shell settings get global adb_enabled' },
+      { label: 'Wireless debugging state',            cmd: 'shell settings get global adb_wifi_enabled' },
+    ],
+  },
+  {
+    name: 'Fastboot — OEM & Advanced',
+    commands: [
+      { label: 'All fastboot variables',              cmd: 'fastboot getvar all' },
+      { label: 'Bootloader lock state',               cmd: 'fastboot getvar unlocked' },
+      { label: 'Current slot (A/B)',                  cmd: 'fastboot getvar current-slot' },
+      { label: 'Product / device',                    cmd: 'fastboot getvar product' },
+      { label: 'Set active slot A',                   cmd: 'fastboot --set-active=a' },
+      { label: 'Set active slot B',                   cmd: 'fastboot --set-active=b' },
+      { label: 'Erase eSIM (Pixel, oem)',             cmd: 'fastboot oem esim_erase' },
+      { label: 'eSIM info (Pixel, oem)',              cmd: 'fastboot oem esim_id' },
+      { label: 'Device info (oem)',                   cmd: 'fastboot oem device-info' },
+      { label: 'Carrier / config (oem)',              cmd: 'fastboot oem get_config' },
+      { label: 'Unlock bootloader',                   cmd: 'fastboot flashing unlock' },
+      { label: 'Lock bootloader',                     cmd: 'fastboot flashing lock' },
+      { label: 'Unlock critical partitions',          cmd: 'fastboot flashing unlock_critical' },
+      { label: 'Reboot to bootloader',               cmd: 'fastboot reboot bootloader' },
+      { label: 'Reboot to fastbootd (userspace)',    cmd: 'fastboot reboot fastboot' },
+      { label: 'Boot a kernel image (no flash)',      cmd: 'fastboot boot <image>',
+        needsInput: [{ placeholder: 'boot.img', token: '<image>' }] },
+      { label: 'Wipe userdata',                       cmd: 'fastboot -w' },
+    ],
+  },
+  {
+    name: 'UWB (Ultra-Wideband)',
+    commands: [
+      { label: 'UWB service dump',                    cmd: 'shell dumpsys uwb' },
+      { label: 'UWB status',                          cmd: 'shell cmd uwb status' },
+      { label: 'UWB device state',                    cmd: 'shell cmd uwb get-device-state' },
+      { label: 'UWB country code',                    cmd: 'shell cmd uwb get-country-code' },
+      { label: 'UWB enabled (setting)',               cmd: 'shell settings get global uwb_enabled' },
+      { label: 'Enable UWB',                          cmd: 'shell settings put global uwb_enabled 1' },
+      { label: 'Disable UWB',                         cmd: 'shell settings put global uwb_enabled 0' },
+      { label: 'UWB hardware feature',                cmd: 'shell pm list features | grep -i uwb' },
+      { label: 'UWB related props',                   cmd: 'shell getprop | grep -i uwb' },
+    ],
+  },
+  {
+    name: 'Satellite',
+    commands: [
+      { label: 'Satellite service dump',              cmd: 'shell dumpsys satellite' },
+      { label: 'Satellite controller (usage)',        cmd: 'shell cmd satellite_controller' },
+      { label: 'Satellite in telephony registry',     cmd: 'shell dumpsys telephony.registry | grep -i satellite' },
+      { label: 'Carrier satellite config',            cmd: 'shell dumpsys carrier_config | grep -i satellite' },
+      { label: 'Satellite hardware feature',          cmd: 'shell pm list features | grep -i satellite' },
+      { label: 'Satellite related props',             cmd: 'shell getprop | grep -i satellite' },
+      { label: 'NTN / non-terrestrial props',         cmd: 'shell getprop | grep -iE "ntn|non.terrestrial"' },
+    ],
+  },
+  {
+    name: 'Verified Boot / AVB / PQC',
+    commands: [
+      { label: 'Verified boot state',                 cmd: 'shell getprop ro.boot.verifiedbootstate' },
+      { label: 'vbmeta hash algorithm',               cmd: 'shell getprop ro.boot.vbmeta.hash_alg' },
+      { label: 'vbmeta digest',                       cmd: 'shell getprop ro.boot.vbmeta.digest' },
+      { label: 'vbmeta size',                         cmd: 'shell getprop ro.boot.vbmeta.size' },
+      { label: 'All vbmeta / AVB props',              cmd: 'shell getprop | grep -iE "vbmeta|avb"' },
+      { label: 'dm-verity mode',                      cmd: 'shell getprop ro.boot.veritymode' },
+      // Android 17 introduced PQC signatures on system partitions — surfaces any
+      // related props if the device exposes them (names may vary by build).
+      { label: 'PQC signature props (Android 17)',    cmd: 'shell getprop | grep -iE "pqc|dilithium|ml.?dsa|sphincs|falcon"' },
+      { label: 'Bootloader lock state',               cmd: 'shell getprop ro.boot.flash.locked' },
+    ],
+  },
 ]
 
 export default function ViewUtilities() {
   const [output, setOutput]           = useState('')
   const [outputLabel, setOutputLabel] = useState('')
   const [running, setRunning]         = useState(false)
-  const [openCats, setOpenCats]       = useState<Set<string>>(new Set(['Device Info']))
+  const [openCats, setOpenCats]       = useState<Set<string>>(new Set())
   const [inputs, setInputs]           = useState<Record<string, string>>({})
   const [copied, setCopied]           = useState(false)
   const [activeCmd, setActiveCmd]     = useState<Command | null>(null)

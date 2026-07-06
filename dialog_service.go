@@ -57,6 +57,15 @@ func (a *App) SelectSaveFile(defaultName string) (string, error) {
 	return path, err
 }
 
+// SelectAnyFile opens a native file picker with no type filter.
+func (a *App) SelectAnyFile() (string, error) {
+	path, err := zenity.SelectFile(zenity.Title("Select a file"))
+	if err == zenity.ErrCanceled {
+		return "", nil
+	}
+	return path, err
+}
+
 // SelectDirectoryForPull opens a native directory picker.
 func (a *App) SelectDirectoryForPull() (string, error) {
 	path, err := zenity.SelectFile(

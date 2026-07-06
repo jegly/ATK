@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -12,12 +13,15 @@ import (
 )
 
 type LogcatLine struct {
-	Raw     string `json:"raw"`
-	Level   string `json:"level"`
-	Tag     string `json:"tag"`
-	Message string `json:"message"`
-	PID     string `json:"pid"`
-	Time    string `json:"time"`
+	Raw      string   `json:"raw"`
+	Level    string   `json:"level"`
+	Tag      string   `json:"tag"`
+	Message  string   `json:"message"`
+	PID      string   `json:"pid"`
+	TID      string   `json:"tid"`
+	Time     string   `json:"time"`
+	Refs     []LogRef `json:"refs"`     // mined relationships (native, for the visual map)
+	Mentions []LogRef `json:"mentions"` // generic package mentions (optional/noisy)
 }
 
 var (
@@ -106,36 +110,85 @@ func (a *App) ClearLogcat() error {
 	return err
 }
 
-// parseLogcatLine parses a threadtime format logcat line:
-// MM-DD HH:MM:SS.mmm PID TID LEVEL TAG: message
+// LogcatProcessNames returns a best-effort PID -> process/package name map so the
+// visual map can label process nodes with real names (e.g. com.android.systemui)
+// instead of bare PIDs. Parsed from `ps -A`; the NAME column is the last field
+// and the PID is the second. Best-effort: a failure just yields an empty map and
+// the UI falls back to PIDs.
+func (a *App) LogcatProcessNames() (map[string]string, error) {
+	out, err := a.runAdbShell("ps", "-A", "-o", "PID,NAME")
+	if err != nil || strings.TrimSpace(out) == "" {
+		// Older toybox builds reject -o; fall back to the full table.
+		out, err = a.runAdbShell("ps", "-A")
+		if err != nil {
+			return map[string]string{}, nil
+		}
+	}
+
+	names := make(map[string]string)
+	for i, line := range strings.Split(out, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		// Skip a header row ("PID NAME" or the ps -A column header).
+		if i == 0 && !isAllDigits(fields[0]) && !isAllDigits(fields[1]) {
+			continue
+		}
+		var pid, name string
+		if isAllDigits(fields[0]) {
+			// `ps -A -o PID,NAME` → "PID NAME"
+			pid, name = fields[0], fields[len(fields)-1]
+		} else if isAllDigits(fields[1]) {
+			// full `ps -A` table → "USER PID PPID ... NAME"
+			pid, name = fields[1], fields[len(fields)-1]
+		} else {
+			continue
+		}
+		if pid != "" && name != "" {
+			names[pid] = name
+		}
+	}
+	return names, nil
+}
+
+func isAllDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+// threadtime format: "MM-DD HH:MM:SS.mmm  PID  TID L TAG: message"
+// PID/TID are right-aligned with variable padding, so a naive split-on-space
+// mis-assigns fields. This regex tolerates arbitrary whitespace runs.
+var logcatRe = regexp.MustCompile(`^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+(\d+)\s+(\d+)\s+([A-Za-z])\s+(.*?):\s?(.*)$`)
+
+// parseLogcatLine parses a threadtime logcat line. Non-matching lines (e.g.
+// "--------- beginning of main") keep their raw text as the message.
 func parseLogcatLine(line string) LogcatLine {
 	result := LogcatLine{Raw: line}
 
-	parts := strings.SplitN(line, " ", 7)
-	if len(parts) < 7 {
-		result.Message = line
+	m := logcatRe.FindStringSubmatch(line)
+	if m == nil {
+		result.Message = strings.TrimSpace(line)
+		result.Refs = []LogRef{}
+		result.Mentions = []LogRef{}
 		return result
 	}
 
-	result.Time = strings.TrimSpace(parts[0] + " " + parts[1])
-	result.PID = strings.TrimSpace(parts[2])
-	// parts[3] = TID
-	level := strings.TrimSpace(parts[4])
-	if len(level) > 0 {
-		result.Level = level
-	}
-	tagAndMsg := strings.TrimSpace(parts[5])
-	if idx := strings.Index(tagAndMsg, ":"); idx >= 0 {
-		result.Tag = strings.TrimSpace(tagAndMsg[:idx])
-		if len(parts) > 6 {
-			result.Message = strings.TrimSpace(parts[6])
-		}
-	} else {
-		result.Tag = tagAndMsg
-		if len(parts) > 6 {
-			result.Message = strings.TrimSpace(parts[6])
-		}
-	}
-
+	result.Time = m[1]
+	result.PID = m[2]
+	result.TID = m[3]
+	result.Level = m[4]
+	result.Tag = strings.TrimSpace(m[5])
+	result.Message = m[6]
+	result.Refs = lcpExtractRefs(result.Tag, result.Message)
+	result.Mentions = lcpExtractMentions(result.Message, 3)
 	return result
 }

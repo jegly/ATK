@@ -3,8 +3,12 @@ module github.com/jegly/ATK
 go 1.24.0
 
 require (
+	github.com/avast/apkparser v0.0.0-20260423123151-7fcaee440f68
+	github.com/avast/apkverifier v0.0.0-20260410045523-e2781ccbddc8
 	github.com/ncruces/zenity v0.10.14
+	github.com/ulikunitz/xz v0.5.15
 	github.com/wailsapp/wails/v2 v2.12.0
+	golang.org/x/crypto v0.45.0
 )
 
 require (
@@ -18,6 +22,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/josephspurrier/goversioninfo v1.4.1 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/labstack/echo/v4 v4.13.3 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
@@ -36,7 +41,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.22 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/image v0.20.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
