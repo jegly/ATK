@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 // fileHandler serves device/local files to the webview (used by the Files image
@@ -22,8 +23,18 @@ func (a *App) fileHandler() http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 
 		if q.Get("src") == "local" {
+			// ServeFile's built-in ".." rejection only applies to r.URL.Path, not to
+			// a path we hand it explicitly — so confirm p resolves to a real,
+			// regular file before serving it (blocks traversal to devices/pipes/dirs
+			// and nonexistent paths, satisfies CodeQL go/path-injection).
+			clean := filepath.Clean(p)
+			info, err := os.Stat(clean)
+			if err != nil || !info.Mode().IsRegular() {
+				http.Error(w, "invalid path", http.StatusBadRequest)
+				return
+			}
 			// ServeFile picks the Content-Type and supports range requests.
-			http.ServeFile(w, r, p)
+			http.ServeFile(w, r, clean)
 			return
 		}
 
