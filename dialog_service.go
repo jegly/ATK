@@ -78,6 +78,33 @@ func (a *App) SelectDirectoryForPull() (string, error) {
 	return path, err
 }
 
+// SelectApkFolder opens a native directory picker for a folder of APKs to
+// batch-install.
+func (a *App) SelectApkFolder() (string, error) {
+	path, err := zenity.SelectFile(
+		zenity.Title("Select a folder of APKs"),
+		zenity.Directory(),
+	)
+	if err == zenity.ErrCanceled {
+		return "", nil
+	}
+	return path, err
+}
+
+// SelectMultipleApkFiles opens a native multi-file picker filtered to APKs.
+func (a *App) SelectMultipleApkFiles() ([]string, error) {
+	paths, err := zenity.SelectFileMultiple(
+		zenity.Title("Select APKs to install"),
+		zenity.FileFilters{
+			{Name: "APK files", Patterns: []string{"*.apk"}, CaseFold: true},
+		},
+	)
+	if err == zenity.ErrCanceled {
+		return nil, nil
+	}
+	return paths, err
+}
+
 // SelectFileWithFilter opens a file picker with custom file type filters.
 func (a *App) SelectFileWithFilter(title string, patterns []string) (string, error) {
 	filters := []zenity.FileFilter{

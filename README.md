@@ -143,7 +143,8 @@ sudo apt install scrcpy
 | 🖥️ **Screen Mirror** | Live mirror and full control via scrcpy; detachable and recordable |
 | 📊 **Dashboard** | Device info, wireless ADB, reboot controls |
 | 📁 **File Explorer** | Browse the device and your computer, push and pull, image viewer |
-| 📦 **Package Manager** | Install, uninstall, enable, disable, pull APK, plus **privileged removal of protected system apps without root** |
+| 📦 **Package Manager** | Install, uninstall, enable, disable, restore, pull APK, plus **privileged removal of protected system apps without root**. Correctly shows packages disabled/uninstalled by other tools (e.g. Canta/Shizuku) instead of hiding them, with a state filter (Enabled/Disabled/Uninstalled) |
+| 📲 **APK Installer** | Batch-install APKs from a folder or hand-picked files, with live per-file progress and select all/none |
 | 🧹 **Debloater** | 5,362 packages across Samsung, Xiaomi, Google, and 11 more OEMs |
 | 💻 **Shell Terminal** | adb shell and host, command library, export session |
 | 📡 **Live Logcat + System Map** | Real-time log streaming, plus a live, interactive map of system behaviour across subsystems |
@@ -158,14 +159,37 @@ sudo apt install scrcpy
 | 💿 **GSI Loader** | Boot a Generic System Image via **DSU** (temporary, no unlock/wipe) or a danger-gated **permanent fastboot flash**, with a Treble/ABI/VNDK compatibility pre-check |
 
 > [!TIP]
-> Hide any module you don't use from **Settings → Sidebar Features**. Theme
-> — Dark, Catppuccin Frappé/Latte/Mocha/Macchiato, Dracula, Gruvbox Material,
-> and a dozen more — plus sidebar position (left, top, bottom) are configurable
-> too.
+> Hide any module you don't use from **Settings → Sidebar Features**. 26 theme
+> palettes — Dark, Catppuccin Frappé/Latte/Mocha/Macchiato, Dracula, Gruvbox
+> Material, Nord, Tokyo Night, Solarized, Rosé Pine, Everforest, and more —
+> plus a custom accent/text colour, 8 bundled display fonts, adjustable font
+> size, and sidebar position (left, top, bottom) are all configurable too. A
+> system tray icon (Linux) lets ATK keep running in the background instead of
+> quitting.
 
 ---
 
-## ✨ What's new in v1.2.0
+## ✨ What's new in v1.3.0
+
+- 🖥️ **System tray** (Linux): closing the window now offers **Minimize to
+  Tray** instead of only Quit, with a tray menu to show/hide the window or
+  quit for good.
+- 📲 **APK Installer**: a new module to batch-install APKs from a folder or
+  hand-picked files, with live per-file progress and select all/none.
+- 📦 **Package visibility fix**: Packages and App Inspector were silently
+  hiding any package disabled/uninstalled by tools like Canta or Shizuku
+  (`pm uninstall --user 0` doesn't fully remove it, just hides it from a plain
+  package list). They now show correctly, with a state filter
+  (Enabled/Disabled/Uninstalled) and per-row Restore/Enable/Disable/Uninstall.
+- 🎨 **6 more theme palettes** — Nord, Tokyo Night, Solarized Dark/Light, Rosé
+  Pine, Everforest (26 total) — plus a custom text colour, 8 bundled display
+  fonts, and an adjustable base font size, all in Settings → Appearance.
+- 🖱️ **Sidebar polish**: a horizontal (top/bottom) sidebar now shrinks label
+  text progressively as the window narrows instead of showing a scrollbar,
+  and a touchpad-triggered stuck-scrollbar-drag bug is fixed.
+
+<details>
+<summary>Previous release (v1.2.0)</summary>
 
 - 💿 **GSI Loader**: boot a Generic System Image via **DSU** (temporary guest OS)
   or a danger-gated **permanent fastboot flash**, with a built-in compatibility
@@ -183,17 +207,6 @@ sudo apt install scrcpy
 - 🔐 **Security**: fixed a path-injection issue in the local file viewer, and
   bumped several dependencies with known CVEs (`x/image`, `x/net`, `vite`,
   `postcss`, `esbuild`).
-
-<details>
-<summary>Previous release (v1.1.0)</summary>
-
-- 📡 **Live System Map**: turn logcat into a live, interactive map of system behaviour across subsystems *(see below)*.
-- 🧹 **Debloater database grew from 2,157 to 5,362 packages**, with a **privileged uninstall of protected system apps without root** and a one-click **restore**.
-- 🧰 **Utilities expanded to 631 one-click commands** across 50+ categories.
-- 🎨 **Themes**: Dark, Catppuccin **Frappé**, and **Latte**. Dismissible safety banners.
-- 🔎 **APK Audit** exports to **JSON, CSV, SARIF**, with an in-app APK explorer.
-- 📦 **Smarter package ops**: combined *Disable + Uninstall*, a *disabled* badge, and verify-then-escalate so removals stick.
-- 🔌 **Offline-capable UI**: fonts are self-hosted, with no runtime CDN fetches.
 
 </details>
 
@@ -351,12 +364,12 @@ Coverage: Samsung · Xiaomi · OnePlus/Oppo · Huawei · Sony · Motorola · LG 
 **Prerequisites on Ubuntu/Debian**
 ```bash
 sudo apt install -y build-essential pkg-config libgtk-3-dev \
-  libwebkit2gtk-4.1-dev libayatana-appindicator3-dev adb fastboot
+  libwebkit2gtk-4.1-dev adb fastboot
 
-# Go 1.23
-wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+# Go 1.25+ (required by go.mod)
+wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> ~/.bashrc
 source ~/.bashrc
 

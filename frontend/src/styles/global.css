@@ -357,6 +357,109 @@
   --scrollbar-hover: 79 136 136;
 }
 
+/* Nord — arctic blue-grey with frost green */
+:root[data-theme="nord"] {
+  --bg-base: 46 52 64;
+  --bg-surface: 59 66 82;
+  --bg-raised: 67 76 94;
+  --bg-border: 76 86 106;
+  --accent-green: 163 190 140;
+  --accent-dim: 130 152 112;
+  --accent-muted: 33 38 28;
+  --text-primary: 236 239 244;
+  --text-secondary: 216 222 233;
+  --text-muted: 76 86 106;
+  --danger: 191 97 106;
+  --warn: 235 203 139;
+  --scrollbar-hover: 126 133 148;
+}
+
+/* Tokyo Night — neon purple & blue on midnight */
+:root[data-theme="tokyo-night"] {
+  --bg-base: 26 27 38;
+  --bg-surface: 22 22 30;
+  --bg-raised: 36 40 59;
+  --bg-border: 41 46 66;
+  --accent-green: 158 206 106;
+  --accent-dim: 126 165 85;
+  --accent-muted: 32 41 21;
+  --text-primary: 192 202 245;
+  --text-secondary: 169 177 214;
+  --text-muted: 86 95 137;
+  --danger: 247 118 142;
+  --warn: 224 175 104;
+  --scrollbar-hover: 101 105 119;
+}
+
+/* Solarized Dark — low-contrast teal & olive */
+:root[data-theme="solarized-dark"] {
+  --bg-base: 0 43 54;
+  --bg-surface: 7 54 66;
+  --bg-raised: 10 61 74;
+  --bg-border: 88 110 117;
+  --accent-green: 133 153 0;
+  --accent-dim: 106 122 0;
+  --accent-muted: 27 31 0;
+  --text-primary: 147 161 161;
+  --text-secondary: 131 148 150;
+  --text-muted: 88 110 117;
+  --danger: 220 50 47;
+  --warn: 181 137 0;
+  --scrollbar-hover: 135 151 156;
+}
+
+/* Solarized Light — low-contrast teal & olive, light */
+:root[data-theme="solarized-light"] {
+  --bg-base: 253 246 227;
+  --bg-surface: 238 232 213;
+  --bg-raised: 229 221 195;
+  --bg-border: 201 189 151;
+  --accent-green: 133 153 0;
+  --accent-dim: 106 122 0;
+  --accent-muted: 233 237 209;
+  --text-primary: 88 110 117;
+  --text-secondary: 101 123 131;
+  --text-muted: 147 161 161;
+  --danger: 220 50 47;
+  --warn: 181 137 0;
+  --scrollbar-hover: 185 174 139;
+}
+:root[data-theme="solarized-light"] body { color-scheme: light; }
+
+/* Rosé Pine — elegant muted purple & rose */
+:root[data-theme="rose-pine"] {
+  --bg-base: 25 23 36;
+  --bg-surface: 31 29 46;
+  --bg-raised: 38 35 58;
+  --bg-border: 64 61 82;
+  --accent-green: 156 207 216;
+  --accent-dim: 125 166 173;
+  --accent-muted: 31 41 43;
+  --text-primary: 224 222 244;
+  --text-secondary: 144 140 170;
+  --text-muted: 110 106 134;
+  --danger: 235 111 146;
+  --warn: 246 193 119;
+  --scrollbar-hover: 117 115 130;
+}
+
+/* Everforest — warm forest green, easy on the eyes */
+:root[data-theme="everforest"] {
+  --bg-base: 45 53 59;
+  --bg-surface: 52 63 68;
+  --bg-raised: 61 72 77;
+  --bg-border: 71 82 88;
+  --accent-green: 167 192 128;
+  --accent-dim: 134 154 102;
+  --accent-muted: 33 38 26;
+  --text-primary: 211 198 170;
+  --text-secondary: 157 169 160;
+  --text-muted: 122 132 120;
+  --danger: 230 126 128;
+  --warn: 219 188 127;
+  --scrollbar-hover: 123 130 135;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -397,10 +500,10 @@
     background: transparent;
     color-scheme: dark;
     color: rgb(var(--text-primary));
-    /* --app-font is an optional system-wide override set from Settings (see
-       lib/appearance.ts); falls back to the bundled UI font. */
+    /* --app-font/--app-font-size are optional system-wide overrides set from
+       Settings (see lib/appearance.ts); fall back to the bundled UI font/14px. */
     font-family: var(--app-font, 'IBM Plex Sans', sans-serif);
-    font-size: 14px;
+    font-size: var(--app-font-size, 14px);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     /* Content is selectable/copyable; interactive chrome opts out below. */
@@ -453,17 +556,18 @@
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 9px;
+    height: 9px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: rgb(var(--bg-border));
-    border-radius: 3px;
+    border-radius: 4px;
   }
-  ::-webkit-scrollbar-thumb:hover {
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
     background: rgb(var(--scrollbar-hover));
   }
 }

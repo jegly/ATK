@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, FolderOpen, Package, Terminal,
+  LayoutDashboard, FolderOpen, Package, PackagePlus, Terminal,
   Zap, Wrench, Settings, Shield,
   ScrollText, Search, Lock, Archive, SlidersHorizontal, ScanSearch, MonitorSmartphone, Rocket, HardDriveDownload
 } from 'lucide-react'
@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
   { view: 'files',        icon: <FolderOpen size={17} />,      label: 'Files' },
   { view: 'mirror',       icon: <MonitorSmartphone size={17} />, label: 'Screen Mirror' },
   { view: 'packages',     icon: <Package size={17} />,         label: 'Packages' },
+  { view: 'apkinstaller', icon: <PackagePlus size={17} />,     label: 'APK Installer' },
   { view: 'debloater',    icon: <Shield size={17} />,          label: 'Debloater' },
   { view: 'shell',        icon: <Terminal size={17} />,        label: 'Shell' },
   { view: 'logcat',       icon: <ScrollText size={17} />,      label: 'Logcat',       dividerBefore: true },
@@ -35,6 +36,10 @@ const navItems: NavItem[] = [
   { view: 'flasher',      icon: <Zap size={17} />,             label: 'Flasher' },
   { view: 'gsiloader',    icon: <HardDriveDownload size={17} />, label: 'GSI Loader' },
 ]
+
+// Floor for progressive label shrinking in the horizontal sidebar - below
+// this, text becomes illegible, so labels hide outright instead.
+const MIN_LABEL_SCALE = 0.65
 
 interface DragProps {
   onDragStart: (e: React.DragEvent) => void
@@ -50,6 +55,19 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
 
   const [hidden, setHidden] = useState<string[]>(getHiddenViews())
   useEffect(() => onHiddenViewsChange(setHidden), [])
+
+  // When horizontal (top/bottom sidebar), labels can make the row wider than
+  // the window - rather than forcing a horizontal scrollbar, shrink label text
+  // progressively as space gets tight (labelScale 1 -> MIN_LABEL_SCALE), and
+  // only hide labels outright once even minimum-size text wouldn't fit.
+  // `measureRef` is an offscreen clone always rendered WITH full-size labels
+  // at natural width; comparing its scrollWidth against the real nav's
+  // clientWidth (which itself doesn't change as labelScale changes) avoids
+  // the flip-flop you'd get measuring the visible, already-shrunk row.
+  const navRef = useRef<HTMLElement>(null)
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [labelScale, setLabelScale] = useState(1)
+  const effectiveShowLabels = showLabels && (!horizontal || labelScale > 0)
 
   // Drag-to-reorder (dock style). Saved order first, then any new defaults.
   const [order, setOrder] = useState<string[]>(getNavOrder())
@@ -70,6 +88,21 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
 
   const visibleItems = ordered.filter(i => !hidden.includes(i.view))
 
+  useEffect(() => {
+    if (!horizontal || !showLabels) { setLabelScale(1); return }
+    const nav = navRef.current
+    const measure = measureRef.current
+    if (!nav || !measure) return
+    const check = () => {
+      const ratio = measure.scrollWidth > 0 ? nav.clientWidth / measure.scrollWidth : 1
+      setLabelScale(ratio >= 1 ? 1 : ratio >= MIN_LABEL_SCALE ? ratio : 0)
+    }
+    check()
+    const ro = new ResizeObserver(check)
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [horizontal, showLabels, visibleItems])
+
   const handleDrop = (target: string) => {
     const from = dragRef.current
     dragRef.current = null
@@ -89,8 +122,8 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
     position === 'left' ? 'border-r' : position === 'top' ? 'border-b' : 'border-t'
 
   const asideCls = horizontal
-    ? `${showLabels ? 'h-[68px]' : 'h-[52px]'} w-full flex flex-row items-center bg-bg-surface ${edgeBorder} border-bg-border shrink-0`
-    : `${showLabels ? 'w-[84px]' : 'w-[52px]'} flex flex-col bg-bg-surface ${edgeBorder} border-bg-border shrink-0`
+    ? `${effectiveShowLabels ? 'h-[68px]' : 'h-[52px]'} w-full flex flex-row items-center bg-bg-surface ${edgeBorder} border-bg-border shrink-0`
+    : `${effectiveShowLabels ? 'w-[84px]' : 'w-[52px]'} flex flex-col bg-bg-surface ${edgeBorder} border-bg-border shrink-0`
 
   const navCls = horizontal
     ? 'flex-1 flex flex-row items-center justify-center gap-0.5 px-1 overflow-x-auto'
@@ -102,13 +135,19 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
     ? 'px-1 h-full flex items-center border-l border-bg-border shrink-0'
     : 'p-1 pb-1.5 border-t border-bg-border shrink-0'
 
-  const btnSizing = !showLabels
+  const btnSizing = !effectiveShowLabels
     ? 'w-8 h-8'
     : horizontal
-      ? 'flex-col gap-1 px-2 py-1.5 min-w-[3.25rem] h-full justify-center'
+      ? 'flex-col gap-1 px-2 py-1.5 h-full justify-center'
       : 'flex-col gap-1 px-1 py-1.5 w-full'
 
-  const labelCls = `text-[10px] leading-tight text-center ${horizontal ? 'whitespace-nowrap' : ''}`
+  const labelCls = `leading-tight text-center ${horizontal ? 'whitespace-nowrap' : ''}`
+
+  // Horizontal-only: button width and label font-size both track labelScale,
+  // so shrinking text actually reclaims row space instead of just looking smaller.
+  const btnStyle: React.CSSProperties | undefined =
+    horizontal && effectiveShowLabels ? { minWidth: `${3.25 * labelScale}rem` } : undefined
+  const labelStyle: React.CSSProperties = { fontSize: `${10 * labelScale}px` }
 
   const renderButton = (view: View | 'settings', icon: React.ReactNode, label: string, drag?: DragProps) => {
     const active = activeView === view
@@ -122,6 +161,7 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
         onDragEnd={drag?.onDragEnd}
         onClick={() => onViewChange(view as View)}
         title={label}
+        style={btnStyle}
         className={`
           flex items-center justify-center rounded transition-all duration-150 relative
           ${btnSizing}
@@ -134,7 +174,7 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
         `}
       >
         {icon}
-        {showLabels && <span className={labelCls}>{label}</span>}
+        {effectiveShowLabels && <span className={labelCls} style={labelStyle}>{label}</span>}
         {active && (
           horizontal
             ? <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-5 bg-accent-green rounded-t" />
@@ -146,7 +186,25 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
 
   return (
     <aside className={asideCls}>
-      <nav className={navCls}>
+      {horizontal && showLabels && (
+        <div ref={measureRef} aria-hidden="true" className="fixed -top-[9999px] left-0 flex flex-row items-center gap-0.5 px-1 pointer-events-none">
+          {visibleItems.map(({ view, icon, label, dividerBefore }, idx) => (
+            <div key={view} className="flex items-center">
+              {dividerBefore && idx > 0 && <div className={dividerCls} />}
+              <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-[3.25rem] h-[68px]">
+                {icon}
+                <span className="text-[10px] leading-tight text-center whitespace-nowrap">{label}</span>
+              </div>
+            </div>
+          ))}
+          <div className="w-px h-7 bg-bg-border mx-1" />
+          <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-[3.25rem] h-[68px]">
+            <Settings size={17} />
+            <span className="text-[10px] leading-tight text-center whitespace-nowrap">Settings</span>
+          </div>
+        </div>
+      )}
+      <nav ref={navRef} className={navCls}>
         {visibleItems.map(({ view, icon, label, dividerBefore }, idx) => (
           <div key={view} className={horizontal ? 'flex items-center' : undefined}>
             {dividerBefore && idx > 0 && <div className={dividerCls} />}

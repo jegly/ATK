@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Shield, RefreshCw, Check, AlertTriangle, Palette, Lock } from 'lucide-react'
-import { GetBinaryInfo, SetAdbPath, SetFastbootPath, AppLockStatus, SetAppPassword, DisableAppLock, SetRequireForDanger } from '../../lib/wails'
+import { Shield, RefreshCw, Check, AlertTriangle, Palette, Lock, ChevronDown, ChevronRight } from 'lucide-react'
+import { GetBinaryInfo, SetAdbPath, SetFastbootPath, AppLockStatus, SetAppPassword, DisableAppLock, SetRequireForDanger, OpenURL } from '../../lib/wails'
 import { notify } from '../../lib/notify'
 import { refreshAppLockStatus } from '../../lib/applock'
 import { applyTheme, getTheme, THEMES, type Theme } from '../../lib/theme'
-import { getCustomAccent, setCustomAccent, getCustomFont, setCustomFont, FONT_OPTIONS } from '../../lib/appearance'
+import {
+  getCustomAccent, setCustomAccent, getCustomTextColor, setCustomTextColor,
+  getCustomFont, setCustomFont, FONT_OPTIONS,
+  getCustomFontSize, setCustomFontSize, FONT_SIZE_MIN, FONT_SIZE_MAX, FONT_SIZE_DEFAULT
+} from '../../lib/appearance'
 import { getSidebarPosition, setSidebarPosition, SIDEBAR_POSITIONS, getSidebarLabels, setSidebarLabels, type SidebarPosition } from '../../lib/layout'
 import { getRootTools, setRootTools, getHiddenViews, setHiddenViews, TOGGLEABLE_VIEWS, getMuteNoDevice, setMuteNoDevice } from '../../lib/featureflags'
 import { resetDismissed } from '../../lib/dismissible'
@@ -18,13 +22,18 @@ export default function ViewSettings() {
   const [sidebarPos, setSidebarPos] = useState<SidebarPosition>(getSidebarPosition())
   const [sidebarLabels, setSidebarLabelsState] = useState<boolean>(getSidebarLabels())
   const [rootTools, setRootToolsState] = useState<boolean>(getRootTools())
+  const [aboutOpen, setAboutOpen] = useState(false)
 
   const [customAccent, setCustomAccentState] = useState<string>(getCustomAccent())
+  const [customTextColor, setCustomTextColorState] = useState<string>(getCustomTextColor())
   const [customFont, setCustomFontState] = useState<string>(getCustomFont())
+  const [customFontSize, setCustomFontSizeState] = useState<number>(getCustomFontSize())
 
   const changeTheme = (t: Theme) => { setTheme(t); applyTheme(t) }
   const changeAccent = (hex: string | null) => { setCustomAccentState(hex || ''); setCustomAccent(hex) }
+  const changeTextColor = (hex: string | null) => { setCustomTextColorState(hex || ''); setCustomTextColor(hex) }
   const changeFont = (id: string) => { setCustomFontState(id); setCustomFont(id || null) }
+  const changeFontSize = (px: number) => { setCustomFontSizeState(px); setCustomFontSize(px) }
   const changeSidebarPos = (p: SidebarPosition) => { setSidebarPos(p); setSidebarPosition(p) }
   const changeSidebarLabels = (on: boolean) => { setSidebarLabelsState(on); setSidebarLabels(on) }
   const changeRootTools = (on: boolean) => { setRootToolsState(on); setRootTools(on) }
@@ -160,8 +169,8 @@ export default function ViewSettings() {
           ))}
         </div>
 
-        {/* Custom accent colour + font — system-wide overrides on top of the theme */}
-        <div className="pt-1 grid grid-cols-2 gap-4">
+        {/* Custom accent/text colour + font/size — system-wide overrides on top of the theme */}
+        <div className="pt-1 grid grid-cols-4 gap-4">
           <div>
             <p className="text-xs text-text-muted mb-1.5">Custom accent colour (overrides the theme accent everywhere)</p>
             <div className="flex items-center gap-2">
@@ -179,6 +188,22 @@ export default function ViewSettings() {
             </div>
           </div>
           <div>
+            <p className="text-xs text-text-muted mb-1.5">Custom text colour (overrides the theme's primary text colour)</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={customTextColor || '#c6d0f5'}
+                onChange={e => changeTextColor(e.target.value)}
+                className="h-8 w-12 rounded border border-bg-border bg-bg-raised cursor-pointer p-0.5"
+                title="Pick a custom text colour"
+              />
+              <span className="mono text-xs text-text-secondary">{customTextColor || 'theme default'}</span>
+              {customTextColor && (
+                <button onClick={() => changeTextColor(null)} className="btn-ghost text-xs ml-auto">Reset</button>
+              )}
+            </div>
+          </div>
+          <div>
             <p className="text-xs text-text-muted mb-1.5">Font (applied app-wide)</p>
             <select
               className="input text-xs w-full"
@@ -187,6 +212,23 @@ export default function ViewSettings() {
             >
               {FONT_OPTIONS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
             </select>
+          </div>
+          <div>
+            <p className="text-xs text-text-muted mb-1.5">Font size ({customFontSize || FONT_SIZE_DEFAULT}px)</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={FONT_SIZE_MIN}
+                max={FONT_SIZE_MAX}
+                value={customFontSize || FONT_SIZE_DEFAULT}
+                onChange={e => changeFontSize(Number(e.target.value))}
+                className="flex-1 accent-accent-green"
+                title="Adjust the app-wide base font size"
+              />
+              {customFontSize > 0 && (
+                <button onClick={() => changeFontSize(0)} className="btn-ghost text-xs">Reset</button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -469,12 +511,26 @@ export default function ViewSettings() {
 
       {/* About */}
       <div className="card p-4 space-y-2">
-        <p className="section-title">About</p>
-        <div className="text-xs text-text-muted space-y-1">
-          <p>ATK (Android Toolkit) — an all-in-one ADB GUI for Android power users and bug hunters</p>
-          <p>All commands use discrete argument passing — no shell string building, no injection vectors</p>
-          <p>Built with Wails v2 (Go + React) · github.com/jegly/ATK</p>
-        </div>
+        <button
+          onClick={() => setAboutOpen(o => !o)}
+          className="flex items-center gap-2 w-full text-left"
+        >
+          {aboutOpen ? <ChevronDown size={13} className="text-text-muted" /> : <ChevronRight size={13} className="text-text-muted" />}
+          <p className="section-title">About</p>
+        </button>
+        {aboutOpen && (
+          <div className="text-xs text-text-muted space-y-1 pl-5">
+            <p>ATK (Android Toolkit) — an all-in-one ADB GUI for Android power users</p>
+            <p>All commands use discrete argument passing — no shell string building, no injection vectors</p>
+            <p>Built with Wails v2 (Go + React) · github.com/jegly/ATK</p>
+            <p>
+              Jesse Li-Yates ·{' '}
+              <button onClick={() => OpenURL('https://www.jegly.xyz')} className="text-accent-green hover:underline">
+                www.jegly.xyz
+              </button>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

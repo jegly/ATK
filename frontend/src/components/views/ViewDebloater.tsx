@@ -31,7 +31,14 @@ interface Row {
   category: string
   deps?: string[]
   neededBy?: string[]
-  isInstalled: boolean
+  // Physically present on the system image (pm list packages -u), regardless
+  // of per-user install state. False only for packages that have never been
+  // seen on this device at all (UAD-database-only entries).
+  onDevice: boolean
+  // onDevice but uninstalled for user 0 - e.g. via Canta/Shizuku, which runs
+  // `pm uninstall --user 0`. The APK is still on disk; it just isn't active
+  // for this user until restored.
+  isUninstalledForUser: boolean
   isDisabled: boolean
 }
 
@@ -56,7 +63,8 @@ export default function ViewDebloater() {
   const [mfrFilter, setMfrFilter]   = useState('all')
   const [openCats, setOpenCats]     = useState<Set<string>>(new Set())
   const [operating, setOperating]   = useState(false)
-  const [stateFilter, setStateFilter] = useState<'installed' | 'enabled' | 'disabled' | 'notinstalled' | 'all'>('installed')
+  const [stateFilter, setStateFilter] = useState<'installed' | 'enabled' | 'disabled' | 'uninstalled' | 'notinstalled' | 'all'>('installed')
+  const [uninstalledForUser, setUninstalledForUser] = useState<Set<string>>(new Set())
 
   // pkg -> UAD database entry (with its category). Built once; first match wins.
   const dbIndex = useMemo(() => {
@@ -67,7 +75,7 @@ export default function ViewDebloater() {
           m.set(p.pkg, {
             pkg: p.pkg, label: p.label, description: p.description, safety: p.safety,
             category: cat.name, deps: p.deps, neededBy: p.neededBy,
-            isInstalled: false, isDisabled: false,
+            onDevice: false, isUninstalledForUser: false, isDisabled: false,
           })
         }
       }
@@ -79,12 +87,16 @@ export default function ViewDebloater() {
     setLoading(true)
     setInstalled(new Set())
     setDisabled(new Set())
+    setUninstalledForUser(new Set())
     setSelected(new Set())
     try {
+      // 'all' now includes packages uninstalled-for-user (pm list packages -u) -
+      // still physically on the device, just not active for user 0.
       const pkgs = await ListPackages('all')
       const names = new Set<string>((pkgs || []).map((p: PackageInfo) => p.packageName))
       setInstalled(names)
-      setDisabled(new Set<string>((pkgs || []).filter((p: PackageInfo) => !p.isEnabled).map((p: PackageInfo) => p.packageName)))
+      setDisabled(new Set<string>((pkgs || []).filter((p: PackageInfo) => p.isInstalled && !p.isEnabled).map((p: PackageInfo) => p.packageName)))
+      setUninstalledForUser(new Set<string>((pkgs || []).filter((p: PackageInfo) => !p.isInstalled).map((p: PackageInfo) => p.packageName)))
       // Auto-open every category that has at least one package on the device.
       const withInstalled = new Set<string>()
       names.forEach(name => withInstalled.add(dbIndex.get(name)?.category ?? UNCATEGORIZED))
@@ -107,22 +119,23 @@ export default function ViewDebloater() {
     const rows: Row[] = []
     installed.forEach(name => {
       const e = dbIndex.get(name)
+      const isUninstalledForUser = uninstalledForUser.has(name)
       if (e) {
-        rows.push({ ...e, isInstalled: true, isDisabled: disabled.has(name) })
+        rows.push({ ...e, onDevice: true, isUninstalledForUser, isDisabled: disabled.has(name) })
       } else {
         rows.push({
           pkg: name, label: shortLabel(name),
           description: 'Not in the debloat database — likely an OEM, carrier, or region-specific package. Safety unknown; research before removing.',
           safety: 'unknown', category: UNCATEGORIZED,
-          isInstalled: true, isDisabled: disabled.has(name),
+          onDevice: true, isUninstalledForUser, isDisabled: disabled.has(name),
         })
       }
     })
     dbIndex.forEach((e, pkg) => {
-      if (!installed.has(pkg)) rows.push({ ...e, isInstalled: false, isDisabled: false })
+      if (!installed.has(pkg)) rows.push({ ...e, onDevice: false, isUninstalledForUser: false, isDisabled: false })
     })
     return rows
-  }, [installed, disabled, dbIndex])
+  }, [installed, disabled, uninstalledForUser, dbIndex])
 
   const visibleCategories = useMemo(() => {
     const q = search.toLowerCase()
@@ -131,10 +144,11 @@ export default function ViewDebloater() {
       if (mfrFilter !== 'all' && r.category !== mfrFilter) continue
       if (safetyFilter !== 'all' && r.safety !== safetyFilter) continue
       switch (stateFilter) {
-        case 'installed':    if (!r.isInstalled) continue; break
-        case 'enabled':      if (!r.isInstalled || r.isDisabled) continue; break
+        case 'installed':    if (!r.onDevice) continue; break
+        case 'enabled':      if (!r.onDevice || r.isUninstalledForUser || r.isDisabled) continue; break
         case 'disabled':     if (!r.isDisabled) continue; break
-        case 'notinstalled': if (r.isInstalled) continue; break
+        case 'uninstalled':  if (!r.isUninstalledForUser) continue; break
+        case 'notinstalled': if (r.onDevice) continue; break
         // 'all' → no state restriction
       }
       if (q && !(r.pkg.toLowerCase().includes(q) || r.label.toLowerCase().includes(q) || r.description.toLowerCase().includes(q))) continue
@@ -243,7 +257,8 @@ export default function ViewDebloater() {
           <option value="installed">On device</option>
           <option value="enabled">Enabled</option>
           <option value="disabled">Disabled</option>
-          <option value="notinstalled">Not installed</option>
+          <option value="uninstalled">Uninstalled (this user)</option>
+          <option value="notinstalled">Not on device</option>
           <option value="all">All</option>
         </select>
 
@@ -332,7 +347,7 @@ export default function ViewDebloater() {
         )}
 
         {!loading && visibleCategories.map(cat => {
-          const installedCount = cat.packages.filter(p => p.isInstalled).length
+          const installedCount = cat.packages.filter(p => p.onDevice).length
           const isOpen = openCats.has(cat.name)
 
           return (
@@ -358,7 +373,8 @@ export default function ViewDebloater() {
 
               {/* Packages */}
               {isOpen && cat.packages.map(p => {
-                const isInst    = p.isInstalled
+                const isInst    = p.onDevice
+                const isUninstalledForUser = p.isUninstalledForUser
                 const isDisabled = p.isDisabled
                 const isSel     = selected.has(p.pkg)
                 const safety    = SAFETY_CONFIG[p.safety]
@@ -388,7 +404,8 @@ export default function ViewDebloater() {
                           {safety.icon} {safety.label}
                         </span>
                         {!isInst && <span className="badge-gray text-xs">not on device</span>}
-                        {isInst && isDisabled && <span className="badge-yellow text-xs">disabled</span>}
+                        {isInst && isUninstalledForUser && <span className="badge-gray text-xs" title="Present on the system image but uninstalled for this user (e.g. via Canta/Shizuku)">uninstalled</span>}
+                        {isInst && !isUninstalledForUser && isDisabled && <span className="badge-yellow text-xs">disabled</span>}
                         {p.deps && p.deps.length > 0 && (
                           <span className="badge-gray text-xs" title={`Depends on: ${p.deps.join(', ')}`}>has deps</span>
                         )}

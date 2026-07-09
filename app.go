@@ -60,6 +60,11 @@ type FileEntry struct {
 type PackageInfo struct {
 	PackageName string `json:"packageName"`
 	IsEnabled   bool   `json:"isEnabled"`
+	// IsInstalled is false when the package is present on the system image but
+	// uninstalled for user 0 (e.g. via `pm uninstall --user 0`, which is what
+	// Canta/Shizuku do to "remove" a system app). Such packages are still on
+	// disk and show up in `pm list packages -u`, but not in the plain listing.
+	IsInstalled bool `json:"isInstalled"`
 }
 
 // AdbConfig holds user-configurable ADB settings
@@ -84,6 +89,10 @@ type App struct {
 	// app-lock "require password for destructive actions" session window
 	dangerMu    sync.Mutex
 	dangerUntil time.Time
+
+	// window visibility, tracked for the tray's show/hide toggle
+	windowMu    sync.Mutex
+	windowShown bool
 }
 
 // NewApp creates a new App instance
@@ -97,8 +106,10 @@ func NewApp() *App {
 // Startup is called when the app starts
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+	a.windowShown = true
 	// Frameless windows can open off-centre on some WMs; centre on launch.
 	runtime.WindowCenter(ctx)
+	initTray(a)
 }
 
 // Shutdown is called when the app is closing — tidy up spawned child processes
@@ -111,4 +122,57 @@ func (a *App) Shutdown(ctx context.Context) {
 	if !detached {
 		a.StopScrcpy()
 	}
+	closeTray()
+}
+
+// ShowWindow restores the main window - used by the tray's "Show ATK" /
+// left-click action and by the frontend's "Minimize to tray" quit dialog.
+func (a *App) ShowWindow() {
+	a.windowMu.Lock()
+	a.windowShown = true
+	a.windowMu.Unlock()
+	runtime.WindowShow(a.ctx)
+	runtime.WindowUnminimise(a.ctx)
+}
+
+// HideWindow parks the window (app keeps running, reachable from the tray).
+func (a *App) HideWindow() {
+	a.windowMu.Lock()
+	a.windowShown = false
+	a.windowMu.Unlock()
+	runtime.WindowHide(a.ctx)
+}
+
+// ToggleWindow shows the window if hidden, hides it if shown - the tray's
+// left-click / "Show ATK" menu action.
+func (a *App) ToggleWindow() {
+	a.windowMu.Lock()
+	shown := a.windowShown
+	a.windowMu.Unlock()
+	if shown {
+		a.HideWindow()
+	} else {
+		a.ShowWindow()
+	}
+}
+
+// TrayAvailable reports whether a real system tray icon was registered (e.g.
+// false on Linux if no StatusNotifierWatcher/AppIndicator host is running).
+// The frontend uses this to decide whether "Minimize to tray" is even a
+// sensible option to offer in the close-confirmation dialog.
+func (a *App) TrayAvailable() bool {
+	return trayAvailable()
+}
+
+// QuitApp fully quits ATK (not just the window) - used by both the tray's
+// "Quit ATK" menu item and the frontend's close-confirmation dialog.
+func (a *App) QuitApp() {
+	runtime.Quit(a.ctx)
+}
+
+// OpenURL opens a link in the user's default system browser. A bare <a
+// target="_blank"> isn't reliable inside the embedded webview - this is
+// Wails' supported way to hand off to the OS.
+func (a *App) OpenURL(url string) {
+	runtime.BrowserOpenURL(a.ctx, url)
 }

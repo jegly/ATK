@@ -3,6 +3,8 @@
 // the drag region via Wails' `--wails-draggable:drag` CSS hint, plus macOS-style
 // traffic-light controls tinted in Catppuccin pastels. No app name by design.
 
+import { requestQuitConfirm } from '../../lib/quitgate'
+
 // Runtime is injected by Wails on window['runtime'] (same access pattern as
 // ViewLogcat.tsx); guarded with ?. so a browser dev session won't crash.
 const rt = () => (window as any)['runtime']
@@ -31,7 +33,7 @@ export default function TitleBar() {
       <div className="flex items-center gap-2 ml-auto" style={{ '--wails-draggable': 'no-drag' } as React.CSSProperties}>
         <TrafficLight color="#e5c890" hover="hover:brightness-110" title="Minimise" onClick={() => rt()?.WindowMinimise?.()} />
         <TrafficLight color="#a6d189" hover="hover:brightness-110" title="Maximise" onClick={() => rt()?.WindowToggleMaximise?.()} />
-        <TrafficLight color="#e78284" hover="hover:brightness-110" title="Close"    onClick={() => rt()?.Quit?.()} />
+        <TrafficLight color="#e78284" hover="hover:brightness-110" title="Close"    onClick={requestQuitConfirm} />
       </div>
     </div>
   )

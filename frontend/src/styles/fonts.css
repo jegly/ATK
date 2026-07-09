@@ -1,0 +1,60 @@
+/* Self-hosted display/decorative fonts (bundled, OFL-licensed - see
+   src/assets/fonts/licenses/). Selectable app-wide from Settings via
+   lib/appearance.ts FONT_OPTIONS. Variable-font files cover their whole
+   weight range through a single @font-face with a weight range. */
+
+@font-face {
+  font-family: 'DotGothic16';
+  src: url('../assets/fonts/DotGothic16-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel';
+  src: url('../assets/fonts/GeistPixel-Regular-VariableFont_ELSH.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gugi';
+  src: url('../assets/fonts/Gugi-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('../assets/fonts/Orbitron-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('../assets/fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('../assets/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'VT323';
+  src: url('../assets/fonts/VT323-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}

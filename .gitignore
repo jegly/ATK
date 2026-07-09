@@ -38,6 +38,10 @@ ATK_*.log
 *.tmp
 /tmp/
 
+# Raw font source dump (bundled fonts already live in frontend/src/assets/fonts/)
+/DotGothic16,Geist_Pixel,Gugi,Orbitron,Playfair_Display,etc/
+/DotGothic16,Geist_Pixel,Gugi,Orbitron,Playfair_Display,etc.zip
+
 # ── PROPRIETARY — Logcat visual map. NEVER publish to GitHub. ──
 # (Builds into the shipped binary as obfuscated JS + native Go; source stays private.)
 /proprietary/

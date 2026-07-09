@@ -17,6 +17,16 @@ export const GetBinaryInfo = () => window['go']['main']['App']['GetBinaryInfo'](
 // @ts-ignore
 export const CheckSystemRequirements = () => window['go']['main']['App']['CheckSystemRequirements']()
 // @ts-ignore
+export const ShowWindow = () => window['go']['main']['App']['ShowWindow']()
+// @ts-ignore
+export const HideWindow = () => window['go']['main']['App']['HideWindow']()
+// @ts-ignore
+export const QuitApp = () => window['go']['main']['App']['QuitApp']()
+// @ts-ignore
+export const TrayAvailable = () => window['go']['main']['App']['TrayAvailable']()
+// @ts-ignore
+export const OpenURL = (url: string) => window['go']['main']['App']['OpenURL'](url)
+// @ts-ignore
 export const SetAdbPath = (path: string) => window['go']['main']['App']['SetAdbPath'](path)
 // @ts-ignore
 export const SetFastbootPath = (path: string) => window['go']['main']['App']['SetFastbootPath'](path)
@@ -99,9 +109,21 @@ export const EnableMultiplePackages = (pkgs: string[]) => window['go']['main']['
 // @ts-ignore
 export const RestoreMultiplePackages = (pkgs: string[]) => window['go']['main']['App']['RestoreMultiplePackages'](pkgs)
 // @ts-ignore
+export const RestorePackage = (pkg: string) => window['go']['main']['App']['RestorePackage'](pkg)
+// @ts-ignore
 export const SelectFileForInstall = () => window['go']['main']['App']['SelectFileForInstall']()
 // @ts-ignore
 export const SideloadPackage = (path: string) => window['go']['main']['App']['SideloadPackage'](path)
+// @ts-ignore
+export const SelectApkFolder = () => window['go']['main']['App']['SelectApkFolder']()
+// @ts-ignore
+export const SelectMultipleApkFiles = () => window['go']['main']['App']['SelectMultipleApkFiles']()
+// @ts-ignore
+export const ListApksInFolder = (folder: string) => window['go']['main']['App']['ListApksInFolder'](folder)
+// @ts-ignore
+export const StatApkFiles = (paths: string[]) => window['go']['main']['App']['StatApkFiles'](paths)
+// @ts-ignore
+export const InstallApksWithProgress = (paths: string[]) => window['go']['main']['App']['InstallApksWithProgress'](paths)
 
 // Shell
 // @ts-ignore

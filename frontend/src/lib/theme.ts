@@ -36,6 +36,13 @@ export const THEMES: ThemeDef[] = [
   { id: 'ocean', label: 'Ocean', hint: 'Muted blue-grey', swatch: ['#2b303b', '#343d46', '#8fa1b3', '#c0c5ce'] },
   { id: 'kokuban', label: 'Kokuban', hint: 'Chalkboard green', swatch: ['#1f3526', '#274030', '#f2e9c8', '#f0f0e8'] },
   { id: 'mono-cyan', label: 'Mono Cyan', hint: 'Monochrome cyan glow', swatch: ['#081414', '#0e1f1f', '#00d0d0', '#c8f0f0'] },
+  // More additions
+  { id: 'nord', label: 'Nord', hint: 'Arctic blue-grey with frost green', swatch: ['#2e3440', '#3b4252', '#a3be8c', '#eceff4'] },
+  { id: 'tokyo-night', label: 'Tokyo Night', hint: 'Neon purple & blue on midnight', swatch: ['#1a1b26', '#16161e', '#9ece6a', '#c0caf5'] },
+  { id: 'solarized-dark', label: 'Solarized Dark', hint: 'Low-contrast teal & olive', swatch: ['#002b36', '#073642', '#859900', '#93a1a1'] },
+  { id: 'solarized-light', label: 'Solarized Light', hint: 'Low-contrast teal & olive, light', swatch: ['#fdf6e3', '#eee8d5', '#859900', '#586e75'] },
+  { id: 'rose-pine', label: 'Rosé Pine', hint: 'Elegant muted purple & rose', swatch: ['#191724', '#1f1d2e', '#9ccfd8', '#e0def4'] },
+  { id: 'everforest', label: 'Everforest', hint: 'Warm forest green, easy on the eyes', swatch: ['#2d353b', '#343f44', '#a7c080', '#d3c6aa'] },
 ]
 
 export type Theme = string

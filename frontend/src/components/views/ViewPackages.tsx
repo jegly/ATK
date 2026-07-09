@@ -1,20 +1,23 @@
 import { useState, useCallback, useMemo } from 'react'
-import { Package, RefreshCw, Search, Download, Trash2, Power, PowerOff, X } from 'lucide-react'
+import { Package, RefreshCw, Search, Download, Trash2, Power, PowerOff, RotateCcw, X } from 'lucide-react'
 import {
   ListPackages, UninstallMultiplePackages, DisableMultiplePackages,
-  EnableMultiplePackages, PullApk, ClearData, ForceStopPackage,
-  SelectFileForInstall, InstallPackage
+  EnableMultiplePackages, RestoreMultiplePackages, PullApk, ClearData, ForceStopPackage,
+  SelectFileForInstall, InstallPackage,
+  UninstallPackage, DisablePackage, EnablePackage, RestorePackage
 } from '../../lib/wails'
 import { notify } from '../../lib/notify'
 import { ensureDangerUnlocked } from '../../lib/applock'
 import type { PackageInfo } from '../../lib/types'
 
 type Filter = 'all' | 'user' | 'system'
+type StateFilter = 'all' | 'enabled' | 'disabled' | 'uninstalled'
 
 export default function ViewPackages() {
   const [packages, setPackages] = useState<PackageInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState<Filter>('user')
+  const [stateFilter, setStateFilter] = useState<StateFilter>('all')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [activeCtx, setActiveCtx] = useState<string | null>(null)
@@ -36,8 +39,16 @@ export default function ViewPackages() {
   const filtered = useMemo(() =>
     packages
       .filter(p => p.packageName.toLowerCase().includes(search.toLowerCase()))
+      .filter(p => {
+        switch (stateFilter) {
+          case 'enabled':     return p.isInstalled && p.isEnabled
+          case 'disabled':    return p.isInstalled && !p.isEnabled
+          case 'uninstalled': return !p.isInstalled
+          default:            return true
+        }
+      })
       .sort((a, b) => a.packageName.localeCompare(b.packageName)),
-    [packages, search]
+    [packages, search, stateFilter]
   )
 
   const toggleSelect = (pkg: string) => {
@@ -120,6 +131,67 @@ export default function ViewPackages() {
     setActiveCtx(null)
   }
 
+  // Single-package state changes, mirroring the batch toolbar actions but
+  // reachable per-row from the "..." menu without needing to select first.
+  const handleUninstall = async (pkg: string) => {
+    setActiveCtx(null)
+    if (!confirm(`Uninstall ${pkg} for the current user?`)) return
+    if (!(await ensureDangerUnlocked())) return
+    const id = notify.loading(`Uninstalling ${pkg}...`)
+    try {
+      const out = await UninstallPackage(pkg)
+      notify.dismiss(id)
+      notify.success(out)
+      load(filter)
+    } catch (e: any) {
+      notify.dismiss(id)
+      notify.error(e)
+    }
+  }
+
+  const handleDisable = async (pkg: string) => {
+    setActiveCtx(null)
+    if (!(await ensureDangerUnlocked())) return
+    const id = notify.loading(`Disabling ${pkg}...`)
+    try {
+      const out = await DisablePackage(pkg)
+      notify.dismiss(id)
+      notify.success(out)
+      load(filter)
+    } catch (e: any) {
+      notify.dismiss(id)
+      notify.error(e)
+    }
+  }
+
+  const handleEnable = async (pkg: string) => {
+    setActiveCtx(null)
+    const id = notify.loading(`Enabling ${pkg}...`)
+    try {
+      const out = await EnablePackage(pkg)
+      notify.dismiss(id)
+      notify.success(out)
+      load(filter)
+    } catch (e: any) {
+      notify.dismiss(id)
+      notify.error(e)
+    }
+  }
+
+  const handleRestore = async (pkg: string) => {
+    setActiveCtx(null)
+    const id = notify.loading(`Restoring ${pkg}...`)
+    try {
+      const out = await RestorePackage(pkg)
+      notify.dismiss(id)
+      notify.success(out)
+      load(filter)
+    } catch (e: any) {
+      notify.dismiss(id)
+      notify.error(e)
+    }
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
@@ -154,6 +226,18 @@ export default function ViewPackages() {
           />
         </div>
 
+        <select
+          className="input text-xs"
+          value={stateFilter}
+          onChange={e => setStateFilter(e.target.value as StateFilter)}
+          title="Filter by state"
+        >
+          <option value="all">All states</option>
+          <option value="enabled">Enabled</option>
+          <option value="disabled">Disabled</option>
+          <option value="uninstalled">Uninstalled</option>
+        </select>
+
         <div className="w-px h-5 bg-bg-border" />
 
         <button onClick={handleInstall} className="btn-primary text-xs">
@@ -170,6 +254,9 @@ export default function ViewPackages() {
             </button>
             <button onClick={() => batchOp('Enabling', EnableMultiplePackages)} className="btn-ghost text-xs">
               <Power size={13} /> Enable ({selected.size})
+            </button>
+            <button onClick={() => batchOp('Restoring', RestoreMultiplePackages)} className="btn-ghost text-xs text-accent-green">
+              <RotateCcw size={13} /> Restore ({selected.size})
             </button>
           </>
         )}
@@ -219,9 +306,13 @@ export default function ViewPackages() {
             />
             <span className="mono text-text-secondary truncate">{pkg.packageName}</span>
             <span>
-              <span className={pkg.isEnabled ? 'badge-green' : 'badge-red'}>
-                {pkg.isEnabled ? 'enabled' : 'disabled'}
-              </span>
+              {!pkg.isInstalled ? (
+                <span className="badge-gray" title="Present on the system image but uninstalled for this user (e.g. via Canta/Shizuku)">uninstalled</span>
+              ) : (
+                <span className={pkg.isEnabled ? 'badge-green' : 'badge-red'}>
+                  {pkg.isEnabled ? 'enabled' : 'disabled'}
+                </span>
+              )}
             </span>
             <div className="relative">
               <button
@@ -232,15 +323,42 @@ export default function ViewPackages() {
               </button>
               {activeCtx === pkg.packageName && (
                 <div className="absolute right-0 top-full mt-1 bg-bg-raised border border-bg-border rounded shadow-xl z-10 min-w-[160px]">
-                  <button onClick={() => handlePullApk(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-surface">
-                    <Download size={12} /> Pull APK
-                  </button>
-                  <button onClick={() => handleClearData(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-warn hover:bg-bg-surface">
-                    <X size={12} /> Clear Data
-                  </button>
-                  <button onClick={() => handleForceStop(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-danger hover:bg-bg-surface">
-                    <PowerOff size={12} /> Force Stop
-                  </button>
+                  {!pkg.isInstalled && (
+                    <>
+                      <button onClick={() => handleRestore(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-accent-green hover:bg-bg-surface">
+                        <RotateCcw size={12} /> Restore
+                      </button>
+                      <button onClick={() => handleDisable(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-warn hover:bg-bg-surface">
+                        <PowerOff size={12} /> Disable
+                      </button>
+                    </>
+                  )}
+                  {pkg.isInstalled && (
+                    <>
+                      <button onClick={() => handlePullApk(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-surface">
+                        <Download size={12} /> Pull APK
+                      </button>
+                      <button onClick={() => handleClearData(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-warn hover:bg-bg-surface">
+                        <X size={12} /> Clear Data
+                      </button>
+                      <button onClick={() => handleForceStop(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-danger hover:bg-bg-surface">
+                        <PowerOff size={12} /> Force Stop
+                      </button>
+                      <div className="h-px bg-bg-border my-1" />
+                      {pkg.isEnabled ? (
+                        <button onClick={() => handleDisable(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-warn hover:bg-bg-surface">
+                          <PowerOff size={12} /> Disable
+                        </button>
+                      ) : (
+                        <button onClick={() => handleEnable(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-accent-green hover:bg-bg-surface">
+                          <Power size={12} /> Enable
+                        </button>
+                      )}
+                      <button onClick={() => handleUninstall(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-danger hover:bg-bg-surface">
+                        <Trash2 size={12} /> Uninstall
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

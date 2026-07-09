@@ -32,16 +32,19 @@ export const TOGGLEABLE_VIEWS: { view: string; label: string }[] = [
   { view: 'files', label: 'Files' },
   { view: 'mirror', label: 'Screen Mirror' },
   { view: 'packages', label: 'Packages' },
+  { view: 'apkinstaller', label: 'APK Installer' },
   { view: 'debloater', label: 'Debloater' },
   { view: 'shell', label: 'Shell' },
   { view: 'logcat', label: 'Logcat' },
   { view: 'appinspect', label: 'App Inspector' },
+  { view: 'intentlab', label: 'Intent Lab' },
   { view: 'apkaudit', label: 'APK Audit' },
   { view: 'certs', label: 'Certificates' },
   { view: 'backup', label: 'Backup' },
   { view: 'props', label: 'Prop Editor' },
   { view: 'utilities', label: 'Utilities' },
   { view: 'flasher', label: 'Flasher' },
+  { view: 'gsiloader', label: 'GSI Loader' },
 ]
 
 export function getHiddenViews(): string[] {

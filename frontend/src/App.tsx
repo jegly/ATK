@@ -5,10 +5,12 @@ import TitleBar from './components/layout/TitleBar'
 import DismissibleBanner from './components/DismissibleBanner'
 import LockGate from './components/LockGate'
 import DangerGate from './components/DangerGate'
+import QuitGate from './components/QuitGate'
 import ViewDashboard    from './components/views/ViewDashboard'
 import ViewFiles        from './components/views/ViewFiles'
 import ViewScreenMirror from './components/views/ViewScreenMirror'
 import ViewPackages     from './components/views/ViewPackages'
+import ViewApkInstaller from './components/views/ViewApkInstaller'
 import ViewDebloater    from './components/views/ViewDebloater'
 import ViewShell        from './components/views/ViewShell'
 import ViewLogcat       from './components/views/ViewLogcat'
@@ -55,6 +57,7 @@ export default function App() {
       case 'files':        return <ViewFiles />
       case 'mirror':       return <ViewScreenMirror />
       case 'packages':     return <ViewPackages />
+      case 'apkinstaller': return <ViewApkInstaller />
       case 'debloater':    return <ViewDebloater />
       case 'shell':        return <ViewShell />
       case 'logcat':       return <ViewLogcat />
@@ -88,6 +91,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-full bg-bg-base overflow-hidden rounded-[10px]">
       <DangerGate />
+      <QuitGate />
       <TitleBar />
       <div className={`flex-1 flex overflow-hidden ${sidebarPos === 'left' ? 'flex-row' : 'flex-col'}`}>
         {sidebarPos !== 'bottom' && sidebar}

@@ -35,25 +35,40 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 	}
 
 	var wg sync.WaitGroup
-	var allPkgs, disabledPkgs []string
+	var allPkgs, installedPkgs, disabledPkgs []string
 	var errAll error
 
-	wg.Add(2)
+	wg.Add(3)
 
-	// Membership = the UNFILTERED list for this category. Every installed package
-	// shows up here regardless of state. The old approach unioned `-e` (enabled)
-	// and `-d` (disabled), but a ROM parks some apps in states (e.g.
-	// DISABLED_UNTIL_USED) that neither filter reports, so system apps silently
-	// went missing from App Inspector / APK Audit. Plain `pm list packages` is a
-	// strict superset, so nothing is dropped.
+	// Membership = the UNFILTERED superset for this category, via `-u`. Every
+	// package that's ever been on the system image shows up here, INCLUDING
+	// ones uninstalled for user 0 (Canta/Shizuku's "uninstall" of a system app
+	// is really `pm uninstall --user 0`, which leaves the APK on disk but drops
+	// it from a plain `pm list packages`). The old approach queried without
+	// `-u`, which is why per-user-uninstalled system apps were invisible in
+	// Packages / Debloater / the App Inspector picker even though they were
+	// still physically present on the device.
 	go func() {
 		defer wg.Done()
-		output, err := a.runAdbShell(buildArgs()...)
+		output, err := a.runAdbShell(buildArgs("-u")...)
 		if err != nil {
 			errAll = err
 			return
 		}
 		allPkgs = parse(output)
+	}()
+
+	// Without `-u`: only packages actually installed for user 0 right now. Used
+	// to tell "uninstalled for user" apart from enabled/disabled — `-d`/`-e`
+	// alone can't do that, since a per-user-uninstalled package appears in
+	// neither.
+	go func() {
+		defer wg.Done()
+		output, err := a.runAdbShell(buildArgs()...)
+		if err != nil {
+			return
+		}
+		installedPkgs = parse(output)
 	}()
 
 	// `-d` is used only to flag the disabled badge. Some ROMs restrict it; that's
@@ -73,6 +88,10 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 		return nil, fmt.Errorf("failed to list packages: %w", errAll)
 	}
 
+	installed := make(map[string]bool, len(installedPkgs))
+	for _, p := range installedPkgs {
+		installed[p] = true
+	}
 	disabled := make(map[string]bool, len(disabledPkgs))
 	for _, p := range disabledPkgs {
 		disabled[p] = true
@@ -85,7 +104,14 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 			continue
 		}
 		seen[p] = true
-		packages = append(packages, PackageInfo{PackageName: p, IsEnabled: !disabled[p]})
+		isInstalled := installed[p]
+		// A package not installed for the user can't run either way, so it's
+		// never reported as enabled regardless of its internal enabled flag.
+		packages = append(packages, PackageInfo{
+			PackageName: p,
+			IsInstalled: isInstalled,
+			IsEnabled:   isInstalled && !disabled[p],
+		})
 	}
 	return packages, nil
 }

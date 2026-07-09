@@ -37,6 +37,15 @@ export interface FileEntry {
 export interface PackageInfo {
   packageName: string
   isEnabled: boolean
+  // False when the package is present on the system image but uninstalled for
+  // user 0 (e.g. via Canta/Shizuku, which runs `pm uninstall --user 0`).
+  isInstalled: boolean
+}
+
+export interface ApkFileInfo {
+  path: string
+  name: string
+  size: number
 }
 
 // Relationship kinds mined (in Go) from a log line for the visual map.
@@ -251,6 +260,7 @@ export type View =
   | 'files'
   | 'mirror'
   | 'packages'
+  | 'apkinstaller'
   | 'debloater'
   | 'shell'
   | 'logcat'

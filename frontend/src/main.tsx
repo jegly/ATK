@@ -7,13 +7,16 @@ import '@fontsource/ibm-plex-sans/500.css'
 import '@fontsource/ibm-plex-sans/600.css'
 import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/500.css'
+import './styles/fonts.css'
 import './styles/global.css'
 import { applyTheme, getTheme } from './lib/theme'
 import { applyAppearance } from './lib/appearance'
+import { installScrollbarDragFix } from './lib/scrollfix'
 
 // Apply the saved theme + custom accent/font before first paint to avoid a flash.
 applyTheme(getTheme())
 applyAppearance()
+installScrollbarDragFix()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

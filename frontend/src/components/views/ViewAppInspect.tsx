@@ -10,8 +10,11 @@ const GRADE_COLOR: Record<string, string> = {
   A: 'text-accent-green', B: 'text-accent-green', C: 'text-warn', D: 'text-warn', F: 'text-danger',
 }
 
+type StateFilter = 'all' | 'enabled' | 'disabled' | 'uninstalled'
+
 export default function ViewAppInspect() {
   const [search, setSearch]         = useState('')
+  const [stateFilter, setStateFilter] = useState<StateFilter>('all')
   const [packages, setPackages]     = useState<PackageInfo[]>([])
   const [pkgsLoaded, setPkgsLoaded] = useState(false)
   const [loading, setLoading]       = useState(false)
@@ -101,9 +104,16 @@ export default function ViewAppInspect() {
     }
   }
 
-  const filtered = packages.filter(p =>
-    p.packageName.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = packages
+    .filter(p => p.packageName.toLowerCase().includes(search.toLowerCase()))
+    .filter(p => {
+      switch (stateFilter) {
+        case 'enabled':     return p.isInstalled && p.isEnabled
+        case 'disabled':    return p.isInstalled && !p.isEnabled
+        case 'uninstalled': return !p.isInstalled
+        default:            return true
+      }
+    })
 
   const tabs = [
     { id: 'overview',     label: 'Overview',     icon: <Package size={12} /> },
@@ -135,6 +145,17 @@ export default function ViewAppInspect() {
           <button onClick={() => inspect(search)} disabled={!search || loading} className="btn-primary text-xs w-full justify-center">
             {loading ? 'Inspecting...' : 'Inspect'}
           </button>
+          <select
+            className="input text-xs w-full"
+            value={stateFilter}
+            onChange={e => setStateFilter(e.target.value as StateFilter)}
+            title="Filter by state"
+          >
+            <option value="all">All states</option>
+            <option value="enabled">Enabled</option>
+            <option value="disabled">Disabled</option>
+            <option value="uninstalled">Uninstalled</option>
+          </select>
         </div>
 
         <div className="flex-1 overflow-auto">
@@ -145,7 +166,9 @@ export default function ViewAppInspect() {
               className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-bg-raised hover:text-text-primary transition-colors border-b border-bg-border/30"
             >
               <p className="truncate mono">{p.packageName}</p>
-              <p className={p.isEnabled ? 'text-accent-green' : 'text-danger'}>{p.isEnabled ? 'enabled' : 'disabled'}</p>
+              <p className={!p.isInstalled ? 'text-text-muted' : p.isEnabled ? 'text-accent-green' : 'text-danger'}>
+                {!p.isInstalled ? 'uninstalled' : p.isEnabled ? 'enabled' : 'disabled'}
+              </p>
             </button>
           ))}
           {!pkgsLoaded && (
