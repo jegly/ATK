@@ -9,7 +9,7 @@ require (
 	github.com/ncruces/zenity v0.10.14
 	github.com/ulikunitz/xz v0.5.15
 	github.com/wailsapp/wails/v2 v2.12.0
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 )
 
 require (
