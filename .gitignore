@@ -48,3 +48,9 @@ ATK_*.log
 /backend_logcatpatterns.go
 /frontend/src/lib/logcatgraph.ts
 /frontend/src/components/views/LogcatMap.tsx
+
+# snapcraft
+*.snap
+parts/
+stage/
+prime/

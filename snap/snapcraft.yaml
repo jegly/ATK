@@ -1,0 +1,125 @@
+name: atk
+title: ATK · Android Toolkit
+base: core26
+version: '1.3.0'
+summary: All-in-one ADB and fastboot command centre for Android power users
+description: |
+  **ATK** (Android Toolkit) is an all-in-one ADB and fastboot command centre
+  for power users, security researchers and bug hunters, built with Go and
+  React via Wails.
+
+  * Mirror and control your phone in a detachable window (scrcpy)
+  * Browse files on the device and your computer, with an image viewer
+  * Root and flash Pixels; firmware, GSI and payload tools
+  * Audit APKs for trackers and secrets
+  * Debloat over 5,000 packages
+  * Live logcat with pattern matching, and a real-time system map
+
+  This snap bundles its own adb, fastboot and scrcpy. Connect USB access once
+  after installing:
+
+      sudo snap connect atk:adb-support
+
+  Your phone will ask you to authorise this computer again the first time,
+  because the snap keeps its own adb keys.
+license: GPL-3.0
+website: https://github.com/jegly/ATK
+source-code: https://github.com/jegly/ATK
+issues: https://github.com/jegly/ATK/issues
+contact: https://github.com/jegly/ATK/issues
+icon: build/appicon.png
+grade: stable
+confinement: strict
+
+platforms:
+  amd64:
+
+# Built on the host in destructive mode (26.04), hence core26. snapcraft's
+# gnome extension doesn't support core26 yet, so the GTK/WebKit stack is
+# staged below and wired up by snap/local/atk-launch.
+
+layout:
+  # WebKit spawns its WebProcess/NetworkProcess helpers from a compiled-in path.
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/webkit2gtk-4.1:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/webkit2gtk-4.1
+
+apps:
+  atk:
+    command: bin/atk-launch
+    desktop: usr/share/applications/atk.desktop
+    extensions: [gpu]
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - unity7            # tray icon
+      - gsettings
+      - audio-playback    # scrcpy audio forwarding
+      - network           # wireless adb
+      - network-bind      # adb server on localhost:5037
+      - home              # pull/push files, APKs, firmware images
+      - removable-media   # firmware on external drives (not auto-connected)
+      - adb-support       # USB access to Android devices (not auto-connected)
+
+parts:
+  atk:
+    plugin: dump
+    source: https://github.com/jegly/ATK/releases/download/v1.3.0/atk_1.3.0_amd64.deb
+    source-type: deb
+    source-checksum: sha256/f06a26ca6a5d2d63598ba963719bdb60daa109a6c1336cb0a1847a5b02233364
+    # The deb's Depends plus the tools ATK finds on PATH. A strict snap can't
+    # run the host's adb/fastboot/scrcpy, so it ships its own.
+    stage-packages:
+      - libgtk-3-0t64
+      - libwebkit2gtk-4.1-0
+      - adb
+      - fastboot
+      - scrcpy
+      - zenity            # file pickers (ncruces/zenity runs the binary)
+      - procps            # pkill, used to stop scrcpy
+      - librsvg2-common
+      - adwaita-icon-theme
+      - dconf-gsettings-backend
+      - fontconfig-config
+      - xkb-data          # libxkbcommon keymaps; GTK segfaults without them
+    override-build: |
+      craftctl default
+      sed -i -e 's|^Exec=.*|Exec=atk|' \
+             -e 's|^Icon=.*|Icon=${SNAP}/meta/gui/icon.png|' \
+        "$CRAFT_PART_INSTALL/usr/share/applications/atk.desktop"
+      rm -f "$CRAFT_PART_INSTALL/usr/bin/atk"   # deb symlink to /opt/atk/ATK
+
+  # Ubuntu's scrcpy package omits the on-device server (its postinst downloads
+  # it). Must match the staged client version exactly.
+  scrcpy-server:
+    plugin: dump
+    source: https://github.com/Genymobile/scrcpy/releases/download/v3.3.4/scrcpy-server-v3.3.4
+    source-type: file
+    source-checksum: sha256/8588238c9a5a00aa542906b6ec7e6d5541d9ffb9b5d0f6e1bc0e365e2303079e
+    organize:
+      scrcpy-server-v3.3.4: usr/share/scrcpy/scrcpy-server
+
+  runtime:
+    after: [atk, scrcpy-server]
+    plugin: dump
+    source: snap/local
+    organize:
+      atk-launch: bin/atk-launch
+    build-packages:
+      - libglib2.0-bin
+      - libgdk-pixbuf2.0-bin
+    override-prime: |
+      craftctl default
+      # GTK aborts without compiled schemas; snap has no post-install hook for it.
+      glib-compile-schemas "$CRAFT_PRIME/usr/share/glib-2.0/schemas"
+      # Pixbuf loader cache holds absolute paths — generate against the primed
+      # loaders, then point it at the installed location.
+      LOADERS="usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0/2.10.0"
+      if [ -d "$CRAFT_PRIME/$LOADERS/loaders" ]; then
+        GDK_PIXBUF_MODULEDIR="$CRAFT_PRIME/$LOADERS/loaders" \
+          "/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders" \
+          | sed "s|$CRAFT_PRIME|/snap/$CRAFT_PROJECT_NAME/current|g" \
+          > "$CRAFT_PRIME/$LOADERS/loaders.cache"
+      fi
