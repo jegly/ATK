@@ -1,4 +1,4 @@
-name: atk
+name: android-tool-kit
 title: ATK · Android Toolkit
 base: core26
 version: '1.3.0'
@@ -18,7 +18,7 @@ description: |
   This snap bundles its own adb, fastboot and scrcpy. Connect USB access once
   after installing:
 
-      sudo snap connect atk:adb-support
+      sudo snap connect android-tool-kit:adb-support
 
   Your phone will ask you to authorise this computer again the first time,
   because the snap keeps its own adb keys.
@@ -44,7 +44,7 @@ layout:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/webkit2gtk-4.1
 
 apps:
-  atk:
+  android-tool-kit:
     command: bin/atk-launch
     desktop: usr/share/applications/atk.desktop
     extensions: [gpu]
@@ -86,7 +86,7 @@ parts:
       - xkb-data          # libxkbcommon keymaps; GTK segfaults without them
     override-build: |
       craftctl default
-      sed -i -e 's|^Exec=.*|Exec=atk|' \
+      sed -i -e 's|^Exec=.*|Exec=android-tool-kit|' \
              -e 's|^Icon=.*|Icon=${SNAP}/meta/gui/icon.png|' \
         "$CRAFT_PART_INSTALL/usr/share/applications/atk.desktop"
       rm -f "$CRAFT_PART_INSTALL/usr/bin/atk"   # deb symlink to /opt/atk/ATK
