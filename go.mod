@@ -8,7 +8,7 @@ require (
 	github.com/godbus/dbus/v5 v5.2.3
 	github.com/ncruces/zenity v0.10.15
 	github.com/ulikunitz/xz v0.5.17
-	github.com/wailsapp/wails/v2 v2.12.0
+	github.com/wailsapp/wails/v2 v2.16.0
 	golang.org/x/crypto v0.58.0
 )
 
