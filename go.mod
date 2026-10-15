@@ -7,7 +7,7 @@ require (
 	github.com/avast/apkverifier v0.0.0-20260410045523-e2781ccbddc8
 	github.com/godbus/dbus/v5 v5.2.3
 	github.com/ncruces/zenity v0.10.15
-	github.com/ulikunitz/xz v0.5.15
+	github.com/ulikunitz/xz v0.5.17
 	github.com/wailsapp/wails/v2 v2.12.0
 	golang.org/x/crypto v0.52.0
 )
