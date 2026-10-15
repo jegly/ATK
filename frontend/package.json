@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@types/three": "^0.184.1",
     "lucide-react": "^1.55.0",
     "pixi.js": "^8.18.1",
