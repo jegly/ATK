@@ -1,6 +1,6 @@
 module github.com/jegly/ATK
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/avast/apkparser v0.0.0-20260423123151-7fcaee440f68
@@ -9,7 +9,7 @@ require (
 	github.com/ncruces/zenity v0.10.15
 	github.com/ulikunitz/xz v0.5.17
 	github.com/wailsapp/wails/v2 v2.12.0
-	golang.org/x/crypto v0.52.0
+	golang.org/x/crypto v0.58.0
 )
 
 require (
@@ -42,7 +42,7 @@ require (
 	github.com/wailsapp/go-webview2 v1.0.22 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/image v0.44.0 // indirect
-	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )
