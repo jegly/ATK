@@ -17,7 +17,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sonner": "^2.0.8",
-    "three": "^0.184.0"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.28",
