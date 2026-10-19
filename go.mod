@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/avast/apkparser v0.0.0-20260423123151-7fcaee440f68
 	github.com/avast/apkverifier v0.0.0-20260410045523-e2781ccbddc8
-	github.com/godbus/dbus/v5 v5.2.3
+	github.com/godbus/dbus/v5 v5.2.4
 	github.com/ncruces/zenity v0.10.15
 	github.com/ulikunitz/xz v0.5.17
 	github.com/wailsapp/wails/v2 v2.16.0
