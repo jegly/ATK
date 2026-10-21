@@ -14,7 +14,7 @@
     "@types/three": "^0.186.0",
     "lucide-react": "^1.59.0",
     "pixi.js": "^8.22.0",
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "react-dom": "^19.3.0",
     "sonner": "^2.0.8",
     "three": "^0.186.1"
