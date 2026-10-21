@@ -15,13 +15,13 @@
     "lucide-react": "^1.59.0",
     "pixi.js": "^8.22.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.0",
+    "react-dom": "^19.3.1",
     "sonner": "^2.0.8",
     "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^18.3.7",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "6",
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.30",
