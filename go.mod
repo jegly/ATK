@@ -8,7 +8,7 @@ require (
 	github.com/godbus/dbus/v5 v5.2.3
 	github.com/ncruces/zenity v0.10.15
 	github.com/ulikunitz/xz v0.5.17
-	github.com/wailsapp/wails/v2 v2.16.0
+	github.com/wailsapp/wails/v2 v2.17.0
 	golang.org/x/crypto v0.58.0
 )
 
@@ -17,6 +17,7 @@ require (
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/dchest/jsmin v1.0.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
@@ -40,7 +41,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.22 // indirect
-	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/image v0.44.0 // indirect
 	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
