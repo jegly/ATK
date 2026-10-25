@@ -156,7 +156,7 @@ export default function ViewScreenMirror() {
             aria-checked={opts.detached}
             className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${opts.detached ? 'bg-accent-green' : 'bg-bg-border'}`}
           >
-            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${opts.detached ? 'left-[18px]' : 'left-0.5'}`} />
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${opts.detached ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
       </div>
@@ -241,7 +241,7 @@ const SHORTCUTS: { action: string; keys: string; alt?: string }[] = [
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="px-1.5 py-0.5 rounded bg-bg-raised border border-bg-border mono text-[10px] text-text-secondary whitespace-nowrap">
+    <kbd className="px-1.5 py-0.5 rounded-sm bg-bg-raised border border-bg-border mono text-[10px] text-text-secondary whitespace-nowrap">
       {children}
     </kbd>
   )
@@ -274,7 +274,7 @@ function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange:
         aria-checked={on}
         className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${on ? 'bg-accent-green' : 'bg-bg-border'}`}
       >
-        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
+        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
       </button>
     </div>
   )

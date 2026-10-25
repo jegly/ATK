@@ -1,463 +1,615 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-/* ============================================================
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@theme {
+  --color-bg-base: rgb(var(--bg-base));
+  --color-bg-surface: rgb(var(--bg-surface));
+  --color-bg-raised: rgb(var(--bg-raised));
+  --color-bg-border: rgb(var(--bg-border));
+
+  --color-accent-green: rgb(var(--accent-green));
+  --color-accent-dim: rgb(var(--accent-dim));
+  --color-accent-muted: rgb(var(--accent-muted));
+
+  --color-text-primary: rgb(var(--text-primary));
+  --color-text-secondary: rgb(var(--text-secondary));
+  --color-text-muted: rgb(var(--text-muted));
+
+  --color-danger: rgb(var(--danger));
+  --color-warn: rgb(var(--warn));
+
+  /* Tailwind v4 retuned its default palette (oklch). Pin the v3 values for the
+     shades this UI uses so colours render exactly as they did on v3. */
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-cyan-400: #22d3ee;
+  --color-pink-300: #f9a8d4;
+  --color-pink-500: #ec4899;
+  --color-purple-500: #a855f7;
+  --color-red-300: #fca5a5;
+  --color-red-500: #ef4444;
+  --color-red-900: #7f1d1d;
+  --color-yellow-400: #facc15;
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+/* Other v3 preflight behaviour that v4 dropped. */
+@layer base {
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  [type='search'] {
+    appearance: textfield;
+    outline-offset: -2px;
+  }
+}
+
+/* Tailwind v4 preflight made buttons `cursor: default`; keep v3's pointer. */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility card {
+  @apply bg-bg-surface border border-bg-border rounded-lg;
+}
+
+@utility btn {
+  @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm font-medium
+           transition-all duration-150 cursor-pointer select-none
+           disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+@utility btn-primary {
+  @apply btn bg-accent-green text-bg-base hover:bg-accent-dim active:scale-95;
+}
+
+@utility btn-ghost {
+  @apply btn bg-transparent text-text-secondary border border-bg-border
+           hover:bg-bg-raised hover:text-text-primary active:scale-95;
+}
+
+@utility btn-danger {
+  @apply btn bg-danger/10 text-danger border border-danger/20
+           hover:bg-danger/20 active:scale-95;
+}
+
+@utility btn-warn {
+  @apply btn bg-warn/10 text-warn border border-warn/20
+           hover:bg-warn/20 active:scale-95;
+}
+
+@utility input {
+  @apply bg-bg-raised border border-bg-border rounded-sm px-3 py-1.5
+           text-sm text-text-primary placeholder:text-text-muted
+           focus:outline-hidden focus:border-accent-green/50
+           transition-colors duration-150 w-full;
+}
+
+@utility badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium;
+}
+
+@utility badge-green {
+  @apply badge bg-accent-green/10 text-accent-green;
+}
+
+@utility badge-red {
+  @apply badge bg-danger/10 text-danger;
+}
+
+@utility badge-yellow {
+  @apply badge bg-warn/10 text-warn;
+}
+
+@utility badge-gray {
+  @apply badge bg-bg-border text-text-secondary;
+}
+
+@utility section-title {
+  @apply text-xs font-medium uppercase tracking-widest text-text-muted;
+}
+
+@utility map-btn {
+  /* compact icon button for the Logcat visual map overlays */
+  @apply inline-flex items-center justify-center h-7 w-7 rounded-sm bg-black/40
+           text-text-secondary border border-bg-border hover:bg-bg-raised
+           hover:text-text-primary transition-colors cursor-pointer;
+}
+
+@utility mono {
+  @apply font-mono text-sm;
+}
+
+@layer utilities {
+  /* ============================================================
    Theme palettes — switch via data-theme on <html>.
    Values are RGB channels so Tailwind opacity modifiers work
    (e.g. bg-accent-green/5 -> rgb(var(--accent-green) / 0.05)).
    ============================================================ */
-:root,
-:root[data-theme="dark"] {
-  --bg-base: 10 10 15;
-  --bg-surface: 17 17 24;
-  --bg-raised: 24 24 31;
-  --bg-border: 37 37 48;
-  --accent-green: 0 255 136;
-  --accent-dim: 0 204 106;
-  --accent-muted: 0 51 34;
-  --text-primary: 232 232 240;
-  --text-secondary: 136 136 170;
-  --text-muted: 68 68 90;
-  --danger: 255 68 68;
-  --warn: 255 170 0;
-  --scrollbar-hover: 51 51 68;
-}
+  :root,
+  :root[data-theme='dark'] {
+    --bg-base: 10 10 15;
+    --bg-surface: 17 17 24;
+    --bg-raised: 24 24 31;
+    --bg-border: 37 37 48;
+    --accent-green: 0 255 136;
+    --accent-dim: 0 204 106;
+    --accent-muted: 0 51 34;
+    --text-primary: 232 232 240;
+    --text-secondary: 136 136 170;
+    --text-muted: 68 68 90;
+    --danger: 255 68 68;
+    --warn: 255 170 0;
+    --scrollbar-hover: 51 51 68;
+  }
 
-/* Catppuccin Frappé — soft pastels on a dark blue-grey base */
-:root[data-theme="frappe"] {
-  --bg-base: 48 52 70;           /* base     #303446 */
-  --bg-surface: 41 44 60;        /* mantle   #292c3c */
-  --bg-raised: 65 69 89;         /* surface0 #414559 */
-  --bg-border: 81 87 109;        /* surface1 #51576d */
-  --accent-green: 166 209 137;   /* green    #a6d189 */
-  --accent-dim: 140 180 115;     /* darker green for hovers */
-  --accent-muted: 65 69 89;      /* surface0 */
-  --text-primary: 198 208 245;   /* text     #c6d0f5 */
-  --text-secondary: 165 173 206; /* subtext0 #a5adce */
-  --text-muted: 115 121 148;     /* overlay0 #737994 */
-  --danger: 231 130 132;         /* red      #e78284 */
-  --warn: 229 200 144;           /* yellow   #e5c890 */
-  --scrollbar-hover: 98 104 128; /* surface2 #626880 */
-}
+  /* Catppuccin Frappé — soft pastels on a dark blue-grey base */
+  :root[data-theme='frappe'] {
+    --bg-base: 48 52 70; /* base     #303446 */
+    --bg-surface: 41 44 60; /* mantle   #292c3c */
+    --bg-raised: 65 69 89; /* surface0 #414559 */
+    --bg-border: 81 87 109; /* surface1 #51576d */
+    --accent-green: 166 209 137; /* green    #a6d189 */
+    --accent-dim: 140 180 115; /* darker green for hovers */
+    --accent-muted: 65 69 89; /* surface0 */
+    --text-primary: 198 208 245; /* text     #c6d0f5 */
+    --text-secondary: 165 173 206; /* subtext0 #a5adce */
+    --text-muted: 115 121 148; /* overlay0 #737994 */
+    --danger: 231 130 132; /* red      #e78284 */
+    --warn: 229 200 144; /* yellow   #e5c890 */
+    --scrollbar-hover: 98 104 128; /* surface2 #626880 */
+  }
 
-/* Catppuccin Latte — soft pastels, true light mode */
-:root[data-theme="latte"] {
-  --bg-base: 239 241 245;        /* base     #eff1f5 */
-  --bg-surface: 230 233 239;     /* mantle   #e6e9ef */
-  --bg-raised: 220 224 232;      /* crust    #dce0e8 */
-  --bg-border: 204 208 218;      /* surface0 #ccd0da */
-  --accent-green: 64 160 43;     /* green    #40a02b */
-  --accent-dim: 50 130 35;       /* darker green for hovers */
-  --accent-muted: 204 227 192;   /* light green tint */
-  --text-primary: 76 79 105;     /* text     #4c4f69 */
-  --text-secondary: 108 111 133; /* subtext0 #6c6f85 */
-  --text-muted: 140 143 161;     /* overlay1 #8c8fa1 */
-  --danger: 210 15 57;           /* red      #d20f39 */
-  --warn: 223 142 29;            /* yellow   #df8e1d */
-  --scrollbar-hover: 188 192 204;/* surface1 #bcc0cc */
-}
+  /* Catppuccin Latte — soft pastels, true light mode */
+  :root[data-theme='latte'] {
+    --bg-base: 239 241 245; /* base     #eff1f5 */
+    --bg-surface: 230 233 239; /* mantle   #e6e9ef */
+    --bg-raised: 220 224 232; /* crust    #dce0e8 */
+    --bg-border: 204 208 218; /* surface0 #ccd0da */
+    --accent-green: 64 160 43; /* green    #40a02b */
+    --accent-dim: 50 130 35; /* darker green for hovers */
+    --accent-muted: 204 227 192; /* light green tint */
+    --text-primary: 76 79 105; /* text     #4c4f69 */
+    --text-secondary: 108 111 133; /* subtext0 #6c6f85 */
+    --text-muted: 140 143 161; /* overlay1 #8c8fa1 */
+    --danger: 210 15 57; /* red      #d20f39 */
+    --warn: 223 142 29; /* yellow   #df8e1d */
+    --scrollbar-hover: 188 192 204; /* surface1 #bcc0cc */
+  }
 
-/* Latte is the only light theme — theme its native form controls light. Set on
+  /* Latte is the only light theme — theme its native form controls light. Set on
    body (not :root) so it never tints the transparent document canvas. */
-:root[data-theme="latte"] body { color-scheme: light; }
+  :root[data-theme='latte'] body {
+    color-scheme: light;
+  }
 
-/* ============================================================
+  /* ============================================================
    Ported palettes from Notas — mapped onto the same RGB-channel
    tokens above. Switch via data-theme on <html>. Secondary tokens
    (accent-dim/-muted, text-muted, scrollbar-hover) are derived.
    ============================================================ */
-/* Dracula — ported from Notas (dark) */
-:root[data-theme="dracula"] {
-  --bg-base: 40 42 54;
-  --bg-surface: 52 55 70;
-  --bg-raised: 60 63 81;
-  --bg-border: 68 71 90;
-  --accent-green: 189 147 249;
-  --accent-dim: 155 121 204;
-  --accent-muted: 73 69 97;
-  --text-primary: 248 248 242;
-  --text-secondary: 158 168 199;
-  --text-muted: 99 105 126;
-  --danger: 255 85 85;
-  --warn: 241 250 140;
-  --scrollbar-hover: 142 151 179;
-}
+  /* Dracula — ported from Notas (dark) */
+  :root[data-theme='dracula'] {
+    --bg-base: 40 42 54;
+    --bg-surface: 52 55 70;
+    --bg-raised: 60 63 81;
+    --bg-border: 68 71 90;
+    --accent-green: 189 147 249;
+    --accent-dim: 155 121 204;
+    --accent-muted: 73 69 97;
+    --text-primary: 248 248 242;
+    --text-secondary: 158 168 199;
+    --text-muted: 99 105 126;
+    --danger: 255 85 85;
+    --warn: 241 250 140;
+    --scrollbar-hover: 142 151 179;
+  }
 
-/* Catppuccin Macchiato — ported from Notas (dark) */
-:root[data-theme="catppuccin-macchiato"] {
-  --bg-base: 36 39 58;
-  --bg-surface: 54 58 79;
-  --bg-raised: 73 77 100;
-  --bg-border: 73 77 100;
-  --accent-green: 198 160 246;
-  --accent-dim: 162 131 202;
-  --accent-muted: 76 73 104;
-  --text-primary: 202 211 245;
-  --text-secondary: 165 173 203;
-  --text-muted: 100 106 130;
-  --danger: 237 135 150;
-  --warn: 238 212 159;
-  --scrollbar-hover: 148 156 184;
-}
+  /* Catppuccin Macchiato — ported from Notas (dark) */
+  :root[data-theme='catppuccin-macchiato'] {
+    --bg-base: 36 39 58;
+    --bg-surface: 54 58 79;
+    --bg-raised: 73 77 100;
+    --bg-border: 73 77 100;
+    --accent-green: 198 160 246;
+    --accent-dim: 162 131 202;
+    --accent-muted: 76 73 104;
+    --text-primary: 202 211 245;
+    --text-secondary: 165 173 203;
+    --text-muted: 100 106 130;
+    --danger: 237 135 150;
+    --warn: 238 212 159;
+    --scrollbar-hover: 148 156 184;
+  }
 
-/* Catppuccin Mocha — ported from Notas (dark) */
-:root[data-theme="catppuccin-mocha"] {
-  --bg-base: 30 30 46;
-  --bg-surface: 49 50 68;
-  --bg-raised: 69 71 90;
-  --bg-border: 69 71 90;
-  --accent-green: 203 166 247;
-  --accent-dim: 166 136 203;
-  --accent-muted: 72 67 95;
-  --text-primary: 205 214 244;
-  --text-secondary: 166 173 200;
-  --text-muted: 98 102 123;
-  --danger: 243 139 168;
-  --warn: 249 226 175;
-  --scrollbar-hover: 149 155 180;
-}
+  /* Catppuccin Mocha — ported from Notas (dark) */
+  :root[data-theme='catppuccin-mocha'] {
+    --bg-base: 30 30 46;
+    --bg-surface: 49 50 68;
+    --bg-raised: 69 71 90;
+    --bg-border: 69 71 90;
+    --accent-green: 203 166 247;
+    --accent-dim: 166 136 203;
+    --accent-muted: 72 67 95;
+    --text-primary: 205 214 244;
+    --text-secondary: 166 173 200;
+    --text-muted: 98 102 123;
+    --danger: 243 139 168;
+    --warn: 249 226 175;
+    --scrollbar-hover: 149 155 180;
+  }
 
-/* Vintage Light — ported from Notas (light) */
-:root[data-theme="vintage-light"] {
-  --bg-base: 246 239 225;
-  --bg-surface: 239 229 208;
-  --bg-raised: 231 218 191;
-  --bg-border: 216 200 168;
-  --accent-green: 176 125 58;
-  --accent-dim: 144 102 48;
-  --accent-muted: 230 213 185;
-  --text-primary: 70 57 43;
-  --text-secondary: 122 106 85;
-  --text-muted: 184 172 155;
-  --danger: 161 77 58;
-  --warn: 176 125 58;
-  --scrollbar-hover: 139 123 100;
-}
-:root[data-theme="vintage-light"] body { color-scheme: light; }
+  /* Vintage Light — ported from Notas (light) */
+  :root[data-theme='vintage-light'] {
+    --bg-base: 246 239 225;
+    --bg-surface: 239 229 208;
+    --bg-raised: 231 218 191;
+    --bg-border: 216 200 168;
+    --accent-green: 176 125 58;
+    --accent-dim: 144 102 48;
+    --accent-muted: 230 213 185;
+    --text-primary: 70 57 43;
+    --text-secondary: 122 106 85;
+    --text-muted: 184 172 155;
+    --danger: 161 77 58;
+    --warn: 176 125 58;
+    --scrollbar-hover: 139 123 100;
+  }
+  :root[data-theme='vintage-light'] body {
+    color-scheme: light;
+  }
 
-/* Neon Tessera — ported from Notas (dark) */
-:root[data-theme="neon-tessera"] {
-  --bg-base: 10 14 20;
-  --bg-surface: 17 22 31;
-  --bg-raised: 22 29 41;
-  --bg-border: 29 39 53;
-  --accent-green: 0 229 255;
-  --accent-dim: 0 188 209;
-  --accent-muted: 14 53 65;
-  --text-primary: 216 230 242;
-  --text-secondary: 126 147 168;
-  --text-muted: 68 80 94;
-  --danger: 255 56 96;
-  --warn: 255 196 0;
-  --scrollbar-hover: 109 128 147;
-}
+  /* Neon Tessera — ported from Notas (dark) */
+  :root[data-theme='neon-tessera'] {
+    --bg-base: 10 14 20;
+    --bg-surface: 17 22 31;
+    --bg-raised: 22 29 41;
+    --bg-border: 29 39 53;
+    --accent-green: 0 229 255;
+    --accent-dim: 0 188 209;
+    --accent-muted: 14 53 65;
+    --text-primary: 216 230 242;
+    --text-secondary: 126 147 168;
+    --text-muted: 68 80 94;
+    --danger: 255 56 96;
+    --warn: 255 196 0;
+    --scrollbar-hover: 109 128 147;
+  }
 
-/* Adventure Time — ported from Notas (dark) */
-:root[data-theme="adventure-time"] {
-  --bg-base: 31 29 69;
-  --bg-surface: 42 39 85;
-  --bg-raised: 52 48 106;
-  --bg-border: 58 53 111;
-  --accent-green: 231 116 30;
-  --accent-dim: 189 95 25;
-  --accent-muted: 70 51 77;
-  --text-primary: 248 220 192;
-  --text-secondary: 163 154 196;
-  --text-muted: 97 92 132;
-  --danger: 189 0 19;
-  --warn: 231 176 0;
-  --scrollbar-hover: 144 136 181;
-}
+  /* Adventure Time — ported from Notas (dark) */
+  :root[data-theme='adventure-time'] {
+    --bg-base: 31 29 69;
+    --bg-surface: 42 39 85;
+    --bg-raised: 52 48 106;
+    --bg-border: 58 53 111;
+    --accent-green: 231 116 30;
+    --accent-dim: 189 95 25;
+    --accent-muted: 70 51 77;
+    --text-primary: 248 220 192;
+    --text-secondary: 163 154 196;
+    --text-muted: 97 92 132;
+    --danger: 189 0 19;
+    --warn: 231 176 0;
+    --scrollbar-hover: 144 136 181;
+  }
 
-/* Borland — ported from Notas (dark) */
-:root[data-theme="borland"] {
-  --bg-base: 0 0 164;
-  --bg-surface: 10 26 176;
-  --bg-raised: 23 48 192;
-  --bg-border: 42 64 196;
-  --accent-green: 255 255 78;
-  --accent-dim: 209 209 64;
-  --accent-muted: 47 60 161;
-  --text-primary: 255 255 128;
-  --text-secondary: 182 182 230;
-  --text-muted: 91 91 197;
-  --danger: 255 89 89;
-  --warn: 255 255 78;
-  --scrollbar-hover: 157 161 224;
-}
+  /* Borland — ported from Notas (dark) */
+  :root[data-theme='borland'] {
+    --bg-base: 0 0 164;
+    --bg-surface: 10 26 176;
+    --bg-raised: 23 48 192;
+    --bg-border: 42 64 196;
+    --accent-green: 255 255 78;
+    --accent-dim: 209 209 64;
+    --accent-muted: 47 60 161;
+    --text-primary: 255 255 128;
+    --text-secondary: 182 182 230;
+    --text-muted: 91 91 197;
+    --danger: 255 89 89;
+    --warn: 255 255 78;
+    --scrollbar-hover: 157 161 224;
+  }
 
-/* Commodore 64 — ported from Notas (dark) */
-:root[data-theme="c64"] {
-  --bg-base: 64 49 141;
-  --bg-surface: 77 62 160;
-  --bg-raised: 90 75 176;
-  --bg-border: 86 72 168;
-  --accent-green: 191 206 114;
-  --accent-dim: 157 169 93;
-  --accent-muted: 94 84 153;
-  --text-primary: 202 189 242;
-  --text-secondary: 147 133 201;
-  --text-muted: 106 91 171;
-  --danger: 136 57 50;
-  --warn: 191 206 114;
-  --scrollbar-hover: 136 122 195;
-}
+  /* Commodore 64 — ported from Notas (dark) */
+  :root[data-theme='c64'] {
+    --bg-base: 64 49 141;
+    --bg-surface: 77 62 160;
+    --bg-raised: 90 75 176;
+    --bg-border: 86 72 168;
+    --accent-green: 191 206 114;
+    --accent-dim: 157 169 93;
+    --accent-muted: 94 84 153;
+    --text-primary: 202 189 242;
+    --text-secondary: 147 133 201;
+    --text-muted: 106 91 171;
+    --danger: 136 57 50;
+    --warn: 191 206 114;
+    --scrollbar-hover: 136 122 195;
+  }
 
-/* Fairy Floss Dark — ported from Notas (dark) */
-:root[data-theme="fairy-floss-dark"] {
-  --bg-base: 59 54 76;
-  --bg-surface: 74 69 100;
-  --bg-raised: 86 80 111;
-  --bg-border: 86 79 111;
-  --accent-green: 255 184 209;
-  --accent-dim: 209 151 171;
-  --accent-muted: 101 86 116;
-  --text-primary: 248 248 242;
-  --text-secondary: 197 189 218;
-  --text-muted: 128 122 147;
-  --danger: 255 133 127;
-  --warn: 255 234 0;
-  --scrollbar-hover: 177 169 199;
-}
+  /* Fairy Floss Dark — ported from Notas (dark) */
+  :root[data-theme='fairy-floss-dark'] {
+    --bg-base: 59 54 76;
+    --bg-surface: 74 69 100;
+    --bg-raised: 86 80 111;
+    --bg-border: 86 79 111;
+    --accent-green: 255 184 209;
+    --accent-dim: 209 151 171;
+    --accent-muted: 101 86 116;
+    --text-primary: 248 248 242;
+    --text-secondary: 197 189 218;
+    --text-muted: 128 122 147;
+    --danger: 255 133 127;
+    --warn: 255 234 0;
+    --scrollbar-hover: 177 169 199;
+  }
 
-/* Flat — ported from Notas (dark) */
-:root[data-theme="flat"] {
-  --bg-base: 44 62 80;
-  --bg-surface: 52 73 94;
-  --bg-raised: 62 88 112;
-  --bg-border: 62 80 102;
-  --accent-green: 52 152 219;
-  --accent-dim: 43 125 180;
-  --accent-muted: 52 85 113;
-  --text-primary: 236 240 241;
-  --text-secondary: 164 181 196;
-  --text-muted: 104 122 138;
-  --danger: 231 76 60;
-  --warn: 241 196 15;
-  --scrollbar-hover: 146 163 179;
-}
+  /* Flat — ported from Notas (dark) */
+  :root[data-theme='flat'] {
+    --bg-base: 44 62 80;
+    --bg-surface: 52 73 94;
+    --bg-raised: 62 88 112;
+    --bg-border: 62 80 102;
+    --accent-green: 52 152 219;
+    --accent-dim: 43 125 180;
+    --accent-muted: 52 85 113;
+    --text-primary: 236 240 241;
+    --text-secondary: 164 181 196;
+    --text-muted: 104 122 138;
+    --danger: 231 76 60;
+    --warn: 241 196 15;
+    --scrollbar-hover: 146 163 179;
+  }
 
-/* Gogh — Starry Night — ported from Notas (dark) */
-:root[data-theme="gogh"] {
-  --bg-base: 13 27 52;
-  --bg-surface: 20 38 74;
-  --bg-raised: 27 50 96;
-  --bg-border: 33 52 95;
-  --accent-green: 244 205 58;
-  --accent-dim: 200 168 48;
-  --accent-muted: 54 63 72;
-  --text-primary: 232 238 255;
-  --text-secondary: 148 168 204;
-  --text-muted: 80 98 128;
-  --danger: 217 96 59;
-  --warn: 244 205 58;
-  --scrollbar-hover: 127 147 184;
-}
+  /* Gogh — Starry Night — ported from Notas (dark) */
+  :root[data-theme='gogh'] {
+    --bg-base: 13 27 52;
+    --bg-surface: 20 38 74;
+    --bg-raised: 27 50 96;
+    --bg-border: 33 52 95;
+    --accent-green: 244 205 58;
+    --accent-dim: 200 168 48;
+    --accent-muted: 54 63 72;
+    --text-primary: 232 238 255;
+    --text-secondary: 148 168 204;
+    --text-muted: 80 98 128;
+    --danger: 217 96 59;
+    --warn: 244 205 58;
+    --scrollbar-hover: 127 147 184;
+  }
 
-/* Grass — ported from Notas (dark) */
-:root[data-theme="grass"] {
-  --bg-base: 19 119 61;
-  --bg-surface: 28 138 74;
-  --bg-raised: 35 154 85;
-  --bg-border: 42 154 94;
-  --accent-green: 231 176 0;
-  --accent-dim: 189 144 0;
-  --accent-muted: 58 144 63;
-  --text-primary: 255 240 165;
-  --text-secondary: 188 214 160;
-  --text-muted: 104 166 110;
-  --danger: 207 58 42;
-  --warn: 231 176 0;
-  --scrollbar-hover: 162 203 148;
-}
+  /* Grass — ported from Notas (dark) */
+  :root[data-theme='grass'] {
+    --bg-base: 19 119 61;
+    --bg-surface: 28 138 74;
+    --bg-raised: 35 154 85;
+    --bg-border: 42 154 94;
+    --accent-green: 231 176 0;
+    --accent-dim: 189 144 0;
+    --accent-muted: 58 144 63;
+    --text-primary: 255 240 165;
+    --text-secondary: 188 214 160;
+    --text-muted: 104 166 110;
+    --danger: 207 58 42;
+    --warn: 231 176 0;
+    --scrollbar-hover: 162 203 148;
+  }
 
-/* Gruvbox Material — ported from Notas (dark) */
-:root[data-theme="gruvbox-material"] {
-  --bg-base: 40 40 40;
-  --bg-surface: 50 48 47;
-  --bg-raised: 60 56 54;
-  --bg-border: 69 64 61;
-  --accent-green: 216 166 87;
-  --accent-dim: 177 136 71;
-  --accent-muted: 75 66 53;
-  --text-primary: 212 190 152;
-  --text-secondary: 168 153 132;
-  --text-muted: 104 96 86;
-  --danger: 234 105 98;
-  --warn: 216 166 87;
-  --scrollbar-hover: 150 137 119;
-}
+  /* Gruvbox Material — ported from Notas (dark) */
+  :root[data-theme='gruvbox-material'] {
+    --bg-base: 40 40 40;
+    --bg-surface: 50 48 47;
+    --bg-raised: 60 56 54;
+    --bg-border: 69 64 61;
+    --accent-green: 216 166 87;
+    --accent-dim: 177 136 71;
+    --accent-muted: 75 66 53;
+    --text-primary: 212 190 152;
+    --text-secondary: 168 153 132;
+    --text-muted: 104 96 86;
+    --danger: 234 105 98;
+    --warn: 216 166 87;
+    --scrollbar-hover: 150 137 119;
+  }
 
-/* Homebrew — ported from Notas (dark) */
-:root[data-theme="homebrew"] {
-  --bg-base: 0 0 0;
-  --bg-surface: 12 20 12;
-  --bg-raised: 18 32 18;
-  --bg-border: 16 56 16;
-  --accent-green: 0 255 0;
-  --accent-dim: 0 209 0;
-  --accent-muted: 10 55 10;
-  --text-primary: 0 208 0;
-  --text-secondary: 31 138 31;
-  --text-muted: 16 69 16;
-  --danger: 200 0 0;
-  --warn: 154 154 0;
-  --scrollbar-hover: 28 123 28;
-}
+  /* Homebrew — ported from Notas (dark) */
+  :root[data-theme='homebrew'] {
+    --bg-base: 0 0 0;
+    --bg-surface: 12 20 12;
+    --bg-raised: 18 32 18;
+    --bg-border: 16 56 16;
+    --accent-green: 0 255 0;
+    --accent-dim: 0 209 0;
+    --accent-muted: 10 55 10;
+    --text-primary: 0 208 0;
+    --text-secondary: 31 138 31;
+    --text-muted: 16 69 16;
+    --danger: 200 0 0;
+    --warn: 154 154 0;
+    --scrollbar-hover: 28 123 28;
+  }
 
-/* Ocean — ported from Notas (dark) */
-:root[data-theme="ocean"] {
-  --bg-base: 43 48 59;
-  --bg-surface: 52 61 70;
-  --bg-raised: 62 72 85;
-  --bg-border: 62 72 85;
-  --accent-green: 143 161 179;
-  --accent-dim: 117 132 147;
-  --accent-muted: 66 76 86;
-  --text-primary: 192 197 206;
-  --text-secondary: 139 149 164;
-  --text-muted: 91 98 112;
-  --danger: 191 97 106;
-  --warn: 235 203 139;
-  --scrollbar-hover: 125 135 150;
-}
+  /* Ocean — ported from Notas (dark) */
+  :root[data-theme='ocean'] {
+    --bg-base: 43 48 59;
+    --bg-surface: 52 61 70;
+    --bg-raised: 62 72 85;
+    --bg-border: 62 72 85;
+    --accent-green: 143 161 179;
+    --accent-dim: 117 132 147;
+    --accent-muted: 66 76 86;
+    --text-primary: 192 197 206;
+    --text-secondary: 139 149 164;
+    --text-muted: 91 98 112;
+    --danger: 191 97 106;
+    --warn: 235 203 139;
+    --scrollbar-hover: 125 135 150;
+  }
 
-/* Kokuban — ported from Notas (dark) */
-:root[data-theme="kokuban"] {
-  --bg-base: 31 53 38;
-  --bg-surface: 39 64 48;
-  --bg-raised: 47 76 57;
-  --bg-border: 49 80 64;
-  --accent-green: 242 233 200;
-  --accent-dim: 198 191 164;
-  --accent-muted: 69 89 71;
-  --text-primary: 240 240 232;
-  --text-secondary: 169 194 175;
-  --text-muted: 100 124 106;
-  --danger: 242 160 160;
-  --warn: 240 230 140;
-  --scrollbar-hover: 147 173 155;
-}
+  /* Kokuban — ported from Notas (dark) */
+  :root[data-theme='kokuban'] {
+    --bg-base: 31 53 38;
+    --bg-surface: 39 64 48;
+    --bg-raised: 47 76 57;
+    --bg-border: 49 80 64;
+    --accent-green: 242 233 200;
+    --accent-dim: 198 191 164;
+    --accent-muted: 69 89 71;
+    --text-primary: 240 240 232;
+    --text-secondary: 169 194 175;
+    --text-muted: 100 124 106;
+    --danger: 242 160 160;
+    --warn: 240 230 140;
+    --scrollbar-hover: 147 173 155;
+  }
 
-/* Mono Cyan — ported from Notas (dark) */
-:root[data-theme="mono-cyan"] {
-  --bg-base: 8 20 20;
-  --bg-surface: 14 31 31;
-  --bg-raised: 20 48 48;
-  --bg-border: 22 56 56;
-  --accent-green: 0 208 208;
-  --accent-dim: 0 171 171;
-  --accent-muted: 12 58 58;
-  --text-primary: 200 240 240;
-  --text-secondary: 92 154 154;
-  --text-muted: 50 87 87;
-  --danger: 224 133 133;
-  --warn: 128 224 224;
-  --scrollbar-hover: 79 136 136;
-}
+  /* Mono Cyan — ported from Notas (dark) */
+  :root[data-theme='mono-cyan'] {
+    --bg-base: 8 20 20;
+    --bg-surface: 14 31 31;
+    --bg-raised: 20 48 48;
+    --bg-border: 22 56 56;
+    --accent-green: 0 208 208;
+    --accent-dim: 0 171 171;
+    --accent-muted: 12 58 58;
+    --text-primary: 200 240 240;
+    --text-secondary: 92 154 154;
+    --text-muted: 50 87 87;
+    --danger: 224 133 133;
+    --warn: 128 224 224;
+    --scrollbar-hover: 79 136 136;
+  }
 
-/* Nord — arctic blue-grey with frost green */
-:root[data-theme="nord"] {
-  --bg-base: 46 52 64;
-  --bg-surface: 59 66 82;
-  --bg-raised: 67 76 94;
-  --bg-border: 76 86 106;
-  --accent-green: 163 190 140;
-  --accent-dim: 130 152 112;
-  --accent-muted: 33 38 28;
-  --text-primary: 236 239 244;
-  --text-secondary: 216 222 233;
-  --text-muted: 76 86 106;
-  --danger: 191 97 106;
-  --warn: 235 203 139;
-  --scrollbar-hover: 126 133 148;
-}
+  /* Nord — arctic blue-grey with frost green */
+  :root[data-theme='nord'] {
+    --bg-base: 46 52 64;
+    --bg-surface: 59 66 82;
+    --bg-raised: 67 76 94;
+    --bg-border: 76 86 106;
+    --accent-green: 163 190 140;
+    --accent-dim: 130 152 112;
+    --accent-muted: 33 38 28;
+    --text-primary: 236 239 244;
+    --text-secondary: 216 222 233;
+    --text-muted: 76 86 106;
+    --danger: 191 97 106;
+    --warn: 235 203 139;
+    --scrollbar-hover: 126 133 148;
+  }
 
-/* Tokyo Night — neon purple & blue on midnight */
-:root[data-theme="tokyo-night"] {
-  --bg-base: 26 27 38;
-  --bg-surface: 22 22 30;
-  --bg-raised: 36 40 59;
-  --bg-border: 41 46 66;
-  --accent-green: 158 206 106;
-  --accent-dim: 126 165 85;
-  --accent-muted: 32 41 21;
-  --text-primary: 192 202 245;
-  --text-secondary: 169 177 214;
-  --text-muted: 86 95 137;
-  --danger: 247 118 142;
-  --warn: 224 175 104;
-  --scrollbar-hover: 101 105 119;
-}
+  /* Tokyo Night — neon purple & blue on midnight */
+  :root[data-theme='tokyo-night'] {
+    --bg-base: 26 27 38;
+    --bg-surface: 22 22 30;
+    --bg-raised: 36 40 59;
+    --bg-border: 41 46 66;
+    --accent-green: 158 206 106;
+    --accent-dim: 126 165 85;
+    --accent-muted: 32 41 21;
+    --text-primary: 192 202 245;
+    --text-secondary: 169 177 214;
+    --text-muted: 86 95 137;
+    --danger: 247 118 142;
+    --warn: 224 175 104;
+    --scrollbar-hover: 101 105 119;
+  }
 
-/* Solarized Dark — low-contrast teal & olive */
-:root[data-theme="solarized-dark"] {
-  --bg-base: 0 43 54;
-  --bg-surface: 7 54 66;
-  --bg-raised: 10 61 74;
-  --bg-border: 88 110 117;
-  --accent-green: 133 153 0;
-  --accent-dim: 106 122 0;
-  --accent-muted: 27 31 0;
-  --text-primary: 147 161 161;
-  --text-secondary: 131 148 150;
-  --text-muted: 88 110 117;
-  --danger: 220 50 47;
-  --warn: 181 137 0;
-  --scrollbar-hover: 135 151 156;
-}
+  /* Solarized Dark — low-contrast teal & olive */
+  :root[data-theme='solarized-dark'] {
+    --bg-base: 0 43 54;
+    --bg-surface: 7 54 66;
+    --bg-raised: 10 61 74;
+    --bg-border: 88 110 117;
+    --accent-green: 133 153 0;
+    --accent-dim: 106 122 0;
+    --accent-muted: 27 31 0;
+    --text-primary: 147 161 161;
+    --text-secondary: 131 148 150;
+    --text-muted: 88 110 117;
+    --danger: 220 50 47;
+    --warn: 181 137 0;
+    --scrollbar-hover: 135 151 156;
+  }
 
-/* Solarized Light — low-contrast teal & olive, light */
-:root[data-theme="solarized-light"] {
-  --bg-base: 253 246 227;
-  --bg-surface: 238 232 213;
-  --bg-raised: 229 221 195;
-  --bg-border: 201 189 151;
-  --accent-green: 133 153 0;
-  --accent-dim: 106 122 0;
-  --accent-muted: 233 237 209;
-  --text-primary: 88 110 117;
-  --text-secondary: 101 123 131;
-  --text-muted: 147 161 161;
-  --danger: 220 50 47;
-  --warn: 181 137 0;
-  --scrollbar-hover: 185 174 139;
-}
-:root[data-theme="solarized-light"] body { color-scheme: light; }
+  /* Solarized Light — low-contrast teal & olive, light */
+  :root[data-theme='solarized-light'] {
+    --bg-base: 253 246 227;
+    --bg-surface: 238 232 213;
+    --bg-raised: 229 221 195;
+    --bg-border: 201 189 151;
+    --accent-green: 133 153 0;
+    --accent-dim: 106 122 0;
+    --accent-muted: 233 237 209;
+    --text-primary: 88 110 117;
+    --text-secondary: 101 123 131;
+    --text-muted: 147 161 161;
+    --danger: 220 50 47;
+    --warn: 181 137 0;
+    --scrollbar-hover: 185 174 139;
+  }
+  :root[data-theme='solarized-light'] body {
+    color-scheme: light;
+  }
 
-/* Rosé Pine — elegant muted purple & rose */
-:root[data-theme="rose-pine"] {
-  --bg-base: 25 23 36;
-  --bg-surface: 31 29 46;
-  --bg-raised: 38 35 58;
-  --bg-border: 64 61 82;
-  --accent-green: 156 207 216;
-  --accent-dim: 125 166 173;
-  --accent-muted: 31 41 43;
-  --text-primary: 224 222 244;
-  --text-secondary: 144 140 170;
-  --text-muted: 110 106 134;
-  --danger: 235 111 146;
-  --warn: 246 193 119;
-  --scrollbar-hover: 117 115 130;
-}
+  /* Rosé Pine — elegant muted purple & rose */
+  :root[data-theme='rose-pine'] {
+    --bg-base: 25 23 36;
+    --bg-surface: 31 29 46;
+    --bg-raised: 38 35 58;
+    --bg-border: 64 61 82;
+    --accent-green: 156 207 216;
+    --accent-dim: 125 166 173;
+    --accent-muted: 31 41 43;
+    --text-primary: 224 222 244;
+    --text-secondary: 144 140 170;
+    --text-muted: 110 106 134;
+    --danger: 235 111 146;
+    --warn: 246 193 119;
+    --scrollbar-hover: 117 115 130;
+  }
 
-/* Everforest — warm forest green, easy on the eyes */
-:root[data-theme="everforest"] {
-  --bg-base: 45 53 59;
-  --bg-surface: 52 63 68;
-  --bg-raised: 61 72 77;
-  --bg-border: 71 82 88;
-  --accent-green: 167 192 128;
-  --accent-dim: 134 154 102;
-  --accent-muted: 33 38 26;
-  --text-primary: 211 198 170;
-  --text-secondary: 157 169 160;
-  --text-muted: 122 132 120;
-  --danger: 230 126 128;
-  --warn: 219 188 127;
-  --scrollbar-hover: 123 130 135;
+  /* Everforest — warm forest green, easy on the eyes */
+  :root[data-theme='everforest'] {
+    --bg-base: 45 53 59;
+    --bg-surface: 52 63 68;
+    --bg-raised: 61 72 77;
+    --bg-border: 71 82 88;
+    --accent-green: 167 192 128;
+    --accent-dim: 134 154 102;
+    --accent-muted: 33 38 26;
+    --text-primary: 211 198 170;
+    --text-secondary: 157 169 160;
+    --text-muted: 122 132 120;
+    --danger: 230 126 128;
+    --warn: 219 188 127;
+    --scrollbar-hover: 123 130 135;
+  }
 }
 
 @layer base {
@@ -569,79 +721,6 @@
   ::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:active {
     background: rgb(var(--scrollbar-hover));
-  }
-}
-
-@layer components {
-  .card {
-    @apply bg-bg-surface border border-bg-border rounded-lg;
-  }
-
-  .btn {
-    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium
-           transition-all duration-150 cursor-pointer select-none
-           disabled:opacity-40 disabled:cursor-not-allowed;
-  }
-
-  .btn-primary {
-    @apply btn bg-accent-green text-bg-base hover:bg-accent-dim active:scale-95;
-  }
-
-  .btn-ghost {
-    @apply btn bg-transparent text-text-secondary border border-bg-border
-           hover:bg-bg-raised hover:text-text-primary active:scale-95;
-  }
-
-  .btn-danger {
-    @apply btn bg-danger/10 text-danger border border-danger/20
-           hover:bg-danger/20 active:scale-95;
-  }
-
-  .btn-warn {
-    @apply btn bg-warn/10 text-warn border border-warn/20
-           hover:bg-warn/20 active:scale-95;
-  }
-
-  .input {
-    @apply bg-bg-raised border border-bg-border rounded px-3 py-1.5
-           text-sm text-text-primary placeholder:text-text-muted
-           focus:outline-none focus:border-accent-green/50
-           transition-colors duration-150 w-full;
-  }
-
-  .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
-  }
-
-  .badge-green {
-    @apply badge bg-accent-green/10 text-accent-green;
-  }
-
-  .badge-red {
-    @apply badge bg-danger/10 text-danger;
-  }
-
-  .badge-yellow {
-    @apply badge bg-warn/10 text-warn;
-  }
-
-  .badge-gray {
-    @apply badge bg-bg-border text-text-secondary;
-  }
-
-  .section-title {
-    @apply text-xs font-medium uppercase tracking-widest text-text-muted;
-  }
-
-  /* compact icon button for the Logcat visual map overlays */
-  .map-btn {
-    @apply inline-flex items-center justify-center h-7 w-7 rounded bg-black/40
-           text-text-secondary border border-bg-border hover:bg-bg-raised
-           hover:text-text-primary transition-colors cursor-pointer;
-  }
-
-  .mono {
-    @apply font-mono text-sm;
   }
 }
 

@@ -187,18 +187,18 @@ export default function Sidebar({ activeView, onViewChange, position, showLabels
   return (
     <aside className={asideCls}>
       {horizontal && showLabels && (
-        <div ref={measureRef} aria-hidden="true" className="fixed -top-[9999px] left-0 flex flex-row items-center gap-0.5 px-1 pointer-events-none">
+        <div ref={measureRef} aria-hidden="true" className="fixed top-[-9999px] left-0 flex flex-row items-center gap-0.5 px-1 pointer-events-none">
           {visibleItems.map(({ view, icon, label, dividerBefore }, idx) => (
             <div key={view} className="flex items-center">
               {dividerBefore && idx > 0 && <div className={dividerCls} />}
-              <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-[3.25rem] h-[68px]">
+              <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-13 h-[68px]">
                 {icon}
                 <span className="text-[10px] leading-tight text-center whitespace-nowrap">{label}</span>
               </div>
             </div>
           ))}
           <div className="w-px h-7 bg-bg-border mx-1" />
-          <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-[3.25rem] h-[68px]">
+          <div className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 min-w-13 h-[68px]">
             <Settings size={17} />
             <span className="text-[10px] leading-tight text-center whitespace-nowrap">Settings</span>
           </div>

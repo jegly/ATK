@@ -1066,7 +1066,7 @@ export default function LogcatMap({ running, registerSink, onInspectEntity, hidd
           </div>
           <div className="px-2 py-1.5 border-t border-bg-border space-y-1">
             <div className="flex gap-1">
-              <input value={ruleInput} onChange={e => setRuleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addRule() }} placeholder="Alert when tag/text contains…" className="flex-1 min-w-0 bg-bg-base border border-bg-border rounded px-1.5 py-0.5 text-[10px] outline-none focus:border-warn text-text-primary" />
+              <input value={ruleInput} onChange={e => setRuleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addRule() }} placeholder="Alert when tag/text contains…" className="flex-1 min-w-0 bg-bg-base border border-bg-border rounded px-1.5 py-0.5 text-[10px] outline-hidden focus:border-warn text-text-primary" />
               <button onClick={addRule} className="px-2 py-0.5 rounded text-[10px] bg-warn/20 text-warn border border-warn/30">Add</button>
             </div>
             {alertRules.length > 0 && <div className="flex flex-wrap gap-1">
@@ -1909,7 +1909,7 @@ function SettingsDrawer({ cfg, patch, applyPreset, userPresets, saveUserPreset, 
         <div className="flex gap-1 pt-0.5">
           <input value={presetName} onChange={e => setPresetName(e.target.value)} placeholder="Save current as…"
             onKeyDown={e => { if (e.key === 'Enter') { saveUserPreset(presetName); setPresetName('') } }}
-            className="flex-1 min-w-0 bg-bg-base border border-bg-border rounded px-1.5 py-0.5 text-[10px] outline-none focus:border-accent-green text-text-primary" />
+            className="flex-1 min-w-0 bg-bg-base border border-bg-border rounded px-1.5 py-0.5 text-[10px] outline-hidden focus:border-accent-green text-text-primary" />
           <button onClick={() => { saveUserPreset(presetName); setPresetName('') }}
             className="px-2 py-0.5 rounded text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30">Save</button>
         </div>

@@ -159,7 +159,7 @@ export default function ViewSettings() {
                 {t.swatch.map((c, i) => (
                   <span
                     key={i}
-                    className="h-4 flex-1 rounded-sm border border-black/10"
+                    className="h-4 flex-1 rounded-xs border border-black/10"
                     style={{ backgroundColor: c }}
                   />
                 ))}
@@ -178,7 +178,7 @@ export default function ViewSettings() {
                 type="color"
                 value={customAccent || '#a6d189'}
                 onChange={e => changeAccent(e.target.value)}
-                className="h-8 w-12 rounded border border-bg-border bg-bg-raised cursor-pointer p-0.5"
+                className="h-8 w-12 rounded-sm border border-bg-border bg-bg-raised cursor-pointer p-0.5"
                 title="Pick a custom accent colour"
               />
               <span className="mono text-xs text-text-secondary">{customAccent || 'theme default'}</span>
@@ -194,7 +194,7 @@ export default function ViewSettings() {
                 type="color"
                 value={customTextColor || '#c6d0f5'}
                 onChange={e => changeTextColor(e.target.value)}
-                className="h-8 w-12 rounded border border-bg-border bg-bg-raised cursor-pointer p-0.5"
+                className="h-8 w-12 rounded-sm border border-bg-border bg-bg-raised cursor-pointer p-0.5"
                 title="Pick a custom text colour"
               />
               <span className="mono text-xs text-text-secondary">{customTextColor || 'theme default'}</span>
@@ -286,7 +286,7 @@ export default function ViewSettings() {
             aria-checked={muteND}
             className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${muteND ? 'bg-accent-green' : 'bg-bg-border'}`}
           >
-            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${muteND ? 'left-[18px]' : 'left-0.5'}`} />
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${muteND ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
 
@@ -320,7 +320,7 @@ export default function ViewSettings() {
                   aria-checked={on}
                   className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${on ? 'bg-accent-green' : 'bg-bg-border'}`}
                 >
-                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
+                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
                 </button>
               </div>
             )
@@ -400,7 +400,7 @@ export default function ViewSettings() {
               disabled={lockBusy}
               className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${lock.requireForDanger ? 'bg-accent-green' : 'bg-bg-border'}`}
             >
-              <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${lock.requireForDanger ? 'left-[18px]' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${lock.requireForDanger ? 'left-[18px]' : 'left-0.5'}`} />
             </button>
           </div>
         )}
@@ -423,7 +423,7 @@ export default function ViewSettings() {
             aria-checked={rootTools}
             className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${rootTools ? 'bg-accent-green' : 'bg-bg-border'}`}
           >
-            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${rootTools ? 'left-[18px]' : 'left-0.5'}`} />
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${rootTools ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
       </div>
@@ -441,7 +441,7 @@ export default function ViewSettings() {
           </button>
         </div>
 
-        <div className="bg-accent-green/5 border border-accent-green/20 rounded p-3 text-xs text-text-secondary space-y-1">
+        <div className="bg-accent-green/5 border border-accent-green/20 rounded-sm p-3 text-xs text-text-secondary space-y-1">
           <p className="text-accent-green font-medium flex items-center gap-1.5">
             <Check size={12} /> ATK uses YOUR system ADB/Fastboot — no bundled binaries
           </p>
@@ -454,7 +454,7 @@ export default function ViewSettings() {
         {Object.entries(binaryInfo).map(([name, info]) => (
           <div key={name} className="space-y-1">
             <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">{name}</p>
-            <pre className="bg-bg-raised rounded p-3 text-xs mono text-text-muted whitespace-pre-wrap break-all border border-bg-border">
+            <pre className="bg-bg-raised rounded-sm p-3 text-xs mono text-text-muted whitespace-pre-wrap break-all border border-bg-border">
               {info}
             </pre>
           </div>

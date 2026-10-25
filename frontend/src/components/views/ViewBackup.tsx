@@ -174,7 +174,7 @@ export default function ViewBackup() {
                 onChange={e => setSearch(e.target.value)}
                 onFocus={loadPackages}
               />
-              <div className="max-h-48 overflow-auto space-y-0.5 border border-bg-border rounded">
+              <div className="max-h-48 overflow-auto space-y-0.5 border border-bg-border rounded-sm">
                 {!pkgsLoaded && (
                   <p className="text-text-muted text-xs text-center p-4">Focus search to load packages</p>
                 )}
@@ -207,7 +207,7 @@ export default function ViewBackup() {
           </div>
 
           {result && (
-            <div className="bg-bg-raised rounded p-3 text-xs mono text-text-secondary whitespace-pre-wrap border border-bg-border">
+            <div className="bg-bg-raised rounded-sm p-3 text-xs mono text-text-secondary whitespace-pre-wrap border border-bg-border">
               {result}
             </div>
           )}
@@ -234,7 +234,7 @@ export default function ViewBackup() {
             {folders.length > 0 && (
               <div className="space-y-1">
                 {folders.map(f => (
-                  <div key={f} className="flex items-center justify-between bg-bg-raised rounded px-2 py-1">
+                  <div key={f} className="flex items-center justify-between bg-bg-raised rounded-sm px-2 py-1">
                     <span className="mono text-xs text-text-secondary truncate">{f}</span>
                     <button onClick={() => setFolders(folders.filter(x => x !== f))} className="text-text-muted hover:text-danger shrink-0"><X size={12} /></button>
                   </div>

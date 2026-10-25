@@ -234,7 +234,7 @@ export default function ViewDebloater() {
         </select>
 
         {/* Safety filter */}
-        <div className="flex gap-0.5 bg-bg-raised rounded p-0.5">
+        <div className="flex gap-0.5 bg-bg-raised rounded-sm p-0.5">
           {(['all', 'safe', 'caution', 'keep', 'unknown'] as const).map(f => (
             <button
               key={f}

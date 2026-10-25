@@ -159,7 +159,7 @@ export default function ViewShell() {
                       <div
                         key={cmd.label}
                         onClick={() => pickCommand(cmd)}
-                        className="flex items-start gap-1 mx-2 rounded px-2 py-1.5 hover:bg-bg-raised transition-colors cursor-pointer"
+                        className="flex items-start gap-1 mx-2 rounded-sm px-2 py-1.5 hover:bg-bg-raised transition-colors cursor-pointer"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
@@ -184,7 +184,7 @@ export default function ViewShell() {
         <div className="border-b border-bg-border px-4 py-2 flex items-center gap-3 shrink-0">
           <Terminal size={14} className="text-accent-green" />
           <span className="text-xs text-text-muted">Mode:</span>
-          <div className="flex gap-1 bg-bg-raised rounded p-0.5">
+          <div className="flex gap-1 bg-bg-raised rounded-sm p-0.5">
             {(['shell', 'adb'] as const).map(m => (
               <button
                 key={m}
@@ -235,14 +235,14 @@ export default function ViewShell() {
                 </div>
               )}
               {entry.error ? (
-                <pre className="whitespace-pre-wrap break-words leading-relaxed text-danger">
+                <pre className="whitespace-pre-wrap wrap-break-word leading-relaxed text-danger">
                   {entry.output}
                 </pre>
               ) : (
                 <CodeView
                   code={entry.output}
                   lang={detectLang('', entry.output) === 'text' ? 'log' : detectLang('', entry.output)}
-                  className="whitespace-pre-wrap break-words leading-relaxed text-text-secondary"
+                  className="whitespace-pre-wrap wrap-break-word leading-relaxed text-text-secondary"
                 />
               )}
             </div>
@@ -263,7 +263,7 @@ export default function ViewShell() {
           <input
             ref={inputRef}
             autoFocus
-            className="flex-1 bg-transparent text-text-primary font-mono text-xs focus:outline-none placeholder:text-text-muted"
+            className="flex-1 bg-transparent text-text-primary font-mono text-xs focus:outline-hidden placeholder:text-text-muted"
             placeholder={mode === 'shell' ? 'ls /sdcard' : 'devices'}
             value={input}
             onChange={e => setInput(e.target.value)}

@@ -289,7 +289,7 @@ export default function ViewAppInspect() {
                   {privacy && (
                     <>
                       {/* Score header */}
-                      <div className="flex items-center gap-4 rounded border border-bg-border bg-bg-raised p-4">
+                      <div className="flex items-center gap-4 rounded-sm border border-bg-border bg-bg-raised p-4">
                         <div className={`text-4xl font-bold ${GRADE_COLOR[privacy.grade] || 'text-text-primary'}`}>
                           {privacy.grade}
                         </div>
@@ -326,7 +326,7 @@ export default function ViewAppInspect() {
                         )}
                         <div className="flex flex-wrap gap-2">
                           {privacy.trackers.map(t => (
-                            <div key={t.name} className="flex items-center gap-2 rounded border border-bg-border bg-bg-surface px-2.5 py-1.5" title={`${t.matches} signature match${t.matches === 1 ? '' : 'es'}`}>
+                            <div key={t.name} className="flex items-center gap-2 rounded-sm border border-bg-border bg-bg-surface px-2.5 py-1.5" title={`${t.matches} signature match${t.matches === 1 ? '' : 'es'}`}>
                               <Radar size={11} className="text-danger shrink-0" />
                               <span className="text-xs text-text-primary">{t.name}</span>
                               <span className="badge-gray text-xs">{t.category}</span>
@@ -422,7 +422,7 @@ export default function ViewAppInspect() {
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <p className="text-xs text-text-muted mb-0.5">{label}</p>
-                      <p className="mono text-xs text-text-primary bg-bg-raised rounded px-3 py-1.5 break-all">
+                      <p className="mono text-xs text-text-primary bg-bg-raised rounded-sm px-3 py-1.5 break-all">
                         {value || 'Not available — run aapt or apksigner manually for cert details'}
                       </p>
                     </div>
@@ -442,7 +442,7 @@ export default function ViewAppInspect() {
                     <CodeView
                       code={result.manifestDump || ''}
                       lang="log"
-                      className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed bg-bg-raised rounded p-3 border border-bg-border max-h-[60vh] overflow-auto"
+                      className="mono text-xs text-text-secondary whitespace-pre-wrap wrap-break-word leading-relaxed bg-bg-raised rounded-sm p-3 border border-bg-border max-h-[60vh] overflow-auto"
                     />
                   )}
                 </div>

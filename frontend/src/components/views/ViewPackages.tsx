@@ -197,7 +197,7 @@ export default function ViewPackages() {
       {/* Toolbar */}
       <div className="border-b border-bg-border px-4 py-2 flex items-center gap-2 shrink-0 flex-wrap">
         {/* Filter tabs */}
-        <div className="flex gap-1 bg-bg-raised rounded p-0.5">
+        <div className="flex gap-1 bg-bg-raised rounded-sm p-0.5">
           {(['user', 'system', 'all'] as Filter[]).map(f => (
             <button
               key={f}
@@ -322,7 +322,7 @@ export default function ViewPackages() {
                 ···
               </button>
               {activeCtx === pkg.packageName && (
-                <div className="absolute right-0 top-full mt-1 bg-bg-raised border border-bg-border rounded shadow-xl z-10 min-w-[160px]">
+                <div className="absolute right-0 top-full mt-1 bg-bg-raised border border-bg-border rounded-sm shadow-xl z-10 min-w-[160px]">
                   {!pkg.isInstalled && (
                     <>
                       <button onClick={() => handleRestore(pkg.packageName)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-accent-green hover:bg-bg-surface">

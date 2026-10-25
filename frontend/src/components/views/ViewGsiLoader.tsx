@@ -95,7 +95,7 @@ export default function ViewGsiLoader() {
       <div className="border-b border-bg-border px-4 py-2 flex items-center gap-2 shrink-0">
         <Boxes size={15} className="text-accent-green" />
         <span className="text-sm font-medium text-text-primary">GSI Loader</span>
-        <div className="flex rounded overflow-hidden border border-bg-border ml-2">
+        <div className="flex rounded-sm overflow-hidden border border-bg-border ml-2">
           <button onClick={() => setTab('dsu')} className={`px-3 py-1 text-xs flex items-center gap-1 ${tab === 'dsu' ? 'bg-accent-green/20 text-accent-green' : 'text-text-muted hover:bg-bg-raised'}`}>
             <HardDriveDownload size={12} /> DSU (Temporary)
           </button>
@@ -181,12 +181,12 @@ export default function ViewGsiLoader() {
                 <button onClick={() => gsiTool(DsuDisable, 'disabled')} className="btn-ghost text-xs"><Power size={12} /> Disable</button>
                 <button onClick={() => gsiTool(DsuWipe, 'wiped')} className="btn-danger text-xs"><Trash2 size={12} /> Wipe DSU</button>
               </div>
-              {dsuStatus && <pre className="mono text-[11px] text-text-secondary whitespace-pre-wrap bg-bg-raised rounded p-2 border border-bg-border max-h-40 overflow-auto">{dsuStatus}</pre>}
+              {dsuStatus && <pre className="mono text-[11px] text-text-secondary whitespace-pre-wrap bg-bg-raised rounded-sm p-2 border border-bg-border max-h-40 overflow-auto">{dsuStatus}</pre>}
             </div>
           </div>
         ) : (
           <div className="max-w-2xl space-y-4">
-            <div className="flex items-start gap-2 rounded border border-danger/30 bg-danger/5 p-3">
+            <div className="flex items-start gap-2 rounded-sm border border-danger/30 bg-danger/5 p-3">
               <AlertTriangle size={14} className="text-danger shrink-0 mt-0.5" />
               <p className="text-xs text-danger/90">
                 <span className="font-medium">Destructive & permanent.</span> Erases the system partition, wipes userdata, and needs an
@@ -239,13 +239,13 @@ export default function ViewGsiLoader() {
             {dryRun && (
               <div>
                 <p className="section-title mb-1">Command preview</p>
-                <pre className="mono text-[11px] text-accent-green whitespace-pre-wrap bg-bg-raised rounded p-2 border border-bg-border">{dryRun}</pre>
+                <pre className="mono text-[11px] text-accent-green whitespace-pre-wrap bg-bg-raised rounded-sm p-2 border border-bg-border">{dryRun}</pre>
               </div>
             )}
             {flashOut && (
               <div>
                 <p className="section-title mb-1">Output</p>
-                <pre className="mono text-[11px] text-text-secondary whitespace-pre-wrap bg-bg-raised rounded p-2 border border-bg-border max-h-60 overflow-auto">{flashOut}</pre>
+                <pre className="mono text-[11px] text-text-secondary whitespace-pre-wrap bg-bg-raised rounded-sm p-2 border border-bg-border max-h-60 overflow-auto">{flashOut}</pre>
               </div>
             )}
           </div>

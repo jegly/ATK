@@ -23,7 +23,7 @@ export default function DismissibleBanner({ id, className = '', children }: Prop
       <button
         onClick={() => { dismiss(id); setHidden(true) }}
         title="Hide this message"
-        className="shrink-0 -my-0.5 -mr-1 p-1 rounded opacity-50 hover:opacity-100 transition-opacity"
+        className="shrink-0 -my-0.5 -mr-1 p-1 rounded-sm opacity-50 hover:opacity-100 transition-opacity"
       >
         <X size={14} />
       </button>

@@ -1294,7 +1294,7 @@ export default function ViewUtilities() {
                   {cat.commands.map(cmd => (
                     <div
                       key={cmd.label}
-                      className="group flex items-start gap-1 mx-2 rounded px-2 py-1.5 hover:bg-bg-raised transition-colors cursor-pointer"
+                      className="group flex items-start gap-1 mx-2 rounded-sm px-2 py-1.5 hover:bg-bg-raised transition-colors cursor-pointer"
                       onClick={() => runCommand(cmd)}
                     >
                       <div className="flex-1 min-w-0">
@@ -1380,7 +1380,7 @@ export default function ViewUtilities() {
             </div>
           )}
           {output && (
-            <pre className="text-xs mono text-text-secondary whitespace-pre-wrap break-words leading-relaxed">
+            <pre className="text-xs mono text-text-secondary whitespace-pre-wrap wrap-break-word leading-relaxed">
               {output}
             </pre>
           )}

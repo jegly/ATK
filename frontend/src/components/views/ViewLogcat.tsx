@@ -258,7 +258,7 @@ export default function ViewLogcat() {
         </label>
 
         {/* Text / Map view toggle */}
-        <div className="flex rounded overflow-hidden border border-bg-border ml-1">
+        <div className="flex rounded-sm overflow-hidden border border-bg-border ml-1">
           <button
             onClick={() => setViewMode('text')}
             className={`px-2 py-1 text-xs flex items-center gap-1 ${viewMode === 'text' ? 'bg-accent-green/20 text-accent-green' : 'text-text-muted hover:bg-bg-raised'}`}
@@ -276,7 +276,7 @@ export default function ViewLogcat() {
         </div>
 
         {/* Text / Map view toggle */}
-        <div className="flex rounded overflow-hidden border border-bg-border ml-1">
+        <div className="flex rounded-sm overflow-hidden border border-bg-border ml-1">
           <button
             onClick={() => setViewMode('text')}
             className={`px-2 py-1 text-xs flex items-center gap-1 ${viewMode === 'text' ? 'bg-accent-green/20 text-accent-green' : 'text-text-muted hover:bg-bg-raised'}`}
@@ -436,7 +436,7 @@ export default function ViewLogcat() {
           ) : (
             <div className="flex flex-wrap gap-2">
               {hiRules.map(r => (
-                <div key={r.id} className="flex items-center gap-1.5 rounded border border-bg-border px-2 py-1" style={{ backgroundColor: `${HI_SWATCH[r.color]}22` }}>
+                <div key={r.id} className="flex items-center gap-1.5 rounded-sm border border-bg-border px-2 py-1" style={{ backgroundColor: `${HI_SWATCH[r.color]}22` }}>
                   <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: HI_SWATCH[r.color] }} />
                   <span className="mono text-xs text-text-primary">{r.pattern}</span>
                   <span className="text-[10px] text-text-muted">{r.mode}</span>
@@ -469,7 +469,7 @@ export default function ViewLogcat() {
           return (
             <div
               key={i}
-              className={`flex gap-2 px-1 py-0.5 rounded leading-relaxed hover:bg-bg-raised ${hi || LEVEL_BG[line.level] || ''}`}
+              className={`flex gap-2 px-1 py-0.5 rounded-sm leading-relaxed hover:bg-bg-raised ${hi || LEVEL_BG[line.level] || ''}`}
             >
               <span className="text-text-muted shrink-0 w-20 truncate">{line.time}</span>
               <span className="text-text-muted shrink-0 w-10 truncate">{line.pid}</span>

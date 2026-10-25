@@ -177,7 +177,7 @@ export default function ViewApkAudit() {
               <Package size={12} /> Installed app…
             </button>
             {showPicker && (
-              <div className="absolute z-20 mt-1 w-72 bg-bg-surface border border-bg-border rounded shadow-lg">
+              <div className="absolute z-20 mt-1 w-72 bg-bg-surface border border-bg-border rounded-sm shadow-lg">
                 <div className="p-2 border-b border-bg-border">
                   <div className="relative">
                     <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -242,7 +242,7 @@ export default function ViewApkAudit() {
             <div className="ml-auto flex items-center gap-3">
               <div className="flex gap-1.5 flex-wrap justify-end">
                 {SEV_ORDER.map(s => (result.counts?.[s] ? (
-                  <span key={s} className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${sevBadge(s)}`}>
+                  <span key={s} className={`px-1.5 py-0.5 rounded-sm text-[10px] font-medium ${sevBadge(s)}`}>
                     {result.counts[s]} {s}
                   </span>
                 ) : null))}
@@ -252,7 +252,7 @@ export default function ViewApkAudit() {
                   <Download size={12} /> {exporting ? 'Exporting…' : 'Export'}
                 </button>
                 {showExport && (
-                  <div className="absolute right-0 z-20 mt-1 w-32 bg-bg-surface border border-bg-border rounded shadow-lg">
+                  <div className="absolute right-0 z-20 mt-1 w-32 bg-bg-surface border border-bg-border rounded-sm shadow-lg">
                     {(['json', 'csv', 'sarif'] as const).map(f => (
                       <button
                         key={f}
@@ -324,7 +324,7 @@ export default function ViewApkAudit() {
                   {dangerousPerms.length === 0 && <p className="text-text-muted text-xs">None of the runtime-dangerous permissions are requested.</p>}
                   <div className="flex flex-wrap gap-1.5">
                     {dangerousPerms.map(p => (
-                      <span key={p.name} className="px-1.5 py-0.5 rounded text-[10px] bg-warn/10 text-warn border border-warn/20 mono">
+                      <span key={p.name} className="px-1.5 py-0.5 rounded-sm text-[10px] bg-warn/10 text-warn border border-warn/20 mono">
                         {p.name.replace('android.permission.', '')}
                       </span>
                     ))}
@@ -406,7 +406,7 @@ export default function ViewApkAudit() {
                 </div>
                 <div>
                   <p className="section-title mb-2">Decoded AndroidManifest.xml</p>
-                  <pre className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed bg-bg-raised rounded p-3 border border-bg-border max-h-[55vh] overflow-auto">
+                  <pre className="mono text-xs text-text-secondary whitespace-pre-wrap wrap-break-word leading-relaxed bg-bg-raised rounded-sm p-3 border border-bg-border max-h-[55vh] overflow-auto">
                     {result.manifestXml || 'Not available'}
                   </pre>
                 </div>
@@ -454,7 +454,7 @@ export default function ViewApkAudit() {
                   {result.cert.weakAlgo && <span className="badge-red">weak algorithm</span>}
                 </div>
                 {result.cert.error && (
-                  <p className="text-xs text-danger bg-danger/10 border border-danger/20 rounded px-3 py-1.5">{result.cert.error}</p>
+                  <p className="text-xs text-danger bg-danger/10 border border-danger/20 rounded-sm px-3 py-1.5">{result.cert.error}</p>
                 )}
                 {[
                   { label: 'Subject',   value: result.cert.subject },
@@ -468,7 +468,7 @@ export default function ViewApkAudit() {
                 ].map(({ label, value }) => (
                   <div key={label}>
                     <p className="text-xs text-text-muted mb-0.5">{label}</p>
-                    <p className="mono text-xs text-text-primary bg-bg-raised rounded px-3 py-1.5 break-all">{value || 'N/A'}</p>
+                    <p className="mono text-xs text-text-primary bg-bg-raised rounded-sm px-3 py-1.5 break-all">{value || 'N/A'}</p>
                   </div>
                 ))}
               </div>
@@ -488,7 +488,7 @@ export default function ViewApkAudit() {
                       onChange={e => setFileSearch(e.target.value)}
                     />
                   </div>
-                  <div className="border border-bg-border rounded overflow-auto flex-1">
+                  <div className="border border-bg-border rounded-sm overflow-auto flex-1">
                     {visibleFiles.map(f => (
                       <button
                         key={f.path}
@@ -509,7 +509,7 @@ export default function ViewApkAudit() {
                 </div>
 
                 {/* viewer */}
-                <div className="flex-1 min-w-0 flex flex-col border border-bg-border rounded overflow-hidden">
+                <div className="flex-1 min-w-0 flex flex-col border border-bg-border rounded-sm overflow-hidden">
                   {!entryPath && (
                     <div className="flex items-center justify-center h-full text-text-muted text-xs">Select a file to view its contents</div>
                   )}
@@ -535,7 +535,7 @@ export default function ViewApkAudit() {
                           <CodeView
                             code={entry.text || ''}
                             lang={detectLang(entry.name || entryPath, entry.text || '')}
-                            className="mono text-[11px] text-text-secondary whitespace-pre-wrap break-words leading-relaxed p-3"
+                            className="mono text-[11px] text-text-secondary whitespace-pre-wrap wrap-break-word leading-relaxed p-3"
                           />
                         )}
                         {entry?.kind === 'binary' && (
@@ -556,10 +556,10 @@ export default function ViewApkAudit() {
 
 function FindingRow({ f, open, onToggle }: { f: APKAuditFinding; open: boolean; onToggle: () => void }) {
   return (
-    <div className="border border-bg-border rounded overflow-hidden">
+    <div className="border border-bg-border rounded-sm overflow-hidden">
       <button onClick={onToggle} className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-bg-raised">
         <ChevronRight size={13} className={`text-text-muted shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} />
-        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase shrink-0 ${sevBadge(f.severity)}`}>{f.severity}</span>
+        <span className={`px-1.5 py-0.5 rounded-sm text-[10px] font-medium uppercase shrink-0 ${sevBadge(f.severity)}`}>{f.severity}</span>
         <span className="text-xs text-text-primary flex-1">{f.title}</span>
         {f.matches?.length > 0 && <span className="text-[10px] text-text-muted shrink-0">{f.matches.length} match{f.matches.length > 1 ? 'es' : ''}</span>}
       </button>
@@ -575,7 +575,7 @@ function FindingRow({ f, open, onToggle }: { f: APKAuditFinding; open: boolean; 
           {f.matches?.length > 0 && (
             <div className="space-y-0.5 mt-1">
               {f.matches.map((m, i) => (
-                <div key={i} className="flex gap-2 text-[11px] mono bg-bg-raised rounded px-2 py-1">
+                <div key={i} className="flex gap-2 text-[11px] mono bg-bg-raised rounded-sm px-2 py-1">
                   {m.file && <span className="text-text-muted shrink-0">{m.file}</span>}
                   <span className="text-text-secondary break-all">{m.value}</span>
                 </div>

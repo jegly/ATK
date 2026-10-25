@@ -151,7 +151,7 @@ export default function ViewDashboard() {
           ) : (
             <div className="space-y-2">
               {devices.map(d => (
-                <div key={d.serial} className="flex items-center justify-between bg-bg-raised rounded px-3 py-2">
+                <div key={d.serial} className="flex items-center justify-between bg-bg-raised rounded-sm px-3 py-2">
                   <div>
                     <p className="mono text-text-primary text-xs">{d.serial}</p>
                     <p className="text-text-muted text-xs mt-0.5">{d.status}</p>

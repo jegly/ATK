@@ -65,7 +65,7 @@ export default function ViewFlasher() {
       <div className="border-b border-bg-border px-4 py-2 flex items-center gap-3 shrink-0">
         <Zap size={15} className="text-accent-green" />
         <span className="text-sm font-medium text-text-primary">Flasher</span>
-        <div className="flex gap-1 bg-bg-raised rounded p-0.5 ml-1">
+        <div className="flex gap-1 bg-bg-raised rounded-sm p-0.5 ml-1">
           {([['manual', 'Manual'], ['pixel', 'Pixel Factory'], ['download', 'Download']] as const).map(([id, label]) => (
             <button
               key={id}
@@ -370,7 +370,7 @@ function ManualFlash({ info, refresh }: ManualProps) {
           aria-checked={dryRun}
           className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${dryRun ? 'bg-warn' : 'bg-bg-border'}`}
         >
-          <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${dryRun ? 'left-[18px]' : 'left-0.5'}`} />
+          <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${dryRun ? 'left-[18px]' : 'left-0.5'}`} />
         </button>
       </div>
 
@@ -385,7 +385,7 @@ function ManualFlash({ info, refresh }: ManualProps) {
           aria-checked={force}
           className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${force ? 'bg-danger' : 'bg-bg-border'}`}
         >
-          <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${force ? 'left-[18px]' : 'left-0.5'}`} />
+          <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${force ? 'left-[18px]' : 'left-0.5'}`} />
         </button>
       </div>
 
@@ -499,7 +499,7 @@ function ManualFlash({ info, refresh }: ManualProps) {
                         title={m.enabled ? 'Enabled' : 'Disabled'}
                         className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${m.enabled ? 'bg-accent-green' : 'bg-bg-border'}`}
                       >
-                        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow transition-all ${m.enabled ? 'left-[18px]' : 'left-0.5'}`} />
+                        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-bg-surface shadow-sm transition-all ${m.enabled ? 'left-[18px]' : 'left-0.5'}`} />
                       </button>
                       <button onClick={() => removeModule(m)} title="Remove on reboot" className="text-text-muted hover:text-danger shrink-0">
                         <Trash2 size={13} />
@@ -591,7 +591,7 @@ function ManualFlash({ info, refresh }: ManualProps) {
           ) : (
             <div className="space-y-2">
               {devices.map(d => (
-                <div key={d.serial} className="flex items-center justify-between bg-bg-raised rounded px-3 py-2">
+                <div key={d.serial} className="flex items-center justify-between bg-bg-raised rounded-sm px-3 py-2">
                   <span className="mono text-xs text-text-primary">{d.serial}</span>
                   <span className="badge-green">{d.status}</span>
                 </div>
@@ -631,7 +631,7 @@ function ManualFlash({ info, refresh }: ManualProps) {
             <button onClick={handleGetvar} className="btn-ghost text-xs">Query</button>
           </div>
           {getvarResult && (
-            <pre className="bg-bg-raised rounded p-3 text-xs mono text-text-secondary whitespace-pre-wrap max-h-48 overflow-auto">{getvarResult}</pre>
+            <pre className="bg-bg-raised rounded-sm p-3 text-xs mono text-text-secondary whitespace-pre-wrap max-h-48 overflow-auto">{getvarResult}</pre>
           )}
         </div>
 

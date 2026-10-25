@@ -156,10 +156,10 @@ export default function ViewFirmware({ codename }: { codename?: string }) {
           Official Google Pixel images. Pick your device (auto-selected from the connected phone when possible). Files are large (2–3 GB) and verified by SHA-256 automatically after download.
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 bg-bg-raised rounded p-0.5 shrink-0">
+          <div className="flex gap-1 bg-bg-raised rounded-sm p-0.5 shrink-0">
             {(['factory', 'ota'] as const).map(k => (
               <button key={k} onClick={() => setKind(k)}
-                className={`px-3 py-0.5 rounded text-xs font-medium transition-colors ${kind === k ? 'bg-accent-green/20 text-accent-green' : 'text-text-muted hover:text-text-secondary'}`}>
+                className={`px-3 py-0.5 rounded-sm text-xs font-medium transition-colors ${kind === k ? 'bg-accent-green/20 text-accent-green' : 'text-text-muted hover:text-text-secondary'}`}>
                 {k === 'factory' ? 'Factory' : 'OTA'}
               </button>
             ))}
@@ -202,7 +202,7 @@ export default function ViewFirmware({ codename }: { codename?: string }) {
           {list.map(fw => (
             <div key={fw.url} className="flex items-center gap-3 px-4 py-2.5">
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-text-primary leading-snug break-words">{fw.version}</p>
+                <p className="text-xs text-text-primary leading-snug wrap-break-word">{fw.version}</p>
                 {fw.sha256 ? (
                   <>
                     <p className="text-[10px] text-accent-green flex items-center gap-1 mt-0.5">
@@ -263,7 +263,7 @@ export default function ViewFirmware({ codename }: { codename?: string }) {
                 key={p.name}
                 onClick={() => extractPart(p.name)}
                 disabled={!!extracting}
-                className="flex items-center justify-between gap-2 rounded border border-bg-border px-2 py-1.5 text-xs hover:bg-bg-raised disabled:opacity-50"
+                className="flex items-center justify-between gap-2 rounded-sm border border-bg-border px-2 py-1.5 text-xs hover:bg-bg-raised disabled:opacity-50"
               >
                 <span className="mono text-text-secondary truncate">{p.name}</span>
                 <span className="text-text-muted shrink-0">{p.sizeMB ? `${p.sizeMB}M` : ''}</span>

@@ -335,7 +335,7 @@ export default function ViewFiles() {
       {/* Toolbar */}
       <div className="border-b border-bg-border px-4 py-2 flex items-center gap-2 shrink-0">
         {/* Source toggle */}
-        <div className="flex gap-1 bg-bg-raised rounded p-0.5 shrink-0">
+        <div className="flex gap-1 bg-bg-raised rounded-sm p-0.5 shrink-0">
           <button
             onClick={() => switchSource('device')}
             className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 transition-colors ${
@@ -595,7 +595,7 @@ export default function ViewFiles() {
       {/* Image viewer — click anywhere (except the image or buttons) to close */}
       {viewer && (
         <div
-          className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-xs"
           onClick={() => setViewer(null)}
         >
           <div className="flex items-center justify-between px-4 py-2 text-xs text-text-secondary shrink-0">
@@ -621,7 +621,7 @@ export default function ViewFiles() {
                   onClick={e => e.stopPropagation()}
                   onLoad={() => setImgLoading(false)}
                   onError={() => { setImgLoading(false); setImgError(true) }}
-                  className="max-h-full max-w-full object-contain rounded"
+                  className="max-h-full max-w-full object-contain rounded-sm"
                 />
               )}
             </div>
@@ -634,7 +634,7 @@ export default function ViewFiles() {
 
       {/* Text viewer — highlighted preview for text/code/config files */}
       {textView && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-sm" onClick={() => setTextView(null)}>
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/85 backdrop-blur-xs" onClick={() => setTextView(null)}>
           <div className="flex items-center justify-between px-4 py-2 text-xs text-text-secondary shrink-0">
             <span className="mono truncate">{textView.name}</span>
             <button onClick={e => { e.stopPropagation(); setTextView(null) }} className="btn-ghost p-1.5" title="Close (Esc)">
@@ -642,7 +642,7 @@ export default function ViewFiles() {
             </button>
           </div>
           <div className="flex-1 overflow-hidden px-4 pb-4" onClick={e => e.stopPropagation()}>
-            <div className="h-full overflow-auto bg-bg-surface border border-bg-border rounded">
+            <div className="h-full overflow-auto bg-bg-surface border border-bg-border rounded-sm">
               {textLoading ? (
                 <div className="flex items-center justify-center h-32">
                   <div className="w-5 h-5 border-2 border-accent-green border-t-transparent rounded-full animate-spin" />
@@ -651,7 +651,7 @@ export default function ViewFiles() {
                 <CodeView
                   code={textView.content}
                   lang={detectLang(textView.name, textView.content)}
-                  className="mono text-xs text-text-secondary whitespace-pre-wrap break-words leading-relaxed p-3"
+                  className="mono text-xs text-text-secondary whitespace-pre-wrap wrap-break-word leading-relaxed p-3"
                 />
               )}
             </div>

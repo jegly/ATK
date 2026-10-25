@@ -389,11 +389,11 @@ export default function ViewPixelFlasher() {
               </button>
             </div>
             {devices.length === 0 ? (
-              <p className="text-xs text-text-muted bg-bg-raised rounded px-3 py-2">
+              <p className="text-xs text-text-muted bg-bg-raised rounded-sm px-3 py-2">
                 No device in fastboot — run: <span className="mono">adb reboot bootloader</span>
               </p>
             ) : (
-              <div className="bg-bg-raised rounded px-3 py-2 mono text-xs text-accent-green">
+              <div className="bg-bg-raised rounded-sm px-3 py-2 mono text-xs text-accent-green">
                 {devices[0].serial} — {devices[0].status}
               </div>
             )}
@@ -495,7 +495,7 @@ export default function ViewPixelFlasher() {
 
             {/* Command preview */}
             {parsedSteps.length > 0 && (
-              <div className="bg-bg-base rounded p-2 border border-bg-border">
+              <div className="bg-bg-base rounded-sm p-2 border border-bg-border">
                 <p className="text-xs text-text-muted mb-1">Command preview:</p>
                 {(() => {
                   const flags: string[] = []
@@ -527,7 +527,7 @@ export default function ViewPixelFlasher() {
             </button>
 
             {done && (
-              <div className="flex items-center gap-2 text-accent-green text-xs bg-accent-green/10 rounded px-3 py-2">
+              <div className="flex items-center gap-2 text-accent-green text-xs bg-accent-green/10 rounded-sm px-3 py-2">
                 <Check size={13} /> Flash complete — device rebooting
               </div>
             )}
@@ -581,7 +581,7 @@ export default function ViewPixelFlasher() {
               <p className="section-title">Flash Log</p>
               <div
                 ref={logRef}
-                className="bg-bg-base rounded p-3 h-48 overflow-auto mono text-xs space-y-0.5 border border-bg-border"
+                className="bg-bg-base rounded-sm p-3 h-48 overflow-auto mono text-xs space-y-0.5 border border-bg-border"
               >
                 {log.map((line, i) => (
                   <div key={i} className={
