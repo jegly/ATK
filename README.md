@@ -114,9 +114,10 @@ https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 **[→ Latest Release](https://github.com/jegly/ATK/releases/latest)**
 
-| Distro          | Format | Install                  |
-|-----------------|--------|--------------------------|
-| Debian / Ubuntu | `.deb` | `sudo dpkg -i ATK-*.deb` |
+| Distro          | Format | Install                                                    |
+|-----------------|--------|------------------------------------------------------------|
+| Debian / Ubuntu | `.deb` | `sudo dpkg -i atk_*_amd64.deb`                             |
+| Any (snapd)     | Snap   | `sudo snap install android-tool-kit` ([Snap Store](https://snapcraft.io/android-tool-kit)) |
 
 > [!NOTE]
 > Linux only. ATK is built and tested on Debian and Ubuntu. Other distros build
@@ -124,12 +125,23 @@ https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 The releases page publishes checksums. Verify before installing.
 
-**Linux requirements**
+**Linux requirements (.deb)**
 ```bash
 sudo apt install adb fastboot libwebkit2gtk-4.1-0
 # scrcpy is only needed for the Screen Mirror module:
 sudo apt install scrcpy
 ```
+
+**Snap**
+
+The snap bundles its own `adb`, `fastboot` and `scrcpy`, so there is nothing
+else to install. Allow USB access to your phone once after installing:
+```bash
+sudo snap connect android-tool-kit:adb-support
+```
+Start it with `android-tool-kit` or from your app menu. The snap keeps its own
+adb keys, so your phone will ask you to authorise the computer again the first
+time.
 
 ---
 
@@ -166,7 +178,24 @@ sudo apt install scrcpy
 
 ---
 
-## ✨ What's new in v1.3.0
+## ✨ What's new in v1.3.1
+
+- 🔐 **Security**: updated `klauspost/compress` to 1.18.7, which fixes an
+  integer overflow in `s2.NewDict` (CVE-2026-63209). It is pulled in
+  indirectly by the APK parsing libraries used for APK Audit.
+- 📦 **Snap**: ATK is on the Snap Store as
+  [`android-tool-kit`](https://snapcraft.io/android-tool-kit), bundling its own
+  `adb`, `fastboot` and `scrcpy`.
+- 🧱 **Frontend rebuilt on current tooling**: Tailwind CSS 4, React 19, Vite 8
+  and TypeScript 7. The styling was migrated class by class and checked
+  against v1.3.0, so ATK should look and behave the same.
+- 🔧 **Dependencies**: Wails 2.17, `golang.org/x/crypto` 0.58, `godbus` 5.2.4,
+  `zenity` 0.10.15, `xz` 0.5.17, plus routine frontend updates.
+
+<details>
+<summary>Previous releases (v1.3.0, v1.2.0)</summary>
+
+**v1.3.0**
 
 - 🖥️ **System tray** (Linux): closing the window now offers **Minimize to
   Tray** instead of only Quit, with a tray menu to show/hide the window or
@@ -185,8 +214,7 @@ sudo apt install scrcpy
   text progressively as the window narrows instead of showing a scrollbar,
   and a touchpad-triggered stuck-scrollbar-drag bug is fixed.
 
-<details>
-<summary>Previous release (v1.2.0)</summary>
+**v1.2.0**
 
 - 💿 **GSI Loader**: boot a Generic System Image via **DSU** (temporary guest OS)
   or a danger-gated **permanent fastboot flash**, with a built-in compatibility
