@@ -65,9 +65,13 @@ jobs:
       - name: Trust the checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      # Latest stable Go, not go.mod's minimum: the tools installed below
+      # (nfpm in particular) need newer Go releases than the code does.
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version: stable
+          check-latest: true
+          cache-dependency-path: go.sum
 
       - uses: actions/setup-node@v7
         with:
