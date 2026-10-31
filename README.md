@@ -125,6 +125,18 @@ https://github.com/user-attachments/assets/47a3590a-11f8-416f-b972-0e89d933419c
 
 The releases page publishes checksums. Verify before installing.
 
+<!-- release-checksums:start -->
+| File | SHA-256 |
+|---|---|
+| `atk_1.3.1_amd64.deb` | *sha256:55eb43ea7b17847482b1bebb20f95ef045c30fd491f7bc14a3f386cb3711cc41* |
+
+Verify a download:
+
+```bash
+sha256sum atk_1.3.1_amd64.deb
+```
+<!-- release-checksums:end -->
+
 **Linux requirements (.deb)**
 ```bash
 sudo apt install adb fastboot libwebkit2gtk-4.1-0

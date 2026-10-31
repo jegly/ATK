@@ -54,3 +54,6 @@ ATK_*.log
 parts/
 stage/
 prime/
+
+# CI: nfpm.yaml with dpkg-shlibdeps dependencies (.github/ci/deb-depends.sh)
+nfpm.ci.yaml
