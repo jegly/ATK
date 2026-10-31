@@ -1,0 +1,79 @@
+# Builds the app (wails build), runs the Go tests and packages the .deb (nfpm)
+# on every push to main and every PR, including Dependabot's.
+# Nothing is published from here; see release.yml.
+#
+# Built inside the latest Ubuntu (ubuntu:latest). The .deb's library
+# minimums come from dpkg-shlibdeps (.github/ci/deb-depends.sh), so they
+# track the newest release.
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, test and package .deb
+    runs-on: ubuntu-latest
+    container: ubuntu:latest
+    defaults:
+      run:
+        # Container jobs default to sh; the steps use bash.
+        shell: bash
+    timeout-minutes: 45
+    steps:
+      - name: Install build tools
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            ca-certificates curl git python3 build-essential pkg-config dpkg-dev \
+            libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      # Wails CLI at the version go.mod uses; nfpm and pnpm at their latest.
+      - name: Install Wails, nfpm and pnpm
+        run: |
+          wails_ver=$(grep -oP 'github.com/wailsapp/wails/v2 \Kv[0-9.]+' go.mod)
+          go install "github.com/wailsapp/wails/v2/cmd/wails@$wails_ver"
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+          npm install -g pnpm@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build app
+        run: wails build -tags webkit2_41
+
+      # After the build: the Go package embeds frontend/dist.
+      - name: Go tests
+        run: go test -tags webkit2_41 ./...
+
+      - name: Package .deb
+        run: |
+          .github/ci/deb-depends.sh
+          nfpm pkg --packager deb --config nfpm.ci.yaml --target build/
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: deb
+          path: build/atk_*_amd64.deb
+          if-no-files-found: error
+          retention-days: 14
