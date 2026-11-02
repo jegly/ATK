@@ -45,6 +45,22 @@ func (a *App) SelectFileForFlash() (string, error) {
 	return path, err
 }
 
+// SelectGsiImage opens a file picker for a DSU image: a raw GSI system.img or
+// a .gz made from one.
+func (a *App) SelectGsiImage() (string, error) {
+	path, err := zenity.SelectFile(
+		zenity.Title("Select GSI image"),
+		zenity.FileFilters{
+			{Name: "GSI images", Patterns: []string{"*.img", "*.gz"}, CaseFold: true},
+			{Name: "All files", Patterns: []string{"*"}},
+		},
+	)
+	if err == zenity.ErrCanceled {
+		return "", nil
+	}
+	return path, err
+}
+
 // SelectSaveFile opens a native save-as dialog.
 func (a *App) SelectSaveFile(defaultName string) (string, error) {
 	path, err := zenity.SelectFileSave(

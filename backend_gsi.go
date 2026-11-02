@@ -35,6 +35,7 @@ type GsiCompat struct {
 	AndroidRelease string `json:"androidRelease"`
 	Sdk            string `json:"sdk"`
 	DsuStatus      string `json:"dsuStatus"`
+	ZonedStorage   bool   `json:"zonedStorage"` // /data on zoned UFS (see backend_gsi_zoned.go)
 }
 
 // GsiCompat runs the documented compatibility checks (getprop + ld.config).
@@ -59,6 +60,7 @@ func (a *App) GsiCompat() (GsiCompat, error) {
 	if v, err := a.runAdbShell("gsi_tool", "status"); err == nil {
 		c.DsuStatus = strings.TrimSpace(v)
 	}
+	c.ZonedStorage = a.dsuZonedStorage()
 	return c, nil
 }
 
@@ -104,9 +106,10 @@ func (a *App) DsuWipe() (string, error)      { return a.runAdbShell("gsi_tool", 
 
 // InstallDsu prepares and installs a temporary DSU from a GSI image, then fires
 // the DynamicSystemInstallationService intent. `systemSize` is the UNCOMPRESSED
-// raw image size in bytes (auto = file size for a raw .img; REQUIRED for a .gz).
-// `userdataSize` defaults to 8 GiB when <= 0.
-func (a *App) InstallDsu(imagePath string, systemSize int64, userdataSize int64) (string, error) {
+// raw image size in bytes (auto = file size for a raw .img, or measured by
+// decompressing a .gz). `userdataSize` defaults to 8 GiB when <= 0. With
+// opts.Zoned the install is followed and retried (backend_gsi_zoned.go).
+func (a *App) InstallDsu(imagePath string, systemSize int64, userdataSize int64, opts DsuInstallOpts) (string, error) {
 	imagePath = strings.TrimSpace(imagePath)
 	if imagePath == "" {
 		return "", fmt.Errorf("no GSI image selected")
@@ -128,10 +131,16 @@ func (a *App) InstallDsu(imagePath string, systemSize int64, userdataSize int64)
 	isGz := strings.HasSuffix(strings.ToLower(imagePath), ".gz")
 	if isGz {
 		gzPath = imagePath
-		if systemSize <= 0 {
-			return "", fmt.Errorf("for a .gz image, provide the uncompressed system image size (bytes) — DSU needs KEY_SYSTEM_SIZE")
-		}
 		sysSize = systemSize
+		if sysSize <= 0 {
+			// DSU needs KEY_SYSTEM_SIZE; the gzip trailer only holds it mod
+			// 4 GiB, so measure it exactly by decompressing.
+			n, err := gzipRawSize(imagePath)
+			if err != nil {
+				return "", fmt.Errorf("could not read the .gz to size it (%w) — enter the uncompressed system size in bytes", err)
+			}
+			sysSize = n
+		}
 	} else {
 		// Raw image: size is exact; gzip it host-side as the docs require.
 		sysSize = info.Size()
@@ -151,7 +160,34 @@ func (a *App) InstallDsu(imagePath string, systemSize int64, userdataSize int64)
 	}
 	remote := dsuRemoteDir + "/" + filepath.Base(gzPath)
 
-	// Fire the DSU install intent — verbatim from the Android docs.
+	// Record the real system size next to the pushed image so it can be pulled
+	// back or reinstalled later without re-entering it (backend_gsi_pull.go).
+	// Best effort: the install doesn't depend on it.
+	_ = a.writeDsuMeta(remote, dsuMeta{
+		SystemSize:   sysSize,
+		UserdataSize: userdataSize,
+		Label:        dsuLabelFor(imagePath),
+		InstalledAt:  time.Now().UTC().Format(time.RFC3339),
+	})
+
+	return a.startDsu(remote, sysSize, userdataSize, opts)
+}
+
+// startDsu installs an image that is already on the device: fire-and-forget
+// normally, or followed and retried in zoned mode.
+func (a *App) startDsu(remote string, sysSize, userdataSize int64, opts DsuInstallOpts) (string, error) {
+	if opts.Zoned {
+		return a.installDsuZoned(remote, sysSize, userdataSize, opts)
+	}
+	if err := a.fireDsuIntent(remote, sysSize, userdataSize); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("DSU install started (system %s, userdata %s). On the device, tap Restart in the notification to boot the GSI, or Discard to cancel. Use 'gsi_tool enable' for sticky mode.",
+		humanBytes(sysSize), humanBytes(userdataSize)), nil
+}
+
+// fireDsuIntent fires the DSU install intent — verbatim from the Android docs.
+func (a *App) fireDsuIntent(remote string, sysSize, userdataSize int64) error {
 	out, err := a.runAdbShell(
 		"am", "start-activity",
 		"-n", "com.android.dynsystem/com.android.dynsystem.VerificationActivity",
@@ -161,10 +197,9 @@ func (a *App) InstallDsu(imagePath string, systemSize int64, userdataSize int64)
 		"--el", "KEY_USERDATA_SIZE", strconv.FormatInt(userdataSize, 10),
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed to launch DSU install: %w (%s)", err, strings.TrimSpace(out))
+		return fmt.Errorf("failed to launch DSU install: %w (%s)", err, strings.TrimSpace(out))
 	}
-	return fmt.Sprintf("DSU install started (system %s, userdata %s). On the device, tap Restart in the notification to boot the GSI, or Discard to cancel. Use 'gsi_tool enable' for sticky mode.",
-		humanBytes(sysSize), humanBytes(userdataSize)), nil
+	return nil
 }
 
 // isSparseImage checks the Android sparse-image magic (0xed26ff3a, little-endian).

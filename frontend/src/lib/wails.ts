@@ -220,7 +220,15 @@ export const GsiCompat = () => window['go']['main']['App']['GsiCompat']()
 // @ts-ignore
 export const GsiDsuStatus = () => window['go']['main']['App']['GsiDsuStatus']()
 // @ts-ignore
-export const InstallDsu = (imagePath: string, systemSize: number, userdataSize: number) => window['go']['main']['App']['InstallDsu'](imagePath, systemSize, userdataSize)
+export const InstallDsu = (imagePath: string, systemSize: number, userdataSize: number, opts: any) => window['go']['main']['App']['InstallDsu'](imagePath, systemSize, userdataSize, opts)
+// @ts-ignore
+export const ListDeviceGsiImages = () => window['go']['main']['App']['ListDeviceGsiImages']()
+// @ts-ignore
+export const PullDeviceGsi = (remote: string, extractRaw: boolean) => window['go']['main']['App']['PullDeviceGsi'](remote, extractRaw)
+// @ts-ignore
+export const InstallDsuFromDevice = (remote: string, systemSize: number, userdataSize: number, opts: any) => window['go']['main']['App']['InstallDsuFromDevice'](remote, systemSize, userdataSize, opts)
+// @ts-ignore
+export const SelectGsiImage = () => window['go']['main']['App']['SelectGsiImage']()
 // @ts-ignore
 export const DsuEnable = () => window['go']['main']['App']['DsuEnable']()
 // @ts-ignore

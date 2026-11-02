@@ -213,6 +213,24 @@ export interface GsiCompat {
   androidRelease: string
   sdk: string
   dsuStatus: string
+  zonedStorage: boolean
+}
+
+export interface DeviceGsiImage {
+  path: string
+  name: string
+  label: string
+  size: number
+  systemSize: number
+  sizeExact: boolean
+  modified: number
+}
+
+export interface DsuInstallOpts {
+  zoned: boolean
+  attempts: number
+  gc: boolean
+  autoFit: boolean
 }
 
 export interface PrivacyTracker {
