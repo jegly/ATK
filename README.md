@@ -344,6 +344,18 @@ VNDK isolation, and Android version — so you know whether a GSI is even viable
 on the connected device before you commit to either path. You supply the GSI
 image file (ATK doesn't fetch these — see Android Flash Tool / ci.android.com).
 
+DSU extras:
+
+- **GSI images on device**: every image ATK installs stays in the device's
+  `Download` folder as a `.gz`. Pull it back to the computer (optionally
+  unpacked to a raw `.img`), or reinstall it as a DSU straight from the device
+  without pushing it again. `.gz` images are sized automatically.
+- **Zoned storage mode**: on zoned UFS (e.g. Pixel 11, auto-detected) DSU can
+  only use completely empty zones, so large userdata sizes fail even with lots
+  of free space. This mode follows the install, runs idle maintenance (f2fs GC)
+  and retries when the allocation falls short, and can fall back to the largest
+  userdata size that fits.
+
 > [!IMPORTANT]
 > The permanent flash path wipes user data and requires an unlocked bootloader.
 > It's gated behind App Lock's danger-unlock, same as other destructive flash
