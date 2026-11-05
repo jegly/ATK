@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Zap, AlertTriangle, FolderOpen, Check, X, RefreshCw, ChevronDown, ChevronRight } from 'lucide-react'
-import { GetFastbootDevices, Reboot } from '../../lib/wails'
+import { GetFastbootDevices, Reboot, FastbootReboot, ResolveFactoryFile, FactoryImagePreflight, FactoryFlash, FactoryUpdate } from '../../lib/wails'
 import { notify } from '../../lib/notify'
+import { ensureDangerUnlocked } from '../../lib/applock'
 import DismissibleBanner from '../DismissibleBanner'
 import type { Device } from '../../lib/types'
 
@@ -95,7 +96,7 @@ function buildSteps(parsed: ParsedStep[], opts: FlashOptions): FlashStep[] {
       steps.push({
         id: 'update_image',
         label: opts.wipeData ? 'Flash image zip (wipe data)' : 'Flash image zip',
-        description: `fastboot ${flagStr}${wipeFlag}update ${p.file}`,
+        description: `fastboot ${flagStr}--skip-reboot ${wipeFlag}update ${p.file}`,
         status: 'waiting',
       })
     }
@@ -201,11 +202,6 @@ export default function ViewPixelFlasher() {
     }
   }
 
-  const runFastboot = async (args: string): Promise<string> => {
-    // @ts-ignore
-    return await window['go']['main']['App']['RunAdbHostCommand']('fastboot ' + args) as string
-  }
-
   const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
   const waitForFastboot = async (timeoutMs = 45000): Promise<boolean> => {
@@ -239,15 +235,13 @@ export default function ViewPixelFlasher() {
       `Extra flags: ${flagSummary}\n\n` +
       `This is irreversible. Confirm you have the correct image for your device.`
     )) return
+    if (!(await ensureDangerUnlocked())) return
 
     const freshSteps = buildSteps(parsedSteps, opts)
     setSteps(freshSteps)
     setLog([])
     setFlashing(true)
     setDone(false)
-
-    // Extract zip directory for file references
-    const zipDir = factoryZip.substring(0, factoryZip.lastIndexOf('/'))
 
     try {
       for (const step of freshSteps) {
@@ -256,7 +250,7 @@ export default function ViewPixelFlasher() {
 
         if (step.id === 'reboot_system') {
           try {
-            await runFastboot('reboot')
+            await FastbootReboot('')
             addLog('Device rebooting to system...')
             updateStep(step.id, 'done')
           } catch (e: any) {
@@ -268,7 +262,7 @@ export default function ViewPixelFlasher() {
 
         if (step.id.startsWith('reboot_')) {
           try {
-            await runFastboot('reboot-bootloader')
+            await FastbootReboot('bootloader')
             addLog('Waiting for device to return to fastboot...')
             await sleep(5000)
             const back = await waitForFastboot()
@@ -285,20 +279,22 @@ export default function ViewPixelFlasher() {
         }
 
         if (step.id === 'update_image') {
-          // fastboot update uses the image-*.zip inside the factory zip
-          // The file path in flash-all.sh is relative — resolve against zip dir
+          // fastboot update uses the image-*.zip from the extracted factory zip.
+          // The backend unpacks into an on-disk temp dir (not the tmpfs /tmp)
+          // and refuses to start if there is not enough free space.
           const parsed = parsedSteps.find(p => p.type === 'update')
-          const imageZipName = parsed?.file || ''
-          const imageZipPath = `${zipDir}/${imageZipName}`
           const flags2: string[] = []
           if (opts.disableVerity) flags2.push('--disable-verity')
           if (opts.disableVerification) flags2.push('--disable-verification')
           if (opts.force) flags2.push('--force')
-          const wipeFlag = opts.wipeData ? '-w ' : ''
-          const flagStr = flags2.length ? flags2.join(' ') + ' ' : ''
-          const cmd = `${flagStr}${wipeFlag}update ${imageZipPath}`
           try {
-            const out = await runFastboot(cmd)
+            const imageZipPath: string = await ResolveFactoryFile(factoryZip, parsed?.file || '')
+            const pre = await FactoryImagePreflight(imageZipPath)
+            const gb = (n: number) => n < 0 ? 'unknown' : `${(n / 1e9).toFixed(1)} GB`
+            addLog(`fastboot: ${pre.fastbootVer || pre.fastboot}`)
+            addLog(`Unpack dir: ${pre.tmpDir} — needs ${gb(pre.needBytes)}, free ${gb(pre.freeBytes)}`)
+            for (const w of pre.warnings || []) addLog(`WARN: ${w}`)
+            const out = await FactoryUpdate(imageZipPath, opts.wipeData, flags2)
             addLog(out || 'Image flashed')
             updateStep(step.id, 'done', out)
           } catch (e: any) {
@@ -314,18 +310,24 @@ export default function ViewPixelFlasher() {
         if (step.id.startsWith('flash_')) {
           const parsed = parsedSteps.find(p => p.type === 'flash' &&
             step.label === `Flash ${p.partition}`)
-          const fileName = parsed?.file || ''
-          const filePath = `${zipDir}/${fileName}`
           const flags2: string[] = []
           if (opts.disableVerity) flags2.push('--disable-verity')
           if (opts.disableVerification) flags2.push('--disable-verification')
           if (opts.force) flags2.push('--force')
-          if (opts.flashBothSlots) flags2.push('--slot all')
-          const flagStr = flags2.length ? flags2.join(' ') + ' ' : ''
+          if (opts.flashBothSlots) flags2.push('--slot', 'all')
           const partition = parsed?.partition || ''
-          const cmd = `${flagStr}flash ${partition} ${filePath}`
+          let filePath = ''
           try {
-            const out = await runFastboot(cmd)
+            filePath = await ResolveFactoryFile(factoryZip, parsed?.file || '')
+          } catch (e: any) {
+            // A missing bootloader/radio file is not a "partition may not exist" case — stop
+            updateStep(step.id, 'error', String(e))
+            addLog(`ERROR: ${e}`)
+            setFlashing(false)
+            return
+          }
+          try {
+            const out = await FactoryFlash(partition, filePath, flags2)
             addLog(out || `${partition} flashed`)
             updateStep(step.id, 'done', out)
           } catch (e: any) {

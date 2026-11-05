@@ -158,6 +158,15 @@ export const FastbootFlashing = (action: string) => window['go']['main']['App'][
 export const FastbootReboot = (target: string) => window['go']['main']['App']['FastbootReboot'](target)
 // @ts-ignore
 export const FlasherDeviceInfo = () => window['go']['main']['App']['FlasherDeviceInfo']()
+// Pixel factory image flashing
+// @ts-ignore
+export const ResolveFactoryFile = (factoryZip: string, name: string) => window['go']['main']['App']['ResolveFactoryFile'](factoryZip, name)
+// @ts-ignore
+export const FactoryImagePreflight = (imageZip: string) => window['go']['main']['App']['FactoryImagePreflight'](imageZip)
+// @ts-ignore
+export const FactoryFlash = (partition: string, file: string, flags: string[]) => window['go']['main']['App']['FactoryFlash'](partition, file, flags)
+// @ts-ignore
+export const FactoryUpdate = (imageZip: string, wipe: boolean, flags: string[]) => window['go']['main']['App']['FactoryUpdate'](imageZip, wipe, flags)
 // Magisk root tools
 // @ts-ignore
 export const MagiskInstalled = () => window['go']['main']['App']['MagiskInstalled']()
