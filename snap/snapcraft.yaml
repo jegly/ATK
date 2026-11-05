@@ -1,7 +1,7 @@
 name: android-tool-kit
 title: ATK · Android Toolkit
 base: core26
-version: '1.3.1'
+version: '1.3.5'
 summary: All-in-one ADB and fastboot command centre for Android power users
 description: |
   **ATK** (Android Toolkit) is an all-in-one ADB and fastboot command centre
@@ -66,9 +66,9 @@ apps:
 parts:
   atk:
     plugin: dump
-    source: https://github.com/jegly/ATK/releases/download/v1.3.1/atk_1.3.1_amd64.deb
+    source: https://github.com/jegly/ATK/releases/download/v1.3.5/atk_1.3.5_amd64.deb
     source-type: deb
-    source-checksum: sha256/55eb43ea7b17847482b1bebb20f95ef045c30fd491f7bc14a3f386cb3711cc41
+    source-checksum: sha256/3772f2e44147c95e04022b7c482f02ed18e251a3d4b73facae3b07fcae7f7afd
     # The deb's Depends plus the tools ATK finds on PATH. A strict snap can't
     # run the host's adb/fastboot/scrcpy, so it ships its own.
     stage-packages:
