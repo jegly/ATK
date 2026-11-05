@@ -128,13 +128,15 @@ The releases page publishes checksums. Verify before installing.
 <!-- release-checksums:start -->
 | File | SHA-256 |
 |---|---|
-| `atk_1.3.1_amd64.deb` | *sha256:55eb43ea7b17847482b1bebb20f95ef045c30fd491f7bc14a3f386cb3711cc41* |
+| `atk_1.3.5_amd64.deb` | *sha256:3772f2e44147c95e04022b7c482f02ed18e251a3d4b73facae3b07fcae7f7afd* |
 
 Verify a download:
 
 ```bash
-sha256sum atk_1.3.1_amd64.deb
+sha256sum atk_1.3.5_amd64.deb
 ```
+
+The [build attestation](https://github.com/jegly/ATK/attestations) shows it was built by this repository's release workflow (with the GitHub CLI: `gh attestation verify atk_1.3.5_amd64.deb --repo jegly/ATK`).
 <!-- release-checksums:end -->
 
 **Linux requirements (.deb)**

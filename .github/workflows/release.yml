@@ -214,7 +214,7 @@ jobs:
           git add README.md nfpm.yaml
           git commit -m "Release v$VERSION: version and checksum" -m "$DEB sha256 $SHA"
           for i in 1 2 3; do
-            git pull --rebase --quiet origin main && git push origin HEAD:main && exit 0
+            git pull --rebase --autostash --quiet origin main && git push origin HEAD:main && exit 0
             sleep 5
           done
           echo "::warning::Could not push the version/README update to main; the release itself is published." | tee -a "$GITHUB_STEP_SUMMARY"
