@@ -68,10 +68,16 @@ func (a *App) ResolveFactoryFile(factoryPath, name string) (string, error) {
 	candidates := []string{filepath.Join(dir, name), filepath.Join(dir, zipBase, name)}
 	if r, err := zip.OpenReader(factoryPath); err == nil {
 		for _, f := range r.File {
-			if filepath.Base(f.Name) == name {
+			// Entry names only steer where we look; still never follow one that
+			// is absolute or climbs out of the factory folder ("zip slip").
+			rel := filepath.FromSlash(f.Name)
+			if strings.Contains(f.Name, "..") || !filepath.IsLocal(rel) {
+				continue
+			}
+			if filepath.Base(rel) == name {
 				candidates = append(candidates,
-					filepath.Join(dir, filepath.FromSlash(f.Name)),
-					filepath.Join(dir, zipBase, filepath.FromSlash(f.Name)))
+					filepath.Join(dir, rel),
+					filepath.Join(dir, zipBase, rel))
 			}
 		}
 		r.Close()
